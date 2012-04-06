@@ -5,6 +5,7 @@ Project-Inglenook is a collection of processes designed to work together with th
 Features
 ---------------------
 Project-Inglenook will provide:
+
 * Module host process, to setup and communciate with each device's own module process
 * Trigger management process, allowing devices events to trigger each other to create the ultimate network
 * Multiple front-ends with web and mobile app interfaces (And with the vision to provide a 'Wall Embedded Touch Interfaces' too!), all exposed using a defined SOA so you can build-your-own!

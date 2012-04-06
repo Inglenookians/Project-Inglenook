@@ -16,4 +16,4 @@ Project-Inglenook will provide:
 
 Development
 ---------------------
-[Please visit the wiki pages to see our development progress...](https://github.com/Inglenookians/Project-Inglenook/wiki)
+[Please visit the wiki pages to see our current development progress...](https://github.com/Inglenookians/Project-Inglenook/wiki)

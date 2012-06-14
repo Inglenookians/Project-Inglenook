@@ -44,6 +44,8 @@ message("	\${CMAKE_INSTALL_FULL_MANDIR}     \t ${CMAKE_INSTALL_FULL_MANDIR}    (
 message(STATUS "Configuring source code")
 # Add the subdirectories to scan for include headers.
 include_directories(src/lib)
+# Add RPATH for install based on CMAKE_INSTALL_FULL_LIBDIR
+set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_FULL_LIBDIR})
 # Add the subdirectories to scan for CMakeFiles.txt to build.
 add_subdirectory(src)
 

@@ -1,0 +1,7 @@
+# configuration for Samsung LMS700KF07-004
+# http://www.project-inglenook.co.uk (21/06/2012)
+hdmi_group=1
+hdmi_mode=4
+disable_overscan=1
+hdmi_force_hotplug=1
+config_hdmi_boost=7

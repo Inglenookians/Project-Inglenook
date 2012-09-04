@@ -3,11 +3,11 @@
 \." Please report errors, typos and any other mistakes on the projects issue tracker
 .TH man IDTMAN.SECTION "16 May 2012" "1.0" IDTMAN.NAME man page
 .SH NAME
-IDTMAN.NAME \- inglenook developer tool for installing and removing manual pages.
+IDTMAN.NAME \- inglenook developer tool for ...
 .SH SYNOPSIS
 IDTMAN.NAME COMMAND [OPTIONS]
 .SH DESCRIPTION
-IDTMAN.NAME is a developer script within project inglenook that can be used to install and remove manual pages either individually or in bulk. IDTMAN.NAME only works with files named with the inglenook manpage naming convention, see the section on this below for more information.
+IDTMAN.NAME is a ...
 .SH OPTIONS
 .TP
 \fB\-i\fR, \fB\-\-install\fR

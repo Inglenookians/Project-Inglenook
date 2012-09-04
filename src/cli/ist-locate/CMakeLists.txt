@@ -1,15 +1,15 @@
 # Make the library.
 add_executable(
-	idt-man
+	ist-locate
 	main.cpp
 )
 
 # Link to required libraries
 target_link_libraries(
-	idt-man
-	ild
+	ist-locate
+	ist
 )
 
 # Specify the install location.
-install(TARGETS idt-man DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+install(TARGETS ist-locate DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 

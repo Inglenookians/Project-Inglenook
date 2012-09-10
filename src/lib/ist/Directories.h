@@ -15,7 +15,7 @@ namespace inglenook
             const std::string DEFAULT_DIR_LOG =           "/var/log/inglenook";
             const std::string DEFAULT_DIR_SBIN =          "/usr/local/sbin";
             const std::string DEFAULT_DIR_MAN =           "/usr/local/share/man";
-            const std::string DEFAULT_DIR_TMP =          "/var/tmp/inglenook";
+            const std::string DEFAULT_DIR_TMP =           "/var/tmp/inglenook";
             
             /**
              * Fetch cli directory.

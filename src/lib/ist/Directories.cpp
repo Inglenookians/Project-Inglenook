@@ -76,15 +76,15 @@ std::string directories::data()
     if(returnValue.empty())
     {
         // Check user configuration
-        returnValue = config::getUser("inglenook.system.directories.cli");
+        returnValue = config::getUser("inglenook.system.directories.data");
         if(returnValue.empty())
         {
             // Check global configuration
-            returnValue = config::getGlobal("inglenook.system.directories.cli");
+            returnValue = config::getGlobal("inglenook.system.directories.data");
             if(returnValue.empty())
             {
                 // Return default.
-                returnValue = directories::DEFAULT_DIR_CLI;
+                returnValue = directories::DEFAULT_DIR_DATA;
             }
         }
     }

@@ -1,0 +1,688 @@
+/*
+* log_writer.cpp: log_writer provides log writing functionality for the logging service daemon.
+* Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
+// inglenook includes
+#include "log_writer.h"
+#include "log_exceptions.h"
+
+// standard library includes
+#include <fstream>
+#include <sstream>
+
+// boost (http://boost.org) includes
+#include <boost/locale.hpp>
+#include <boost/format.hpp>
+#include <boost/exception/all.hpp>
+#include <boost/scope_exit.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/posix_time/posix_time_io.hpp>
+#include <boost/thread/locks.hpp>
+#include <boost/algorithm/string/replace.hpp>
+
+namespace inglenook
+{
+
+namespace logging
+{
+
+// todo: move this - its useful.
+const boost::posix_time::ptime timeout_ms(int ms)
+{
+	return boost::get_system_time() +
+		boost::posix_time::milliseconds(ms);
+}
+
+/**
+ * Creates a new log_writer instance which will emit output to the specified std::ostream.
+ * @param output_stream std::ostream to write XML to.
+ * @see ~log_writer()
+ */
+log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream)
+	: m_log_serialization_thread(nullptr),
+	  m_log_serialization_shutdown_mutex(new boost::timed_mutex()),
+	  m_log_serialization_queue_mutex(new boost::timed_mutex()),
+	  m_process_id(get_real_process_id()),
+	  m_process_name(get_real_process_name()),
+	  m_output_stream(output_stream)
+{
+
+	// check the output streams health
+	if(m_output_stream == nullptr || m_output_stream->fail())
+	{
+		BOOST_THROW_EXCEPTION(failed_to_create_log_exception()
+			<< inglenook_error_number(log_exception_bad_stream));
+	}
+
+	// create the transaction buffer.
+	m_log_serialization_queue = std::shared_ptr<log_message_queue>(
+			new log_message_queue(LOG_WRITER_QUEUE_SIZE));
+
+	// we are good, start the serialization thread.
+	m_log_serialization_thread = std::shared_ptr<boost::thread>(
+		new boost::thread(&log_writer::_log_serialization_worker, this));
+
+
+}
+
+/**
+ * Creates a new log_writer instance based on inglenooks logging directory structure. This can be impacted by a variety of factors
+ * including but not limited to; global configuration, application configuration and environment. This logic is described in the inglenook
+ * wiki at (todo site link here).
+ */
+std::shared_ptr<log_writer> log_writer::create()
+{
+	std::stringstream filename_buffer;
+
+	// todo ild-locate here, for now hard code the inglenook directory
+	filename_buffer << "/var/log/inglenook" << "/";
+
+	// append the process name
+	filename_buffer << log_writer::get_real_process_name() << "/";
+
+	// get the current process id.
+	filename_buffer << log_writer::get_real_process_id() << "-";
+
+	// append a reverse time stamp to the pid so file name format becomes
+	// pid_yyyymmdd_hhmmss.xml, as per the specifications. time is UTC.
+	filename_buffer.imbue(std::locale(filename_buffer.getloc(),
+			new boost::posix_time::time_facet("%Y%m%d-%H%M%S")));
+	filename_buffer << boost::posix_time::second_clock::universal_time();
+
+	// add file extension
+	filename_buffer << ".xml";
+
+	return log_writer::create_from_file_path(filename_buffer.str());
+
+}
+
+
+/**
+ * Creates a new log_writer instance which will emit output to the specified file.
+ * @param output_file Path identifying file to write XML to.
+ * @param create If output_file doesn't exist, indicates whether to create it on the fly. Defaults to true.
+ */
+std::shared_ptr<log_writer> log_writer::create_from_file_path(const boost::filesystem::path& output_file, const bool& create)
+{
+	try
+	{
+		using namespace boost::filesystem;
+
+		// determine if the file exists
+		if( !exists( output_file ) )
+		{
+			// the file doesn't exist.
+			// check to see if we should create it...
+			if(create)
+			{
+
+				//
+				// ideally - I would like to check the validity of the requested file here but
+				// boost::filesystem::native() is having some problems with relative paths such
+				// as "./log.xml" (incl. the leading ./); which is apparently not a valid file path.
+				// instead we'll have to push on and rely on the resulting exception to indicate bad files.
+				//
+
+				// determine the parent directory path (required for relative paths)
+				auto parent_directory =  absolute(output_file).branch_path();
+				boost::system::error_code filesystem_error;
+
+				// ensure parent directory exists, or create it
+				if( ! exists( parent_directory ) && !create_directories( parent_directory, filesystem_error ) )
+				{
+					// the parent path doesn't exist and we failed to create it.
+					BOOST_THROW_EXCEPTION(failed_to_create_log_exception()
+						<< boost_filesystem_error(filesystem_error)
+						<< inglenook_error_number(log_exception_bad_file_path));
+				}
+
+			}
+			else // the file does not exist, and we were not instructed to create it.
+				BOOST_THROW_EXCEPTION(log_not_found_exception()
+					<< inglenook_error_number(log_exception_bad_file_path));
+
+		}
+
+		// at this point either the log exists, or we are good to create it
+		// so attempt to open the specified file path for appending data.
+		return std::shared_ptr<log_writer>(new log_writer(std::shared_ptr<std::ofstream>(
+			new std::ofstream(output_file.native(), std::ios::app))
+		));
+
+	}
+	catch(boost::exception& ex)
+	{
+		// if anything goes wrong augment exception with the file path we were working with.
+		ex << log_file_name(output_file);
+		throw;
+	}
+}
+
+/**
+ * Creates a new log_writer instance which will emit output to the specified output stream.
+ * @param output_stream stream to write XML to.
+ */
+std::shared_ptr<log_writer> log_writer::create_from_stream(const std::shared_ptr<std::ostream>& output_stream)
+{
+	// at this point either the log exists, or we are good to create it
+	// so attempt to open the specified file path for appending data.
+	return std::shared_ptr<log_writer>(new log_writer(output_stream));
+}
+
+/**
+* Deconstructs the log_writer, releasing any associated resources.
+* @see log_writer()
+*/
+log_writer::~log_writer()
+{
+
+	// nothing to do you - m_output_stream should close itself if sharedptr's have expired.
+	if(m_log_serialization_thread != nullptr)
+	{
+		// attempt to acquire the lock on the shutdown mutex
+		boost::timed_mutex::scoped_lock lock_shutdown(
+			(*m_log_serialization_shutdown_mutex.get()),
+			timeout_ms(LOCK_SHUTDOWN_TIMEOUT));
+
+		// check we asserted lock ownership
+		if(!lock_shutdown.owns_lock())
+		{
+			// throw an exception - indicating that the fault was a lock acquisition issue.
+			BOOST_THROW_EXCEPTION( log_serialization_exception()
+				<< inglenook_error_number(unable_to_aquire_shutdown_lock) );
+		}
+
+		// notify serialization worker its time for shutdown...
+		m_log_serialization_worker_shutdown = true;
+
+		// release the lock
+		lock_shutdown.unlock();
+
+		// wait for serialization thread to close.
+		m_log_serialization_thread->join();
+
+	}
+
+}
+
+/**
+ * Adds a log entry to the serialization queue.
+ * This method is responsible for submitting the item to the serialization queue.
+ * It is important to note that the serialization worker accesses entry in a non-thread safe manner. the assumption is that
+ * after the entry has been passed to this method and enqueued successfully, entry is no longer your responsibility and should
+ * not be handled by any other threads but serialization (which will release the resource when it is finished). TLDR; DO NOT
+ * USE [entry] AFTER A SUCCESSFUL CALL TO THIS METHOD.
+ * @param entry log entry to enqueue and serialize
+ * @returns true if the item is enqueued.
+ */
+bool log_writer::add_entry(std::shared_ptr<log_entry>& entry)
+{
+
+	bool entry_scheduled = false;
+
+	// make sure there is a message
+	if(entry->message().length() > 0)
+	{
+		// correct empty name spaces.
+		if(entry->log_namespace().length() == 0)
+			entry->log_namespace(boost::locale::translate("none"));
+
+		int schedule_attempts = 0;
+		const int MAX_SCHEDULE_ATTEMPTS = 10000;
+
+		// attempt to schedule this entry...
+		while(schedule_attempts++ < MAX_SCHEDULE_ATTEMPTS)
+		{
+
+			// attempt to acquire the lock on the queue mutex
+			boost::timed_mutex::scoped_lock lock_queue(
+				(*m_log_serialization_queue_mutex.get()),
+				timeout_ms(LOCK_QUEUE_TIMEOUT));
+
+			// check we asserted lock ownership
+			if(lock_queue.owns_lock())
+			{
+				// make sure the queue isn't full
+				if(!m_log_serialization_queue->full())
+				{
+					// push the item on to the queue
+					m_log_serialization_queue->push_back(entry);
+					entry_scheduled = true;
+					break;
+				}
+			}
+
+			// we waited 250ms for the lock and still no give - something is wrong.
+			else break;
+
+			//
+			// the queue is full. yield time slice to let other threads do some work
+			// (most importantly the log writer thread!).
+			boost::this_thread::yield();
+
+		}
+
+		// check if we failed to schedule to entry.
+		if(!entry_scheduled)
+		{
+			// todo: IMPORTANT: how do we want to handle this?
+			// discuss with the inglenookians, but for now out good friend std::cerr.
+			std::cerr << "WARNING: failed to schedule log entry." << std::endl;
+		}
+
+	}
+
+	// return result
+	return entry_scheduled;
+
+}
+
+/**
+ * Gets the process id
+ * This is the id of the parent process and is self determined by the class. It shouldn't be modified.
+ * @returns The process id of this process.
+ */
+const pid_type log_writer::pid() const
+{
+	// return the process id
+	return m_process_id;
+}
+
+/**
+ * Gets the process name
+ * This is the name of the process we are logging on behalf of. This can be modified, but only during instantiation
+ * Note that this might not be the same as the current process name, and as such might not correlate to the process
+ * identified by log_writer::get_real_process_name().
+ * @returns The name of the process this transaction is acting on behalf of.
+ */
+const std::string log_writer::process_name() const
+{
+	// return the name of the process.
+	return m_process_name;
+}
+
+/**
+ * Get the current process ID [NOTE: Platform Specified Code].
+ * This method resorts to platform specific code to attempt to self determine the process id.
+ * @returns The ID of the current process.
+ */
+const pid_type log_writer::get_real_process_id()
+{
+	// return the process id for the current process using the
+	// platform specific method call.
+	return INGLENOOK_CURRENT_PID();
+}
+
+/**
+ * Get the current process name [NOTE: Platform Specified Code].
+ * This method resorts to platform specific code to attempt to self determine the process name.
+ * @returns The name of the current process, or empty string on failure.
+ */
+const std::string log_writer::get_real_process_name()
+{
+
+	//
+	// shortly we'll delve in to some platform specific stuff. these blocks are designed such that
+	// they should place a path to this processes entry assembly (relative or absolute) in to this boost
+	// path object. we will then trim this to get the assembly name.
+	boost::filesystem::path binary_path("");
+
+#ifndef _WIN32 // the following block is for LINUX and is both tested and maintained.
+
+	// build path to the cmdline file for this process.
+	boost::filesystem::path process_cmdline_file_path(
+		( boost::format("/proc/%1%/cmdline") % get_real_process_id() ).str()
+	);
+
+	try
+	{
+
+		// make sure this file actually exists before proceeding
+		if( boost::filesystem::exists(process_cmdline_file_path) )
+		{
+
+			// file  exists... try and open it.
+			std::ifstream process_cmdline_file ( process_cmdline_file_path.native() );
+
+			// check if we managed to open the file, throw exception on failure.
+			if(!process_cmdline_file.is_open()) BOOST_THROW_EXCEPTION( process_name_exception() );
+
+			// we have opened the file, set up a scoped exit clause to ensure the file is closed.
+			BOOST_SCOPE_EXIT( (&process_cmdline_file) )
+			{	process_cmdline_file.close();
+			} 	BOOST_SCOPE_EXIT_END
+
+			// create commandLine and copy file contents in to it. DO NOT remove braces around the
+			// first argument - c++11 resolution for potential most-vexing-parse issues
+			std::string command_line(
+				{ std::istreambuf_iterator<char>(process_cmdline_file) },
+				std::istreambuf_iterator<char>()
+			);
+
+			// create a string stream to delimit the file
+			std::stringstream parser(command_line);
+			std::string buffer;
+
+			// read a line in to the buffer, and then convert to path.
+			std::getline(parser, buffer, ' ');
+			binary_path = buffer;
+
+		}
+
+		// the cmdline file doesn't appear to exist?
+		else BOOST_THROW_EXCEPTION( process_name_exception() );
+	}
+	catch(boost::exception& ex)
+	{
+		ex << process_cmdline_file(process_cmdline_file_path);
+		throw;
+	}
+
+#else // the following block is for WINDOWS and is NOT tested or maintained.
+#  warning INGLENOOK: WIN32 code has never been tested. This might not even compile. Good luck brave warrior.
+
+	// define a buffer to store path
+	char process_name[MAX_PATH] = {};
+
+	try
+	{
+
+		// attempt to open the our own process with read access rights.
+		HANDLE process_handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, get_real_process_id());
+
+		// check if anything went wrong
+		if (!process_handle) BOOST_THROW_EXCEPTION(
+			ProcessNameException());
+
+		// attempt to open handle was successful, set up a scoped exit clause to
+		// ensure that the process handle is closed when we are done.
+		BOOST_SCOPE_EXIT( (&process_handle) )
+		{	CloseHandle(process_handle);
+		} 	BOOST_SCOPE_EXIT_END
+
+		// query the name of the process using the handle acquired.
+		if (!GetModuleFileNameEx(process_handle, 0, process_name, sizeof(process_name) - 1))
+		{
+			// something went wrong, abort and sulk
+			BOOST_THROW_EXCEPTION( process_name_exception()
+				<< inglenook_win32_error( GetLastError() ));
+		}
+
+		// return the process name
+		binary_path = process_name;
+
+	}
+	catch(boost::exception& ex)
+	{
+		// in the event of any errors note that this is windows code.
+		ex << inglenook_win32(true);
+		throw;
+	}
+
+#endif
+
+	// hopefully we have a path to pass back by now (empty string on failure).
+	return binary_path.filename().native();
+
+}
+
+/**
+ * Get the current process name [NOTE: Platform Specified Code].
+ * This method resorts to platform specific code to attempt to self determine the process name.
+ * @returns The name of the current process, or empty string on failure.
+ */
+void log_writer::_log_serialization_worker()
+{
+
+	// xml root dom element name
+	std::string xml_dom_root = "inglenook-log-file";
+
+	try
+	{
+
+		// write out the xml starting header
+		(*m_output_stream.get())  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+		(*m_output_stream.get()) << "<" << xml_dom_root << ">";
+
+		while(true)
+		{
+
+			//
+			// while there are log entries in the serialization queue, pop them
+			// off and process them, as configured to do so.
+			//
+
+			std::shared_ptr<log_entry> entry;
+			while((entry = _log_serialization_worker_next_entry()) != nullptr)
+			{
+
+				_log_serialization_worker_serialize(entry);
+				_log_serialization_worker_screen(entry);
+
+			}
+
+			//
+			// the queue is empty, use this breathing time to check to see if the
+			// shutdown flag is set, if so we'll want to initialize a thread shutdown,
+			// else we will enter a sleep state for a new ms to lighten cpu load
+			// before we re-check the queue for contents.
+			//
+
+			// attempt to acquire the lock on the shutdown mutex
+			boost::timed_mutex::scoped_lock lock_shutdown(
+				(*m_log_serialization_shutdown_mutex.get()),
+				timeout_ms(LOCK_SHUTDOWN_TIMEOUT));
+
+			// check we asserted lock ownership
+			if(!lock_shutdown.owns_lock())
+			{
+				// throw an exception - indicating that the fault was a lock acquisition issue.
+				BOOST_THROW_EXCEPTION( log_serialization_exception()
+					<< inglenook_error_number(unable_to_aquire_shutdown_lock) );
+			}
+
+			// if we have been told to shutdown - exit loop
+			// deconstruction of lock_shutdown will release mutex.
+			if(m_log_serialization_worker_shutdown) break;
+
+			// release the lock
+			lock_shutdown.unlock();
+
+			// we are idle, nothing to do so sleep for a bit. siesta!
+			// (I envisage, just waiting around for a few ms to be more efficient than blocking the thread
+			// on a conditional variable and notifying it when the queue has some new contents to process).
+			boost::this_thread::yield();
+
+
+		}
+	}
+	catch(boost::exception&)
+	{
+		// if the serializer crashes we can't write a log entry, best we can muster is standard error.
+		std::cerr << boost::locale::translate("ERROR: Log serialization has failed.") << std::endl;
+		std::cerr << boost::current_exception_diagnostic_information() << std::endl;
+	}
+
+	//
+	// shutdown serialization.
+	//
+	try
+	{
+		(*m_output_stream.get()) << "</" << xml_dom_root << ">";
+	}
+	catch(...) 	{	/* if we crashed because of a bad stream, don't make the problem worse */}
+
+}
+
+/**
+ * Serializes an entry to the output stream as XML.
+ * Given a pointer to a log entry, serializes the item to the output stream as XML. This should only
+ * ever be called by the serialization worker thread.
+ * @param entry entry to serialize.
+ */
+void log_writer::_log_serialization_worker_serialize(std::shared_ptr<log_entry> entry)
+{
+	// should only need to initialize this stuff once for performance
+	auto output_stream = m_output_stream.get();
+	auto timestamp_formatter = std::locale(output_stream->getloc(),
+		new boost::posix_time::time_facet("%Y-%m-%dT%H:%M:%sZ"));
+
+	/*
+	 * This is what we are aiming for:
+
+	<log-entry timestamp="2012-12-21T00:00:00.00Z" severity="4" ns="inglenook.sample.process">
+	  <message><![CDATA[Yikes! Something incredibly Mayan happened to the process - cannot continue.]]></message>
+	  <extended-data>
+	    <item key="sample.specific"><![CDATA[Kittens]]></item>
+	    <item key="sample.host"><![CDATA[127.0.0.1]]></item>
+	  <extended-data>
+	</log-entry>
+
+	*/
+
+	// sanitize message this can contain user input
+	std::string message = entry->message();
+	boost::replace_all(message, "<", "&lt;");
+	boost::replace_all(message, ">", "&gt;");
+
+	// get the extended data (pre-doing this to keep xml writing as clean as possible).
+	auto extended_data = entry->extended_data();
+
+	// open the <log-entry> dom element
+	*output_stream << "<log-entry timestamp=\"";
+	output_stream->imbue(timestamp_formatter);
+	*output_stream << boost::posix_time::second_clock::universal_time();
+	*output_stream << "\" severity=\"" << entry->entry_type() << "\" ns=\"" << entry->log_namespace() << "\">";
+
+	// output the message body
+	*output_stream << "<message><![CDATA[" << message << "]]></message>";
+
+	// check for extended data
+	if(extended_data.size() > 0)
+	{
+
+		// start the <extended-data> dom item
+		*output_stream << "<extended-data>";
+
+		// iterate through all the data in the map
+		for(auto data = extended_data.begin(); data != extended_data.end(); data++)
+		{
+
+			// sanitize the data provided (not only value is sanitized).
+			std::string value = data->second;
+			boost::replace_all(value, "<", "&lt;");
+			boost::replace_all(value, ">", "&gt;");
+
+			// and write it out.
+			*output_stream << "<item key=\"" << data->first << "\"><![CDATA[" << value << "]]></item>";
+
+		}
+
+		// end the <extended-data> dom item
+		*output_stream << "</extended-data>";
+
+	}
+
+	// close the <log-entry>
+	*output_stream << "</log-entry>";
+}
+
+
+/**
+ * Serializes an entry to the console.
+ * Given a pointer to a log entry, serializes the item to the console. This should only
+ * ever be called by the serialization worker thread.
+ * @param entry entry to serialize.
+ */
+void log_writer::_log_serialization_worker_screen(std::shared_ptr<log_entry> entry)
+{
+
+	/*
+	// both cout and ceer should have the same locale...
+	auto timestamp_formatter = std::locale(std::cout.getloc(),
+		new boost::posix_time::time_facet("%d-%M-%Y-%H:%M:%S"));
+
+	// short names for all the entry types localized for user.
+	std::string categories[] =
+	{
+		boost::locale::translate("     "),
+		boost::locale::translate("debug"),
+		boost::locale::translate("trace"),
+		boost::locale::translate(" info"),
+		boost::locale::translate(" warn"),
+		boost::locale::translate("error"),
+		boost::locale::translate("fatal")
+	};
+
+	// choose a category string for the entry
+	std::string category = entry->entry_type() < sizeof(categories) ?
+			categories[entry->entry_type()] : categories[0];
+	 */
+
+	// determine which stream we need to push this message to.
+	std::ostream *output_stream = entry->entry_type() >= LOG_CATEGORY_CERR_BOUNTRY ?
+			&std::cerr : &std::cout;
+	/*
+	// push it all out to console.
+	*output_stream << "[";
+	output_stream->imbue(timestamp_formatter);
+	*output_stream << boost::posix_time::second_clock::local_time();
+	*output_stream << " " << category << "] ";
+	*/
+	*output_stream << entry->message() << std::endl;
+
+}
+/**
+ * Gets the next item off the queue for serialization.
+ * This method will in a thread safe manner, get the next item off the queue for processing. If there is no item
+ * available for processing the method will return nullptr. If a lock on the queue's mutex cannot be obtained
+ * it will also return nullptr. If the thread successively fails to acquire a lock on the queue mutex, the queue
+ * will eventually fill resulting in an exception in client processes. If this becomes a problem we may want to
+ * allow the writer to wait on the lock longer than clients.
+ * @returns next log entry for serialization, or nullptr if unavailable.
+ */
+std::shared_ptr<log_entry> log_writer::_log_serialization_worker_next_entry()
+{
+
+	std::shared_ptr<log_entry> result = nullptr;
+
+	// attempt to acquire the lock on the queue mutex
+	boost::timed_mutex::scoped_lock lock_queue(
+		(*m_log_serialization_queue_mutex.get()),
+		timeout_ms(LOCK_QUEUE_TIMEOUT));
+
+	// check we asserted lock ownership
+	if(lock_queue.owns_lock())
+	{
+		// if the queue isn't empty
+		if(!m_log_serialization_queue->empty())
+		{
+			// pop an item off the front of the queue...
+			result = m_log_serialization_queue->front();
+			m_log_serialization_queue->pop_front();
+		}
+
+	}
+
+	// return the result.
+	return result;
+
+}
+
+} // namespace inglenook::logging
+
+} // namespace inglenook

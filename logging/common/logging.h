@@ -27,7 +27,7 @@ namespace inglenook
 	static auto log_output = logging::log_writer::create();
 
 	/// thread safe logging interface.
-	static logging::log_client iout(log_output);
+	static logging::log_client ilog(log_output);
 
 
 }

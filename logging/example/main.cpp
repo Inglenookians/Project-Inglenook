@@ -43,18 +43,20 @@ void loud_thread(int id, int no_outputs)
 	using namespace inglenook;
 
 	// notify callers that we have started.
-	iout.info() << "thread #" << id << " started." << lf::end;
+	ilog.info() << "thread #" << id << " started." << lf::end;
 
 	// spam a few messages out to the log.
 	for(int i = 0; i < no_outputs; i++)
 	{
 		// write the message, lots of places for bad thread safety to show...
-		iout.info() << "this is message #" << (i+1) << " of " <<
+		ilog.info() << "this is message #" << (i+1) << " of " <<
 				no_outputs << " from thread " << id << lf::end;
 	}
 
-	// notify thread complete.
-	iout.info() << "thread #" << id << " complete!" << lf::end;
+	// notify thread complete (broken up a bit to test).
+	ilog.info() << "thread #" << id;
+	ilog << " has completed!";
+	ilog << lf::end;
 
 }
 

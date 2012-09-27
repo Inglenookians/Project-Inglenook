@@ -126,6 +126,10 @@ class log_writer
 		/// Gets and returns the current process name.
 		static const std::string get_real_process_name();
 
+		/// amount of time a worker should wait for a space availability notification from the serializer
+		/// before it just tries to reschedule the message anyway.
+		const int RESCHEDULE_MAX_RETRY_DELAY = 250; //ms (0.25 seconds);
+
 		/// amount of time that the log writer will wait idly, before checking if there are
 		/// any messages to serialize. It can be prematurely awoke using m_log_serialization_element_queued
 		/// if required to serialize a message (this timeout is mearly a fallback / fail safe).
@@ -139,10 +143,6 @@ class log_writer
 		/// mutex. the serialization thread will abort if it cannot acquire a lock, worker
 		/// threads will ignore the condition and accept that they will need to wait.
 		const int LOCK_ITEM_QUEUED_TIMEOUT = 250; // ms (0.25seconds)
-
-		/// The amount of time (in milliseconds) that a lock should wait to acquire
-		/// m_log_serialization_queue_mutex, before giving up and raising an error.
-		const int LOCK_QUEUE_TIMEOUT = 250;// ms (0.25seconds);
 
 		/// The number of elements to store in the log writer queue. Changing this
 		/// number will impact the memory footprint of all applications. We may want

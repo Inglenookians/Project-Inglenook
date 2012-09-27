@@ -281,7 +281,7 @@ bool log_writer::add_entry(std::shared_ptr<log_entry>& entry)
 				//
 				// the queue is full. yield time slice to let other threads do some work
 				// (most importantly the log writer thread!).
-				m_log_serialization_element_serialized.timed_wait(lock_queue, timeout_ms(250));
+				m_log_serialization_element_serialized.timed_wait(lock_queue, timeout_ms(RESCHEDULE_MAX_RETRY_DELAY));
 			}
 
 		}

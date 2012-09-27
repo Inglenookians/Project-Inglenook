@@ -55,7 +55,8 @@ const boost::posix_time::ptime timeout_ms(int ms)
 log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream)
 	: m_log_serialization_thread(nullptr),
 	  m_log_serialization_shutdown_mutex(new boost::timed_mutex()),
-	  m_log_serialization_queue_mutex(new boost::timed_mutex()),
+	  m_log_serialization_queue_mutex(new boost::mutex()),
+	  m_log_serialization_element_queuing_mutex(new boost::mutex()),
 	  m_process_id(get_real_process_id()),
 	  m_process_name(get_real_process_name()),
 	  m_output_stream(output_stream)
@@ -242,37 +243,46 @@ bool log_writer::add_entry(std::shared_ptr<log_entry>& entry)
 			entry->log_namespace(boost::locale::translate("none"));
 
 		int schedule_attempts = 0;
-		const int MAX_SCHEDULE_ATTEMPTS = 10000;
+		const int MAX_SCHEDULE_ATTEMPTS = 10;
 
-		// attempt to schedule this entry...
-		while(schedule_attempts++ < MAX_SCHEDULE_ATTEMPTS)
+		// attempt to acquire the lock on the queue mutex
+		boost::mutex::scoped_lock lock_queue(
+			(*m_log_serialization_queue_mutex.get()));
+
+		// check we asserted lock ownership
+		if(lock_queue.owns_lock())
 		{
 
-			// attempt to acquire the lock on the queue mutex
-			boost::timed_mutex::scoped_lock lock_queue(
-				(*m_log_serialization_queue_mutex.get()),
-				timeout_ms(LOCK_QUEUE_TIMEOUT));
-
-			// check we asserted lock ownership
-			if(lock_queue.owns_lock())
+			// attempt to schedule this entry...
+			while(schedule_attempts++ < MAX_SCHEDULE_ATTEMPTS)
 			{
+
+				bool boolean_queue = true;
+
+				// if the queue is empty
+				if(m_log_serialization_queue->empty())
+				{
+					// acquire the queue notification mutex
+					boost::mutex::scoped_lock lock_notify((*m_log_serialization_element_queuing_mutex.get()));
+					m_log_serialization_element_queuing.notify_all();
+				}
+				// else we'll attempt to schedule based on the queue size
+				else boolean_queue = !m_log_serialization_queue->full();
+
 				// make sure the queue isn't full
-				if(!m_log_serialization_queue->full())
+				if(boolean_queue)
 				{
 					// push the item on to the queue
 					m_log_serialization_queue->push_back(entry);
 					entry_scheduled = true;
 					break;
 				}
+
+				//
+				// the queue is full. yield time slice to let other threads do some work
+				// (most importantly the log writer thread!).
+				m_log_serialization_element_serialized.timed_wait(lock_queue, timeout_ms(250));
 			}
-
-			// we waited 250ms for the lock and still no give - something is wrong.
-			else break;
-
-			//
-			// the queue is full. yield time slice to let other threads do some work
-			// (most importantly the log writer thread!).
-			boost::this_thread::yield();
 
 		}
 
@@ -454,6 +464,15 @@ void log_writer::_log_serialization_worker()
 	try
 	{
 
+		// attempt to acquire the lock on the shutdown mutex
+		boost::mutex::scoped_lock lock_item_waiting(
+			(*m_log_serialization_element_queuing_mutex.get()));
+
+		// make sure this thread owns the notification lock.
+		if(!lock_item_waiting.owns_lock())
+			BOOST_THROW_EXCEPTION( log_serialization_exception()
+				<< inglenook_error_number(unable_to_aquire_queue_notification_lock) );
+
 		// write out the xml starting header
 		(*m_output_stream.get())  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 		(*m_output_stream.get()) << "<" << xml_dom_root << ">";
@@ -505,7 +524,7 @@ void log_writer::_log_serialization_worker()
 			// we are idle, nothing to do so sleep for a bit. siesta!
 			// (I envisage, just waiting around for a few ms to be more efficient than blocking the thread
 			// on a conditional variable and notifying it when the queue has some new contents to process).
-			boost::this_thread::yield();
+			m_log_serialization_element_queuing.timed_wait(lock_item_waiting, timeout_ms(SERIALIZER_IDLE_TIMEOUT));
 
 
 		}
@@ -661,9 +680,8 @@ std::shared_ptr<log_entry> log_writer::_log_serialization_worker_next_entry()
 	std::shared_ptr<log_entry> result = nullptr;
 
 	// attempt to acquire the lock on the queue mutex
-	boost::timed_mutex::scoped_lock lock_queue(
-		(*m_log_serialization_queue_mutex.get()),
-		timeout_ms(LOCK_QUEUE_TIMEOUT));
+	boost::mutex::scoped_lock lock_queue(
+		(*m_log_serialization_queue_mutex.get()));
 
 	// check we asserted lock ownership
 	if(lock_queue.owns_lock())
@@ -674,6 +692,10 @@ std::shared_ptr<log_entry> log_writer::_log_serialization_worker_next_entry()
 			// pop an item off the front of the queue...
 			result = m_log_serialization_queue->front();
 			m_log_serialization_queue->pop_front();
+
+			// notify someone queing (if anyone is) that space has become available.
+			m_log_serialization_element_serialized.notify_one();
+
 		}
 
 	}

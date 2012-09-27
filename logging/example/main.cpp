@@ -25,6 +25,8 @@
 #include <boost/locale.hpp>
 #include <boost/exception/all.hpp>
 #include <boost/thread/thread.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/posix_time/posix_time_io.hpp>
 
 // inglenook includes
 #include "../common/logging.h"
@@ -79,8 +81,8 @@ int main(int arg_c, char* arg_v[])
 	{
 
 		// number of threads, and number of messages to spawn.
-		const int NO_THREADS = 5;
-		const int NO_MESSAGES = 150;
+		const int NO_THREADS = 55; // more threads than queue space
+		const int NO_MESSAGES = 100; // lots of messages...
 
 		// thread collection
 		std::shared_ptr<boost::thread> threads[NO_THREADS];

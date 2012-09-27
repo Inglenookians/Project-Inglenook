@@ -44,6 +44,9 @@ const unsigned long log_exception_bad_file_path = module_error_base + 0x02;
 /// used when a thread attempts to acquire the shutdown lock for the writer thread, but fails.
 const unsigned long unable_to_aquire_shutdown_lock = module_error_base + 0x03;
 
+/// used by the serialization thread when it cannot acquire ownership of its notification mechanism lock.
+const unsigned long unable_to_aquire_queue_notification_lock = module_error_base + 0x04;
+
 /// error number used to refine error site when stack traces are not available.
 typedef boost::error_info<struct __inglenook_error_number, unsigned long> inglenook_error_number;
 

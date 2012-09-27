@@ -126,9 +126,19 @@ class log_writer
 		/// Gets and returns the current process name.
 		static const std::string get_real_process_name();
 
+		/// amount of time that the log writer will wait idly, before checking if there are
+		/// any messages to serialize. It can be prematurely awoke using m_log_serialization_element_queued
+		/// if required to serialize a message (this timeout is mearly a fallback / fail safe).
+		const int SERIALIZER_IDLE_TIMEOUT = 250; // ms (0.25seconds)
+
 		/// The amount of time (in milliseconds) that a lock should wait to acquire
 		/// m_log_serialization_shutdown_mutex, before giving up and raising an error.
 		const int LOCK_SHUTDOWN_TIMEOUT = 1000; // milliseconds (1secs)
+
+		/// the amount of time that a the any thread will wait to acquire the "item queued"
+		/// mutex. the serialization thread will abort if it cannot acquire a lock, worker
+		/// threads will ignore the condition and accept that they will need to wait.
+		const int LOCK_ITEM_QUEUED_TIMEOUT = 250; // ms (0.25seconds)
 
 		/// The amount of time (in milliseconds) that a lock should wait to acquire
 		/// m_log_serialization_queue_mutex, before giving up and raising an error.
@@ -173,9 +183,16 @@ class log_writer
 		std::shared_ptr<log_message_queue> m_log_serialization_queue;
 
 		/// mutex that must be acquired to work with the shutdown variable.
-		std::shared_ptr<boost::timed_mutex> m_log_serialization_queue_mutex;
+		std::shared_ptr<boost::mutex> m_log_serialization_queue_mutex;
 
+		/// mutex that must be acquired to work with the element queued notification system.
+		std::shared_ptr<boost::mutex> m_log_serialization_element_queuing_mutex;
 
+		/// used to notify the serialization thread that it needs to process some information.
+		boost::condition_variable m_log_serialization_element_queuing;
+
+		/// used to notify the queuing entries that space in the queue has become available.
+		boost::condition_variable m_log_serialization_element_serialized;
 
 		/// current process id
 		pid_type m_process_id;

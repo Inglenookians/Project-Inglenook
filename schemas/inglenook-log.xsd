@@ -49,7 +49,7 @@
   			</xsd:documentation>
   		</xsd:annotation>
   	</xsd:attribute>
-  	<xsd:attribute name="severity" use="required" default="3">
+  	<xsd:attribute name="severity" use="optional" default="3">
   		<xsd:annotation>
   			<xsd:documentation>The type of log message (directly relates to category enumeration defined in logging/common/log_entry.h)
 	Unspecified 	= 0 (Not valid in an XML context - internal use only). 

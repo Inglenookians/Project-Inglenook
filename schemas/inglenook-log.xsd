@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:this="http:///schemas.project-inglenook.co.uk/core/logging.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http:///schemas.project-inglenook.co.uk/core/logging.xsd">
+  <xsd:element name="inglenook-log" type="this:log"></xsd:element>
+
+  <xsd:complexType name="entry">
+  	<xsd:annotation>
+  		<xsd:documentation>
+  			Represents a single log entry.
+  		</xsd:documentation>
+  	</xsd:annotation>
+  	<xsd:sequence>
+  		<xsd:element name="message" minOccurs="1" maxOccurs="1">
+  			<xsd:annotation>
+  				<xsd:documentation>
+  					The actual log message. This will usually be quite
+  					informative in its own right, but may be enchanced
+  					or fully comprehendable only with extended-data.
+  				</xsd:documentation>
+  			</xsd:annotation>
+  			<xsd:simpleType>
+  				<xsd:annotation>
+  					<xsd:documentation>
+  						This type is used to ensure a message is
+  						provided with each log entry.
+  					</xsd:documentation>
+  				</xsd:annotation>
+  				<xsd:restriction base="xsd:string">
+  					<xsd:minLength value="1"></xsd:minLength>
+  				</xsd:restriction>
+  			</xsd:simpleType>
+  		</xsd:element>
+  		<xsd:element name="extended-data"
+  			type="this:entry-data-collection" minOccurs="0" maxOccurs="1">
+  			<xsd:annotation>
+  				<xsd:documentation>
+  					An optional node that can contain additional, key
+  					value pairs for information specific to a type of
+  					message or process.
+  				</xsd:documentation>
+  			</xsd:annotation>
+  		</xsd:element>
+  	</xsd:sequence>
+  	<xsd:attribute name="timestamp" type="xsd:dateTime"
+  		use="required">
+  		<xsd:annotation>
+  			<xsd:documentation>
+  				The date and time that the log message was created
+  				(RFC-3339/ISO-8601 formatted).
+  			</xsd:documentation>
+  		</xsd:annotation>
+  	</xsd:attribute>
+  	<xsd:attribute name="severity" use="required" default="3">
+  		<xsd:annotation>
+  			<xsd:documentation>The type of log message (directly relates to category enumeration defined in logging/common/log_entry.h)
+	Unspecified 	= 0 (Not valid in an XML context - internal use only). 
+	Debugging 	= 1 (Debugging information. Extremely verbose, usually only	beneficial during development).
+	Verbose 		= 2 (Verbose. Useful for diagnosing hard to track issues in live environments). 
+	Information 	= 3 (Information. Standard output messages related to key events within the software).
+	Warning 		= 4 (Warning. Notification of potentially erroneous or unexpected behavior. Usually not fatal).
+	Error		= 5 (Error. Significant deviation of expected behavior). 
+	Fatal 		= 6 (Fatal Error. Unrecoverable deviation from expected behaviour. This will usually be the last entry).
+  			</xsd:documentation>
+  		</xsd:annotation>
+  		<xsd:simpleType>
+  			<xsd:restriction base="xsd:unsignedInt">
+  				<xsd:minExclusive value="1"></xsd:minExclusive>
+  				<xsd:maxExclusive value="6"></xsd:maxExclusive>
+  			</xsd:restriction>
+  		</xsd:simpleType>
+  	</xsd:attribute>
+  	<xsd:attribute name="ns" use="required">
+  		<xsd:annotation>
+  			<xsd:documentation>
+  				The namespace of the component within the log enabled
+  				software generating the log.
+  			</xsd:documentation>
+  		</xsd:annotation>
+  		<xsd:simpleType>
+  			<xsd:annotation>
+  				<xsd:documentation>
+  					This type ensures that a namespace is provided
+  					with each log entry.
+  				</xsd:documentation>
+  			</xsd:annotation>
+  			<xsd:restriction base="xsd:string">
+  				<xsd:minLength value="1"></xsd:minLength>
+  			</xsd:restriction>
+  		</xsd:simpleType>
+  	</xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:complexType name="entry-data-collection">
+        <xsd:annotation>
+        	<xsd:documentation>Collection of data entries associate with an event log.</xsd:documentation>
+        </xsd:annotation>
+        <xsd:sequence>
+  		<xsd:element name="item" type="this:entry-data" minOccurs="1" maxOccurs="unbounded">
+  			<xsd:annotation>
+  				<xsd:documentation>Items within the entry data collection</xsd:documentation>
+  			</xsd:annotation></xsd:element>
+  	</xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="entry-data">
+  	<xsd:simpleContent>
+  		<xsd:extension base="xsd:string">
+  			<xsd:attribute name="key" type="xsd:string" use="required">
+  				<xsd:annotation>
+  					<xsd:documentation>Represents an entry within the entry data collection.</xsd:documentation>
+  				</xsd:annotation></xsd:attribute>
+  		</xsd:extension>
+  	</xsd:simpleContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="log">
+  	<xsd:sequence>
+  		<xsd:element name="NewElement" type="this:entry" minOccurs="0" maxOccurs="unbounded">
+  			<xsd:annotation>
+  				<xsd:documentation>The entries within the file that consistute the log.</xsd:documentation>
+  			</xsd:annotation></xsd:element>
+  	</xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

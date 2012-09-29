@@ -95,14 +95,14 @@ std::shared_ptr<log_writer> log_writer::create()
 	// append the process name
 	filename_buffer << log_writer::get_real_process_name() << "/";
 
-	// get the current process id.
-	filename_buffer << log_writer::get_real_process_id() << "-";
-
 	// append a reverse time stamp to the pid so file name format becomes
 	// pid_yyyymmdd_hhmmss.xml, as per the specifications. time is UTC.
 	filename_buffer.imbue(std::locale(filename_buffer.getloc(),
 			new boost::posix_time::time_facet("%Y%m%d-%H%M%S")));
 	filename_buffer << boost::posix_time::second_clock::universal_time();
+
+	// get the current process id.
+	filename_buffer << "-" << log_writer::get_real_process_id();
 
 	// add file extension
 	filename_buffer << ".xml";
@@ -451,15 +451,48 @@ const std::string log_writer::get_real_process_name()
 }
 
 /**
+ * This method writes out the XML header.
+ * This includes the XML declaration, root node (tied in the XSD) and the binary information element.
+ */
+void log_writer::write_xml_header()
+{
+
+	// locate the logging xsd
+	std::stringstream xsd_location;
+	xsd_location << "http://schemas.project-inglenook.co.uk/" // domain for schema's
+				 << "0.00-DEVELOPMENT/"                       // software version
+				 << "schemas/"                                // keep top level tidy for html.
+				 << "file-formats/"                           // types of schema
+				 << "inglenook-log-file.xsd";                 // specific file.
+
+	// just because the binary name can be tampered with..
+	std::string safe_process_name = process_name();
+	boost::replace_all(safe_process_name, "<", "&lt;");
+	boost::replace_all(safe_process_name, ">", "&gt;");
+
+	// write out the xml data type declaration
+	(*m_output_stream.get())  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+
+	// write out the root node and type in the xsd
+	(*m_output_stream.get()) << "<inglenook-log-file xmlns=\"" << xsd_location.str() << "\">";
+
+	// write out binary information block.
+	(*m_output_stream.get())  << "<process-id pid=\"" << pid() << "\">";
+	(*m_output_stream.get())  << "<binary-name><![CDATA[" << safe_process_name << "]]></binary-name>";
+	(*m_output_stream.get())  << "<binary-version><![CDATA[" << "#.## DEVELOPMENT" << "]]></binary-version>";
+	(*m_output_stream.get())  << "<log-writer-version><![CDATA[" << "#.## DEVELOPMENT" << "]]></log-writer-version>";
+	(*m_output_stream.get())  << "</process-id>";
+	(*m_output_stream.get())  << "<log-entries>";
+}
+
+
+/**
  * Get the current process name [NOTE: Platform Specified Code].
  * This method resorts to platform specific code to attempt to self determine the process name.
  * @returns The name of the current process, or empty string on failure.
  */
 void log_writer::_log_serialization_worker()
 {
-
-	// xml root dom element name
-	std::string xml_dom_root = "inglenook-log-file";
 
 	try
 	{
@@ -473,9 +506,8 @@ void log_writer::_log_serialization_worker()
 			BOOST_THROW_EXCEPTION( log_serialization_exception()
 				<< inglenook_error_number(unable_to_aquire_queue_notification_lock) );
 
-		// write out the xml starting header
-		(*m_output_stream.get())  << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-		(*m_output_stream.get()) << "<" << xml_dom_root << ">";
+		// start the log file.
+		write_xml_header();
 
 		while(true)
 		{
@@ -541,7 +573,8 @@ void log_writer::_log_serialization_worker()
 	//
 	try
 	{
-		(*m_output_stream.get()) << "</" << xml_dom_root << ">";
+		(*m_output_stream.get()) << "</log-entries>";
+		(*m_output_stream.get()) << "</inglenook-log-file>";
 	}
 	catch(...) 	{	/* if we crashed because of a bad stream, don't make the problem worse */}
 

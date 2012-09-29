@@ -126,6 +126,9 @@ class log_writer
 		/// Gets and returns the current process name.
 		static const std::string get_real_process_name();
 
+		/// Writes the xml header out to the stream.
+		void write_xml_header();
+
 		/// amount of time a worker should wait for a space availability notification from the serializer
 		/// before it just tries to reschedule the message anyway.
 		const int RESCHEDULE_MAX_RETRY_DELAY = 250; //ms (0.25 seconds);
@@ -193,6 +196,8 @@ class log_writer
 
 		/// used to notify the queuing entries that space in the queue has become available.
 		boost::condition_variable m_log_serialization_element_serialized;
+
+
 
 		/// current process id
 		pid_type m_process_id;

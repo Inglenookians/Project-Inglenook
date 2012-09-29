@@ -94,6 +94,17 @@ int main(int arg_c, char* arg_v[])
 		std::cout << "================================================================================================"                                                << std::endl;
 		std::cout << ""                                                                                                                                                << std::endl;
 
+		using namespace inglenook;
+		using namespace inglenook::logging;
+
+		// example of using extended data (non-streaming).
+		auto le = std::shared_ptr<log_entry>(new log_entry());
+		le->message("This message has some additional information tied in with it.");
+		le->extended_data("variable 1", "value 1");
+		le->extended_data("variable 2", "value 2");
+		le->entry_type(category::warning);
+		log_output->add_entry(le);
+
 		// start all the threads
 		for(int i = 0; i < NO_THREADS; i++)
 		{

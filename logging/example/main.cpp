@@ -29,6 +29,7 @@
 #include <boost/date_time/posix_time/posix_time_io.hpp>
 
 // inglenook includes
+#define INGLENOOK_LOG_FILE "/dev/null"
 #include "../common/logging.h"
 
 /**
@@ -89,7 +90,7 @@ int main(int arg_c, char* arg_v[])
 
 		// print out a small introduction block...
 		std::cout << translate("This is an example of logging; and is for development and testing."                                                                  ) << std::endl;
-		std::cout << translate("This demo shows the expected use of the inglenook logging and output mechanism (inglenook::iout)"                                    ) << std::endl;
+		std::cout << translate("This demo shows the expected use of the inglenook logging and output mechanism (inglenook::ilog)"                                    ) << std::endl;
 		std::cout << translate("Its is also a test of thread safety and severe load conditions. Launching ") << NO_THREADS << " / " << NO_MESSAGES                     << std::endl;
 		std::cout << "================================================================================================"                                                << std::endl;
 		std::cout << ""                                                                                                                                                << std::endl;

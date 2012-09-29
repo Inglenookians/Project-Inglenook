@@ -23,8 +23,17 @@
 namespace inglenook
 {
 
+#ifndef INGLENOOK_LOG_FILE
+
 	/// create the log writer (used by most applications).
 	static auto log_output = logging::log_writer::create();
+
+#else
+
+	/// create the log writer (used by most applications).
+	static auto log_output = logging::log_writer::create_from_file_path( (INGLENOOK_LOG_FILE) );
+
+#endif
 
 	/// thread safe logging interface.
 	static logging::log_client ilog(log_output);

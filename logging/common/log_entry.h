@@ -54,9 +54,8 @@ enum category : unsigned int
  */
 class log_entry
 {
+
 	public:
-
-
 
 		// creates a new log entry
 		log_entry();
@@ -71,25 +70,23 @@ class log_entry
 		/// sets the current category
 		void entry_type(const category& value);
 
-		// gets the log name space
+		/// gets the log name space
 		const std::string& log_namespace() const;
 
-		// sets the log name space
+		/// sets the log name space
 		void log_namespace(const std::string& value);
 
-		// gets the log message
-		const std::string& message() const;
+		/// gets the log message
+		virtual const std::string& message();
 
-		// sets the log message
-		void message(const std::string& value);
+		/// sets the log message
+		virtual void message(const std::string& value);
 
-		// add a data entry to the log
+		/// add a data entry to the log
 		void extended_data(const std::string& key, const std::string& value);
 
-		// get the data records from the log.
+		/// get the data records from the log.
 		const std::map<std::string, std::string>& extended_data();
-
-
 
 	private:
 
@@ -99,7 +96,7 @@ class log_entry
 		/// name space for this message
 		std::string m_namespace;
 
-		/// log message content
+		/// logs message body
 		std::string m_message;
 
 		/// buffer for extended data.

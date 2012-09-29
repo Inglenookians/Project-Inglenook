@@ -47,14 +47,22 @@ log_client::~log_client()
 	// nothing to do at the moment.
 }
 
-
 /**
- * Initializes the internal data buffer (if it is not already initialized for this thread).
+ * Initializes the internal data buffer. .
  */
 void log_client::initialize_buffer()
 {
+	// create a new log entry (this is now a tls_ptr to a shared_ptr to a buffer).
+	m_buffer.reset(new std::shared_ptr<log_entry_buffered>(new log_entry_buffered()));
+}
+
+/**
+ * Initializes the internal data buffer if it is not already initialized for this thread.
+ */
+void log_client::check_buffer()
+{
 	// if the buffer has not been initialized for this thread then initialize it.
-	if (m_buffer.get() == nullptr) m_buffer.reset(new log_entry_buffer());
+	if (m_buffer.get() == nullptr) initialize_buffer();
 }
 
 /**
@@ -66,10 +74,10 @@ void log_client::initialize_buffer()
 template <class type> log_client& log_client::send_to_stream(type& x)
 {
 	// make sure buffers initialized
-	initialize_buffer();
+	check_buffer();
 
 	// push element in the message stream
-	*(m_buffer.get()->message.get()) << x;
+	(m_buffer->get()->message_buffer()) << x;
 
 	//std::cout << m_buffer.get()->message->str();
 	return *this;
@@ -83,10 +91,10 @@ template <class type> log_client& log_client::send_to_stream(type& x)
 log_client& log_client::create_log_stream(category _category)
 {
 	// make sure buffers initialized
-	initialize_buffer();
+	check_buffer();
 
 	// set the initial category
-	m_buffer.get()->entry_type = _category;
+	m_buffer->get()->entry_type(_category);
 
 	// return the message stream (even though its not entirely what we are currently
 	// working with it is the most relevant, usable std::ostream.
@@ -120,7 +128,7 @@ log_client& log_client::operator<<(lf _lf)
 {
 
 	// make sure buffers initialized
-	initialize_buffer();
+	check_buffer();
 
 	// decide how to handle modifier.
 	switch(_lf)
@@ -128,20 +136,16 @@ log_client& log_client::operator<<(lf _lf)
 		// end entry and flush (lf::end)
 		case (lf::end):
 		{
-			// get a local handle to the buffer and create log entry
-			auto entry = std::shared_ptr<log_entry>(new log_entry());
-			auto buffer = m_buffer.get();
-
-			// populate log entry information
-			entry->log_namespace(buffer->log_namespace);
-			entry->entry_type(buffer->entry_type);
-			entry->message(buffer->message->str());
 
 			// todo verify entry - fill in the blanks.
 
+
 			// add the entry to the log schedule and create next entry.
-			m_output_interface->add_entry(entry);
-			m_buffer.reset(new log_entry_buffer());
+			auto converted_buffer = std::dynamic_pointer_cast<log_entry>(*m_buffer);
+
+			// schedule the entry for serialization and re-initialize buffer
+			m_output_interface->add_entry(converted_buffer);
+			initialize_buffer();
 
 			break;
 		}

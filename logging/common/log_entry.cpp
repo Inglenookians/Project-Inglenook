@@ -15,6 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+// boost includes
+#include <boost/exception/all.hpp>
+
+// inglenook includes
+#include "log_exceptions.h"
 #include "log_entry.h"
 
 namespace inglenook
@@ -95,18 +101,6 @@ void log_entry::log_namespace(const std::string& value)
 }
 
 /**
- * Gets the entry message.
- * This method gets the current log message body, This is the core part of the log and
- * the only required field (where other parts are technically required, they will be
- * automatically completed with default values by logging mechanisms if neglected).
- * @returns current entry message.
- */
-const std::string& log_entry::message() const
-{
-	return m_message;
-}
-
-/**
  * Sets the entry message.
  * This method sets the current log message body, This is the core part of the log and
  * the only required field (where other parts are technically required, they will be
@@ -116,6 +110,18 @@ const std::string& log_entry::message() const
 void log_entry::message(const std::string& value)
 {
 	m_message = value;
+}
+
+/**
+ * Gets the entry message.
+ * This method gets the current log message body, This is the core part of the log and
+ * the only required field (where other parts are technically required, they will be
+ * automatically completed with default values by logging mechanisms if neglected).
+ * @returns current entry message.
+ */
+const std::string& log_entry::message()
+{
+	return m_message;
 }
 
 /**

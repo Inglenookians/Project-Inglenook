@@ -26,7 +26,7 @@
 
 // inglenook includes
 #include "log_writer.h"
-#include "log_entry_buffer.h"
+#include "log_entry_buffered.h"
 
 namespace inglenook
 {
@@ -43,8 +43,11 @@ enum lf : unsigned int
 	end = 0x01 /**< End the current log entry and schedule for serialization. */
 };
 
+/// shared points to a log buffer
+typedef std::shared_ptr<log_entry_buffered> log_buffer;
+
 /// thread specific data is held entirely within this data type.
-typedef boost::thread_specific_ptr<log_entry_buffer> ts_log_buffer;
+typedef boost::thread_specific_ptr<log_buffer> ts_log_buffer;
 
 /**
  * The log_client class provides a thread safe log writing interface for client applications.
@@ -89,8 +92,12 @@ public:
 
 private:
 
-    /// ensures that the internal buffer is initialized.
+
+    /// initializes the data buffer for the current context.
     void initialize_buffer();
+
+    /// ensures that the internal buffer is initialized within the current context.
+    void check_buffer();
 
 	/// creates a log category of the specified type.
 	inline log_client& create_log_stream(category _category);

@@ -129,6 +129,19 @@ class log_writer
 		/// sets the default entry type
 		void default_entry_type(const category& value);
 
+		/// gets the xml threshold
+		const category& xml_threshold() const;
+
+		/// sets the xml threshold
+		void xml_threshold(const category& value);
+
+		/// gets the console threshold
+		const category& console_threshold() const;
+
+		/// sets the console threshold
+		void console_threshold(const category& value);
+
+
 	private:
 
 		/// Gets and returns the current process id.
@@ -219,10 +232,16 @@ class log_writer
 		/// output stream to write log messages to
 		std::shared_ptr<std::ostream> m_output_stream;
 
-	    /// thread specific default entry type.
+		/// lowest type of information that will be written to xml
+		category m_xml_serialization_threshold;
+
+		/// lowest type of information that will be written to console
+		category m_console_serialization_threshold;
+
+	    /// global entry type.
 	    category m_default_entry_type;
 
-	    /// thread specific default name space.
+	    /// global default name space.
 	    std::string m_default_namespace;
 
 

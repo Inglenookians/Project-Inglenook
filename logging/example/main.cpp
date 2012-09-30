@@ -109,6 +109,9 @@ int main(int arg_c, char* arg_v[])
 
 		ilog << "The default namespace has been set to inglenook.logging.example, the default entry type hasn't been changed." << lf::end;
 
+		log_output->console_threshold(category::warning);
+		log_output->xml_threshold(category::warning);
+
 		// example of building up a log entry manually
 		auto le = std::shared_ptr<log_entry>(new log_entry());
 		le->message("This message has some additional information tied in with it.");

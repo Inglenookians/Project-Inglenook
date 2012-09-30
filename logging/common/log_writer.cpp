@@ -56,6 +56,8 @@ log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream) :
 	m_process_id(get_real_process_id()),
 	m_process_name(get_real_process_name()),
 	m_output_stream(output_stream),
+	m_xml_serialization_threshold(category::information),
+	m_console_serialization_threshold(category::information),
 	m_default_entry_type(category::information),
 	m_default_namespace("inglenook.anonymous")
 	{
@@ -510,9 +512,14 @@ else				// the file does not exist, and we were not instructed to create it.
 				while((entry = _log_serialization_worker_next_entry()) != nullptr)
 				{
 
-					_log_serialization_worker_serialize(entry);
-					_log_serialization_worker_screen(entry);
-
+					// make sure the entry is filled out.
+					if(entry->entry_type() != category::unspecified &&
+					   entry->log_namespace().length() > 0 &&
+					   entry->message().length() > 0)
+					{
+						_log_serialization_worker_serialize(entry);
+						_log_serialization_worker_screen(entry);
+					}
 				}
 
 				//
@@ -576,69 +583,74 @@ else				// the file does not exist, and we were not instructed to create it.
 	 */
 	void log_writer::_log_serialization_worker_serialize(std::shared_ptr<log_entry> entry)
 	{
-		// should only need to initialize this stuff once for performance
-		auto output_stream = m_output_stream.get();
-		auto timestamp_formatter = std::locale(output_stream->getloc(),
-				new boost::posix_time::time_facet("%Y-%m-%dT%H:%M:%sZ"));
 
-		/*
-		 * This is what we are aiming for:
-
-		 <log-entry timestamp="2012-12-21T00:00:00.00Z" severity="4" ns="inglenook.sample.process">
-		 <message><![CDATA[Yikes! Something incredibly Mayan happened to the process - cannot continue.]]></message>
-		 <extended-data>
-		 <item key="sample.specific"><![CDATA[Kittens]]></item>
-		 <item key="sample.host"><![CDATA[127.0.0.1]]></item>
-		 <extended-data>
-		 </log-entry>
-
-		 */
-
-		// sanitize message this can contain user input
-		std::string message = entry->message();
-		boost::replace_all(message, "<", "&lt;");
-		boost::replace_all(message, ">", "&gt;");
-
-		// get the extended data (pre-doing this to keep xml writing as clean as possible).
-		auto extended_data = entry->extended_data();
-
-		// open the <log-entry> dom element
-		*output_stream << "<log-entry timestamp=\"";
-		output_stream->imbue(timestamp_formatter);
-		*output_stream << boost::posix_time::second_clock::universal_time();
-		*output_stream << "\" severity=\"" << entry->entry_type() << "\" ns=\"" << entry->log_namespace() << "\">";
-
-		// output the message body
-		*output_stream << "<message><![CDATA[" << message << "]]></message>";
-
-		// check for extended data
-		if(extended_data.size() > 0)
+		// check serialization filter.
+		if(entry->entry_type() >= xml_threshold())
 		{
+			// should only need to initialize this stuff once for performance
+			auto output_stream = m_output_stream.get();
+			auto timestamp_formatter = std::locale(output_stream->getloc(),
+					new boost::posix_time::time_facet("%Y-%m-%dT%H:%M:%sZ"));
 
-			// start the <extended-data> dom item
-			*output_stream << "<extended-data>";
+			/*
+			 * This is what we are aiming for:
 
-			// iterate through all the data in the map
-			for(auto data = extended_data.begin(); data != extended_data.end(); data++)
+			 <log-entry timestamp="2012-12-21T00:00:00.00Z" severity="4" ns="inglenook.sample.process">
+			 <message><![CDATA[Yikes! Something incredibly Mayan happened to the process - cannot continue.]]></message>
+			 <extended-data>
+			 <item key="sample.specific"><![CDATA[Kittens]]></item>
+			 <item key="sample.host"><![CDATA[127.0.0.1]]></item>
+			 <extended-data>
+			 </log-entry>
+
+			 */
+
+			// sanitize message this can contain user input
+			std::string message = entry->message();
+			boost::replace_all(message, "<", "&lt;");
+			boost::replace_all(message, ">", "&gt;");
+
+			// get the extended data (pre-doing this to keep xml writing as clean as possible).
+			auto extended_data = entry->extended_data();
+
+			// open the <log-entry> dom element
+			*output_stream << "<log-entry timestamp=\"";
+			output_stream->imbue(timestamp_formatter);
+			*output_stream << boost::posix_time::second_clock::universal_time();
+			*output_stream << "\" severity=\"" << entry->entry_type() << "\" ns=\"" << entry->log_namespace() << "\">";
+
+			// output the message body
+			*output_stream << "<message><![CDATA[" << message << "]]></message>";
+
+			// check for extended data
+			if(extended_data.size() > 0)
 			{
 
-				// sanitize the data provided (not only value is sanitized).
-				std::string value = data->second;
-				boost::replace_all(value, "<", "&lt;");
-				boost::replace_all(value, ">", "&gt;");
+				// start the <extended-data> dom item
+				*output_stream << "<extended-data>";
 
-				// and write it out.
-				*output_stream << "<item key=\"" << data->first << "\"><![CDATA[" << value << "]]></item>";
+				// iterate through all the data in the map
+				for(auto data = extended_data.begin(); data != extended_data.end(); data++)
+				{
+
+					// sanitize the data provided (not only value is sanitized).
+					std::string value = data->second;
+					boost::replace_all(value, "<", "&lt;");
+					boost::replace_all(value, ">", "&gt;");
+
+					// and write it out.
+					*output_stream << "<item key=\"" << data->first << "\"><![CDATA[" << value << "]]></item>";
+
+				}
+
+				// end the <extended-data> dom item
+				*output_stream << "</extended-data>";
 
 			}
 
-			// end the <extended-data> dom item
-			*output_stream << "</extended-data>";
-
+			// close the <log-entry>
+			*output_stream << "</log-entry>";
 		}
-
-		// close the <log-entry>
-		*output_stream << "</log-entry>";
 	}
 
 	/**
@@ -650,39 +662,44 @@ else				// the file does not exist, and we were not instructed to create it.
 	void log_writer::_log_serialization_worker_screen(std::shared_ptr<log_entry> entry)
 	{
 
-		/*
-		 // both cout and ceer should have the same locale...
-		 auto timestamp_formatter = std::locale(std::cout.getloc(),
-		 new boost::posix_time::time_facet("%d-%M-%Y-%H:%M:%S"));
+		// check serialization filter.
+		if(entry->entry_type() >= console_threshold())
+		{
 
-		 // short names for all the entry types localized for user.
-		 std::string categories[] =
-		 {
-		 boost::locale::translate("     "),
-		 boost::locale::translate("debug"),
-		 boost::locale::translate("trace"),
-		 boost::locale::translate(" info"),
-		 boost::locale::translate(" warn"),
-		 boost::locale::translate("error"),
-		 boost::locale::translate("fatal")
-		 };
+			/*
+			 // both cout and ceer should have the same locale...
+			 auto timestamp_formatter = std::locale(std::cout.getloc(),
+			 new boost::posix_time::time_facet("%d-%M-%Y-%H:%M:%S"));
 
-		 // choose a category string for the entry
-		 std::string category = entry->entry_type() < sizeof(categories) ?
-		 categories[entry->entry_type()] : categories[0];
-		 */
+			 // short names for all the entry types localized for user.
+			 std::string categories[] =
+			 {
+			 boost::locale::translate("     "),
+			 boost::locale::translate("debug"),
+			 boost::locale::translate("trace"),
+			 boost::locale::translate(" info"),
+			 boost::locale::translate(" warn"),
+			 boost::locale::translate("error"),
+			 boost::locale::translate("fatal")
+			 };
 
-		// determine which stream we need to push this message to.
-		std::ostream *output_stream = entry->entry_type() >= LOG_CATEGORY_CERR_BOUNTRY ?
-		&std::cerr : &std::cout;
-		/*
-		 // push it all out to console.
-		 *output_stream << "[";
-		 output_stream->imbue(timestamp_formatter);
-		 *output_stream << boost::posix_time::second_clock::local_time();
-		 *output_stream << " " << category << "] ";
-		 */
-		*output_stream << entry->message() << std::endl;
+			 // choose a category string for the entry
+			 std::string category = entry->entry_type() < sizeof(categories) ?
+			 categories[entry->entry_type()] : categories[0];
+			 */
+
+			// determine which stream we need to push this message to.
+			std::ostream *output_stream = entry->entry_type() >= LOG_CATEGORY_CERR_BOUNTRY ?
+			&std::cerr : &std::cout;
+			/*
+			 // push it all out to console.
+			 *output_stream << "[";
+			 output_stream->imbue(timestamp_formatter);
+			 *output_stream << boost::posix_time::second_clock::local_time();
+			 *output_stream << " " << category << "] ";
+			 */
+			*output_stream << entry->message() << std::endl;
+		}
 
 	}
 
@@ -728,7 +745,7 @@ else				// the file does not exist, and we were not instructed to create it.
 
 	/**
 	 * Gets the value for the default name space
-	 * This property is not thread safe (cross thread impact)
+	 * This property makes no guarantees of thread safety.
 	 * @returns value of the property
 	 */
 	const std::string& log_writer::default_namespace() const
@@ -738,7 +755,7 @@ else				// the file does not exist, and we were not instructed to create it.
 
 	/**
 	 * Sets the value for the default name space
-	 * This property is not thread safe (cross thread impact)
+	 * This property makes no guarantees of thread safety.
 	 * @param value new value for the property
 	 */
 	void log_writer::default_namespace(const std::string& value)
@@ -748,7 +765,7 @@ else				// the file does not exist, and we were not instructed to create it.
 
 	/**
 	 * Gets the value for the default entry type
-	 * This property is not thread safe (cross thread impact)
+	 * This property makes no guarantees of thread safety.
 	 * @returns value of the property
 	 */
 	const category& log_writer::default_entry_type() const
@@ -758,13 +775,62 @@ else				// the file does not exist, and we were not instructed to create it.
 
 	/**
 	 * Sets the value for the default entry type
-	 * This property is not thread safe (cross thread impact)
+	 * This property makes no guarantees of thread safety.
 	 * @param value new value for the property
 	 */
 	void log_writer::default_entry_type(const category& value)
 	{
 		m_default_entry_type = value;
 	}
+
+	/**
+	 * Gets the value of the xml serialization threshold.
+	 * This property makes no guarantees of thread safety. The writer consults this property
+	 * when deciding whether an entry can be serialized to XML. Properties lower than this
+	 * threshold (more verbose) will not be emitted.
+	 * @returns the current value of the property
+	 */
+	const category& log_writer::xml_threshold() const
+	{
+		return m_xml_serialization_threshold;
+	}
+
+	/**
+	 * Sets the value for the xml serialization threshold.
+	 * This property makes no guarantees of thread safety. The writer consults this property
+	 * when deciding whether an entry can be serialized to XML. Properties lower than this
+	 * threshold (more verbose) will not be emitted.
+	 * @param value new value for the property
+	 */
+	void log_writer::xml_threshold(const category& value)
+	{
+		m_xml_serialization_threshold = value;
+	}
+
+	/**
+	 * Gets the value of the console serialization threshold.
+	 * This property makes no guarantees of thread safety. The writer consults this property
+	 * when deciding whether an entry can be serialized to the console. Properties lower than this
+	 * threshold (more verbose) will not be emitted.
+	 * @returns the current value of the property
+	 */
+	const category& log_writer::console_threshold() const
+	{
+		return m_console_serialization_threshold;
+	}
+
+	/**
+	 * Sets the value for the console serialization threshold.
+	 * This property makes no guarantees of thread safety. The writer consults this property
+	 * when deciding whether an entry can be serialized to the console. Properties lower than this
+	 * threshold (more verbose) will not be emitted.
+	 * @param value new value for the property
+	 */
+	void log_writer::console_threshold(const category& value)
+	{
+		m_console_serialization_threshold = value;
+	}
+
 
 } // namespace inglenook::logging
 

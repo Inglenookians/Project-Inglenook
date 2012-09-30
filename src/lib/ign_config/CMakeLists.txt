@@ -16,7 +16,55 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-# Include subdirectories to process.
-add_subdirectory(lib)
-add_subdirectory(cli)
-add_subdirectory(srv)
+###########
+# Library #
+###########
+
+# Make the library.
+add_library(
+	ign_config 
+	SHARED
+	config.cpp
+)
+
+# Link to required libraries
+target_link_libraries(
+	ign_config
+	ign_directories
+)
+
+# Set the properties
+set_target_properties(
+	ign_config PROPERTIES
+	VERSION 1.0.0
+	SOVERSION 1
+)
+
+# Specify the install location.
+install(
+	TARGETS ign_config 
+	DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
+)
+
+#########
+# Tests #
+#########
+
+# Make the test.
+add_executable(
+	ign_config_tests 
+	tests.cpp
+)
+
+# Link to required libraries
+target_link_libraries(
+	ign_config_tests
+	ign_config
+	boost_unit_test_framework
+) 
+
+# Add the test.
+add_test(
+	NAME ign_config_tests
+	COMMAND ign_config_tests
+)

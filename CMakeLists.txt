@@ -1,3 +1,21 @@
+#
+# CMakeLists.txt: CMake configuration file.
+# Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
 cmake_minimum_required (VERSION 2.8)
 
 #
@@ -37,6 +55,17 @@ message("	\${CMAKE_INSTALL_FULL_LIBDIR}     \t ${CMAKE_INSTALL_FULL_LIBDIR}     
 message("	\${CMAKE_INSTALL_FULL_INCLUDEDIR} \t ${CMAKE_INSTALL_FULL_INCLUDEDIR} \t (Header Includes)")
 message("	\${CMAKE_INSTALL_FULL_MANDIR}     \t ${CMAKE_INSTALL_FULL_MANDIR}    (Manual Pages)")
 
+# Setup the compiler to use c++11
+message(STATUS "Configuring c++11 support")
+ADD_DEFINITIONS("-std=c++11")
+
+
+#
+# Testing (use 'make test')
+#
+message(STATUS "Configuring testing")
+enable_testing()
+
 
 #
 # Source code
@@ -44,6 +73,7 @@ message("	\${CMAKE_INSTALL_FULL_MANDIR}     \t ${CMAKE_INSTALL_FULL_MANDIR}    (
 message(STATUS "Configuring source code")
 # Add the subdirectories to scan for include headers.
 include_directories(src/lib)
+
 # Add RPATH for install based on CMAKE_INSTALL_FULL_LIBDIR
 set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_FULL_LIBDIR})
 # Add the subdirectories to scan for CMakeFiles.txt to build.
@@ -95,7 +125,7 @@ foreach(MANPAGE_NUM RANGE 1 9)
 				| ${SED_EXECUTABLE} s/IDTMAN.SECTION/${MANPAGE_NUM}/g
 				| ${GZIP_EXECUTABLE} -qc > ${MAN_OUTPUT_DIRECTORY}/${MANPAGE_GZ}
 			DEPENDS ${MANPAGE_FILE}
-			COMMENT "Generating manpage '${MANPAGE_GZ}'"
+			COMMENT "Generating manual page '${MANPAGE_GZ}'"
 		)
 
 		# Add a rule for 'make install' to install the man page into the current location.
@@ -111,7 +141,7 @@ endforeach(MANPAGE_NUM)
 # Ensure that the man build directory exists before creating the target.
 execute_process(COMMAND mkdir -p ${MAN_OUTPUT_DIRECTORY})
 # Add a custom target that required that all listed manpgaes processed above are built.
-add_custom_target(Manpages ALL echo
+add_custom_target("manual pages" ALL echo
 	DEPENDS ${MANPAGE_LIST}
 )
 

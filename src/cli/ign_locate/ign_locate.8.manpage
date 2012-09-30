@@ -1,0 +1,48 @@
+\." manpage for IDTMAN.NAME
+\." This manpage is part of project inglenook (http://www.project-inglenook.co.uk).
+\." Please report errors, typos and any other mistakes on the projects issue tracker
+.TH man IDTMAN.SECTION "16 May 2012" "1.0" IDTMAN.NAME man page
+.SH NAME
+IDTMAN.NAME \- inglenook developer tool for ...
+.SH SYNOPSIS
+IDTMAN.NAME COMMAND [OPTIONS]
+.SH DESCRIPTION
+IDTMAN.NAME is a ...
+.SH OPTIONS
+.TP
+\fB\-i\fR, \fB\-\-install\fR
+the install command usually takes either a file or directory as an additional argument (the 'target'). if the target is a file, IDTMAN.NAME will attempt to install the file into the relevant section of the manual. if the target is a directory IDTMAN.NAME will search the directory (and any directories within it) for files following the inglenook manpage naming convection and attempt to install them. if the target argument is ommited then IDTMAN.NAME will perform a directory scan within the current working directory, this is the equivilent of 'IDTMAN.NAME -i $(pwd)'.
+.TP
+\fB\-r\fR, \fB\-\-remove\fR
+the remove command usually takes a string as an additional argument (the 'target'). this string could be a directory, a file, a binary name and section number or just a binary name. if the target is a directory, IDTMAN.NAME will search the directory (and any directories within it) for files following the inglenook manpage naming convention and attempt to remove thier corresponding manual entries if they are installed. if the string is a file IDTMAN.NAME will attempt to remove the corresponding manual page if it is installed. it will also accept input in the format 'bin.1' or just 'bin' to remove the 'bin' manual page entry. \fBnote that all remove methods actually ignore the section number\; IDTMAN.NAME will attempt to remove the manual page from all sections whether or not the section number is actually inferred\fR. this is to ensure pages are removed if they relocate to another section, and also as the section number shown in the manual page may not be syncronised with the files actual name and location.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+shows a brief overview of how to use the tool, and points you here for additional support.
+.SH THE INGLENOOK MANPAGE NAMING CONVENTION
+.TP
+IDTMAN.NAME will only operates with files named with the inglenook manpage naming convention, this format is 'bin.1.manpage' where 'bin' is the binary names (with no periods), '1' is the section number and 'manpage' is always 'manpage'. note that the remove command may operate on files not named with this convention.
+.SH NOTES
+.TP
+during installation (-i, --install), IDTMAN.NAME will replace all instances of IDTMAN.\fBNAME\fR with the binary name, and IDTMAN.\fBSECTION\fR with the section number. use of these template variables mean the name and section are always syncronised and give a single point of modification for future changes.
+.TP
+There is no need to remove manual entries before installing newer versions, IDTMAN.NAME will always attempt to remove existing versions automatically prior to installing the new ones.  
+.TP
+if you have any problems, both install and remove command accept a file path as a final argument (after 'target'), IDTMAN.NAME will append the output of any sub-call to this file (the output of these calls are normally writtern to /dev/null). 
+.TP
+IDTMAN.NAME must be ran as root.
+.SH COPYRIGHT
+Copyright \(co 2012 Project Inglenook <http://www.project\-inglenook.co.uk>.
+.br
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+.br
+There is NO WARRANTY, to the extent permitted by law.
+.SH SEE ALSO
+None
+.SH BUGS
+No known bugs. Report new bugs at:
+.br
+<https://github.com/inglenookians/project-inglenook/issues>
+.SH Author
+Project Inglenook (http://www.project\-inglenook.co.uk).

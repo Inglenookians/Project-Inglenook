@@ -49,12 +49,16 @@ const boost::posix_time::ptime timeout_ms(int ms) {
  * @see ~log_writer()
  */
 log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream) :
-	m_log_serialization_thread(nullptr), m_log_serialization_shutdown_mutex(
-			new boost::timed_mutex()), m_log_serialization_queue_mutex(
-			new boost::mutex()), m_log_serialization_element_queuing_mutex(
-			new boost::mutex()), m_process_id(get_real_process_id()),
-			m_process_name(get_real_process_name()), m_output_stream(
-					output_stream) {
+	m_log_serialization_thread(nullptr),
+	m_log_serialization_shutdown_mutex(new boost::timed_mutex()),
+	m_log_serialization_queue_mutex(new boost::mutex()),
+	m_log_serialization_element_queuing_mutex(new boost::mutex()),
+	m_process_id(get_real_process_id()),
+	m_process_name(get_real_process_name()),
+	m_output_stream(output_stream),
+	m_default_entry_type(category::information),
+	m_default_namespace("inglenook.anonymous")
+	{
 
 	// check the output streams health
 	if (m_output_stream == nullptr || m_output_stream->fail()) {
@@ -681,6 +685,7 @@ else				// the file does not exist, and we were not instructed to create it.
 		*output_stream << entry->message() << std::endl;
 
 	}
+
 	/**
 	 * Gets the next item off the queue for serialization.
 	 * This method will in a thread safe manner, get the next item off the queue for processing. If there is no item
@@ -719,6 +724,46 @@ else				// the file does not exist, and we were not instructed to create it.
 		// return the result.
 		return result;
 
+	}
+
+	/**
+	 * Gets the value for the default name space
+	 * This property is not thread safe (cross thread impact)
+	 * @returns value of the property
+	 */
+	const std::string& log_writer::default_namespace() const
+	{
+		return m_default_namespace;
+	}
+
+	/**
+	 * Sets the value for the default name space
+	 * This property is not thread safe (cross thread impact)
+	 * @param value new value for the property
+	 */
+	void log_writer::default_namespace(const std::string& value)
+	{
+		m_default_namespace = value;
+	}
+
+	/**
+	 * Gets the value for the default entry type
+	 * This property is not thread safe (cross thread impact)
+	 * @returns value of the property
+	 */
+	const category& log_writer::default_entry_type() const
+	{
+		return m_default_entry_type;
+	}
+
+	/**
+	 * Sets the value for the default entry type
+	 * This property is not thread safe (cross thread impact)
+	 * @param value new value for the property
+	 */
+	void log_writer::default_entry_type(const category& value)
+	{
+		m_default_entry_type = value;
 	}
 
 } // namespace inglenook::logging

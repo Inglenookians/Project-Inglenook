@@ -48,9 +48,6 @@ const unsigned long unable_to_aquire_shutdown_lock = module_error_base + 0x03;
 /// used by the serialization thread when it cannot acquire ownership of its notification mechanism lock.
 const unsigned long unable_to_aquire_queue_notification_lock = module_error_base + 0x04;
 
-/// used by the log_entry class when it receives a method call for message().
-const unsigned long log_entry_message_not_implemented  = module_error_base + 0x05;
-
 /// error number used to refine error site when stack traces are not available.
 typedef boost::error_info<struct __inglenook_error_number, unsigned long> inglenook_error_number;
 
@@ -121,17 +118,6 @@ struct log_serialization_exception : virtual log_exception
 	   return boost::locale::translate("There was a problem with the log serialization mechanism").str().c_str();
    }
 };
-
-//
-// virtual_method_not_implemented
-// This exception is thrown when a virtual method is called and no derived implementation exists where it should
-struct virtual_method_not_implemented : virtual log_exception
-{	/// provides a boiler plate explanation of the exception.
-   const char* what() const throw() {
-	   return boost::locale::translate("A call for a virtual method was received by the base class; a derived class was expected to implement this.").str().c_str();
-   }
-};
-
 
 } // namespace inglenook::logging
 

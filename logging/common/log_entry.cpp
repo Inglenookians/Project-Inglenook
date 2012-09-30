@@ -117,9 +117,12 @@ void log_entry::message(const std::string& value)
  * This method gets the current log message body, This is the core part of the log and
  * the only required field (where other parts are technically required, they will be
  * automatically completed with default values by logging mechanisms if neglected).
+ * NOTE: this is no longer a const method as derived classes do modify the class on calls
+ *   to this method const is commented out on the end of the method to remind people not to
+ *   add it back in.
  * @returns current entry message.
  */
-const std::string& log_entry::message()
+const std::string& log_entry::message() //const
 {
 	return m_message;
 }

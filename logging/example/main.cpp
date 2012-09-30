@@ -29,7 +29,7 @@
 #include <boost/date_time/posix_time/posix_time_io.hpp>
 
 // inglenook includes
-#define INGLENOOK_LOG_FILE "/dev/null"
+//#define INGLENOOK_LOG_FILE "/dev/null"
 #include "../common/logging.h"
 
 /**
@@ -45,6 +45,9 @@ void loud_thread(int id, int no_outputs)
 	using namespace inglenook::logging;
 	using namespace inglenook;
 
+	// change the thread specific default category to warning.
+	ilog.default_entry_type(category::warning);
+
 	// notify callers that we have started.
 	ilog.info() << "thread #" << id << " started." << lf::end;
 
@@ -52,7 +55,7 @@ void loud_thread(int id, int no_outputs)
 	for(int i = 0; i < no_outputs; i++)
 	{
 		// write the message, lots of places for bad thread safety to show...
-		ilog.info() << "this is message #" << (i+1) << " of " <<
+		ilog << "this is message #" << (i+1) << " of " <<
 				no_outputs << " from thread " << id << lf::end;
 	}
 
@@ -98,7 +101,15 @@ int main(int arg_c, char* arg_v[])
 		using namespace inglenook;
 		using namespace inglenook::logging;
 
-		// example of using extended data (non-streaming).
+		// modify the default name space (if you do not do this the name space "inglenook.anonymous" will be used.
+		log_output->default_namespace("inglenook.logging.example");
+
+		// you can also change the default entry type (if you do not to this, the category "information" will be used."
+		log_output->default_entry_type(category::warning);
+
+		ilog << "The default namespace has been set to inglenook.logging.example, the default entry type hasn't been changed." << lf::end;
+
+		// example of building up a log entry manually
 		auto le = std::shared_ptr<log_entry>(new log_entry());
 		le->message("This message has some additional information tied in with it.");
 		le->extended_data("variable 1", "value 1");

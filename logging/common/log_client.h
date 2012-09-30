@@ -72,6 +72,18 @@ public:
 	/// deconstructs the log_client and releases resources.
 	virtual ~log_client();
 
+	// gets the default name space for this thread.
+	const std::string& default_namespace() const;
+
+	// sets the default name space for this thread.
+	void default_namespace(const std::string& value);
+
+	// gets the default entry type for this thread.
+	const category& default_entry_type() const;
+
+ 	/// sets the default entry type for this thread.
+	void default_entry_type(const category& value);
+
     /// Creates a debug log entry
     log_client& debug();
 
@@ -109,6 +121,12 @@ private:
     /// pointer to the output interface that this client should submit log
     /// entries to. this is set at construction and shouldn't change.
     std::shared_ptr<log_writer> m_output_interface;
+
+    /// thread specific default entry type.
+    boost::thread_specific_ptr<category> m_ts_default_entry_type;
+
+    /// thread specific default name space.
+    boost::thread_specific_ptr<std::string> m_ts_default_namespace;
 
     /// thread specific data buffer used to collate stream input until a
     /// log entry is flushed with lf::end;

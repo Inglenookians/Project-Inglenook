@@ -54,6 +54,10 @@ void log_client::initialize_buffer()
 {
 	// create a new log entry (this is now a tls_ptr to a shared_ptr to a buffer).
 	m_buffer.reset(new std::shared_ptr<log_entry_buffered>(new log_entry_buffered()));
+
+	// set the initial category
+	m_buffer->get()->entry_type(default_entry_type());
+	m_buffer->get()->log_namespace(default_namespace());
 }
 
 /**
@@ -63,6 +67,67 @@ void log_client::check_buffer()
 {
 	// if the buffer has not been initialized for this thread then initialize it.
 	if (m_buffer.get() == nullptr) initialize_buffer();
+}
+
+/**
+ * Gets the value for the default event type for this thread.
+ * @returns value of the property
+ */
+const std::string& log_client::default_namespace() const
+{
+	// check if a default is set, else fall back to writers.
+	return (m_ts_default_namespace.get() != nullptr) ?
+		*m_ts_default_namespace : m_output_interface->default_namespace();
+}
+
+/**
+ * Sets the value of the default name space for this thread.
+ * @params value new value for this property
+ */
+void log_client::default_namespace(const std::string& value)
+{
+	check_buffer();
+
+	// update default and current namespace
+	if(m_ts_default_namespace.get() == nullptr)
+		m_ts_default_namespace.reset(new std::string());
+	*m_ts_default_namespace = value;
+
+	m_buffer->get()->log_namespace(value);
+}
+
+/**
+ * Gets the value for the default entry type for this thread.
+ * @returns value of the property
+ */
+const category& log_client::default_entry_type() const
+{
+	// check if a default is set, else fall back to writers.
+	if (m_ts_default_entry_type.get() != nullptr)
+	{
+		return *m_ts_default_entry_type;
+	}
+	else
+	{
+		return m_output_interface->default_entry_type();
+	}
+}
+
+
+/**
+ * Sets the value of the default entry type for this thread.
+ * @params value new value for this property
+ */
+void log_client::default_entry_type(const category& value)
+{
+	check_buffer();
+
+	// update default and current entry types
+	if(m_ts_default_entry_type.get() == nullptr)
+		m_ts_default_entry_type.reset(new category);
+	*m_ts_default_entry_type = value;
+
+	m_buffer->get()->entry_type(value);
 }
 
 /**

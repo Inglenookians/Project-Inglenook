@@ -117,6 +117,17 @@ class log_writer
 		/// gets the current process name (or name of process we are logging on behalf of)
 		const std::string process_name() const;
 
+		// gets the default name space
+		const std::string& default_namespace() const;
+
+		// sets the default name space
+		void default_namespace(const std::string& value);
+
+		// gets the default entry type
+		const category& default_entry_type() const;
+
+		/// sets the default entry type
+		void default_entry_type(const category& value);
 
 	private:
 
@@ -208,6 +219,11 @@ class log_writer
 		/// output stream to write log messages to
 		std::shared_ptr<std::ostream> m_output_stream;
 
+	    /// thread specific default entry type.
+	    category m_default_entry_type;
+
+	    /// thread specific default name space.
+	    std::string m_default_namespace;
 
 
 };

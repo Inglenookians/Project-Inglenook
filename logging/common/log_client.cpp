@@ -202,9 +202,6 @@ log_client& log_client::operator<<(lf _lf)
 		case (lf::end):
 		{
 
-			// todo verify entry - fill in the blanks.
-
-
 			// add the entry to the log schedule and create next entry.
 			auto converted_buffer = std::dynamic_pointer_cast<log_entry>(*m_buffer);
 

@@ -38,7 +38,10 @@ namespace inglenook {
 
 namespace logging {
 
-// todo: move this - its useful.
+/**
+ * Creates a POSIX time item out of a milisecond duration..
+ * @param ms milliseconds until event.
+ */
 const boost::posix_time::ptime timeout_ms(int ms) {
 	return boost::get_system_time() + boost::posix_time::milliseconds(ms);
 }
@@ -80,8 +83,7 @@ log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream) :
 
 /**
  * Creates a new log_writer instance based on inglenooks logging directory structure. This can be impacted by a variety of factors
- * including but not limited to; global configuration, application configuration and environment. This logic is described in the inglenook
- * wiki at (todo site link here).
+ * including but not limited to; global configuration, application configuration and environment.
  */
 std::shared_ptr<log_writer> log_writer::create() {
 	std::stringstream filename_buffer;
@@ -282,8 +284,8 @@ else				// the file does not exist, and we were not instructed to create it.
 			// check if we failed to schedule to entry.
 			if(!entry_scheduled)
 			{
-				// todo: IMPORTANT: how do we want to handle this?
-				// discuss with the inglenookians, but for now out good friend std::cerr.
+				// for now out good friend std::cerr, may want to make this throw in the future.
+				// currently not hitting this event, even under the most obscene load.
 				std::cerr << "WARNING: failed to schedule log entry." << std::endl;
 			}
 

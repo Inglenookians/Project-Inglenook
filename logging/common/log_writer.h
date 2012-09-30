@@ -70,9 +70,8 @@ typedef boost::circular_buffer<std::shared_ptr<log_entry>> log_message_queue;
 /**
  * The log_writer class provides log writing functionality for client applications.
  * The log_writer class will write log entries as well formed XML to a specified output stream (std::ostream). XML emitted by this class
- * adheres to the 'Inglenook Logging File Format' (XSD, or xml schema) which is fully defined at http://TODO/meep. This XML is designed to
- * be read by (TODO name of XML reader class here), if also contains an XLT so should be human readable. Clients not capable of linking to
- * libraries (such as scripts) should use (TODO name of log-writer) to handle this.
+ * adheres to the 'Inglenook Logging File Format' (XSD, or xml schema) which is fully defined by the XSD in the XML header. This XML is designed to
+ * be read by inglenook system tools, if also may contain an XLT so should be human readable.
  */
 class log_writer
 {

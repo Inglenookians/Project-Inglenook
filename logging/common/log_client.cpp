@@ -22,6 +22,7 @@
 // inglenook includes
 #include "log_client.h"
 
+
 namespace inglenook
 {
 
@@ -185,10 +186,44 @@ log_client& log_client::error() { return create_log_stream(category::error); }
 log_client& log_client::fatal() { return create_log_stream(category::fatal); }
 
 /**
+ * processes a name space (ns) stream manipulator.
+ * @param ns new name space to apply
+ * @returns always returns *this
+ **/
+log_client& log_client::operator<<(const log_data& _log_data)
+{
+	// make sure buffers initialized
+	check_buffer();
+
+	// update namespace
+	m_buffer->get()->extended_data(_log_data.m_key, _log_data.m_value);
+
+	// return the stream
+	return *this;
+}
+
+/**
+ * processes a name space (ns) stream manipulator.
+ * @param ns new name space to apply
+ * @returns always returns *this
+ **/
+log_client& log_client::operator<<(const ns& _ns)
+{
+	// make sure buffers initialized
+	check_buffer();
+
+	// update namespace
+	m_buffer->get()->log_namespace(_ns.m_ns);
+
+	// return the stream
+	return *this;
+}
+
+/**
  * processes a log file (lf) stream manipulator.
  * @param output_file Path identifying file to write XML to.
  * @returns always returns *this
- *  */
+ **/
 log_client& log_client::operator<<(lf _lf)
 {
 

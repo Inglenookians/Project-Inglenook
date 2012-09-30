@@ -104,21 +104,20 @@ int main(int arg_c, char* arg_v[])
 		// modify the default name space (if you do not do this the name space "inglenook.anonymous" will be used.
 		log_output->default_namespace("inglenook.logging.example");
 
-		// you can also change the default entry type (if you do not to this, the category "information" will be used."
-		log_output->default_entry_type(category::warning);
-
-		ilog << "The default namespace has been set to inglenook.logging.example, the default entry type hasn't been changed." << lf::end;
-
-		log_output->console_threshold(category::warning);
-		log_output->xml_threshold(category::warning);
-
 		// example of building up a log entry manually
 		auto le = std::shared_ptr<log_entry>(new log_entry());
 		le->message("This message has some additional information tied in with it.");
+		le->log_namespace("inglenook.logging.example.manual");
 		le->extended_data("variable 1", "value 1");
 		le->extended_data("variable 2", "value 2");
 		le->entry_type(category::warning);
 		log_output->add_entry(le);
+
+		// same message built on a stream
+		ilog.warning() << ns("inglenook.logging.example.stream")
+				    << "This message has some additional information tied in with it"
+				    << log_data("variable 1", "value 1") << log_data("variable 2", "value 2")
+				    << lf::end;
 
 		// start all the threads
 		for(int i = 0; i < NO_THREADS; i++)

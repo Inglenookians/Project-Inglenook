@@ -27,6 +27,7 @@
 // inglenook includes
 #include "log_writer.h"
 #include "log_entry_buffered.h"
+#include "log_entry_modifiers.h"
 
 namespace inglenook
 {
@@ -157,6 +158,8 @@ public:
     log_client& operator<<(std::string* _string);
     log_client& operator<<(std::stringstream _stringstream);
     log_client& operator<<(lf _lf);
+    log_client& operator<<(const ns& _ns);
+    log_client& operator<<(const log_data& _log_data);
     /////////////////////////////////////////////////////////////////
     //
 };

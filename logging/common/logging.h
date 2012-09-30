@@ -19,6 +19,7 @@
 #define LOGGING_H_
 
 #include "log_client.h"
+#include "log_entry_modifiers.h"
 
 namespace inglenook
 {

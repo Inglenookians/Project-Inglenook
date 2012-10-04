@@ -1,5 +1,5 @@
 /*
-* logging.h: External interface for client applications. Not use in common logging directly.
+* logging_test.h: Test routines to make sure the logging mechanisms are working.
 * Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
 *
 * This program is free software: you can redistribute it and/or modify
@@ -15,34 +15,42 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef LOGGING_H_
-#define LOGGING_H_
 
-#include "log_client.h"
-#include "log_entry_modifiers.h"
+#ifndef LOGGING_TESTS_
+#define LOGGING_TESTS_
+
+
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE common_logging
+
+// boost (http://boost.org) includes
+#include <boost/test/unit_test.hpp>
 
 namespace inglenook
 {
 
-	namespace
-	{
+namespace logging
+{
 
-	#ifndef INGLENOOK_LOG_FILE
-
-		/// create the log writer (used by most applications).
-		auto log_output = logging::log_writer::create();
-
-	#else
-
-		/// create the log writer (used by most applications).
-		auto log_output = logging::log_writer::create_from_file_path( (INGLENOOK_LOG_FILE) );
-
-	#endif
-
-		/// thread safe logging interface.
-		logging::log_client ilog(log_output);
-	}
-
+BOOST_AUTO_TEST_CASE ( log_writer_tests )
+{
+	// pending cmake
 }
 
-#endif /* LOGGING_H_ */
+BOOST_AUTO_TEST_CASE ( log_client_tests )
+{
+	// pending cmake
+}
+
+BOOST_AUTO_TEST_CASE ( log_entry )
+{
+	// pending cmake
+}
+
+
+
+} // namespace inglenook::logging
+
+} // namespace inglenook
+
+#endif LOGGING_TESTS_

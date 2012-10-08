@@ -21,6 +21,9 @@
 #include <ign_core/application_exceptions.h>
 #include <ign_directories/directories.h>
 
+#include <ign_config/config.h>
+
+
 // standard library includes
 #include <iostream>
 
@@ -40,6 +43,9 @@ int main(int argc, char* argv[])
     // Program version
     /// @todo calculate version from somewhere?
     std::string version("0.0.1a");
+    
+    // Create the application store.
+    inglenook::core::application app(description, version,  __DATE__, __TIME__);
     
     // Program specific options.
     boost::program_options::options_description options("Program options");
@@ -68,15 +74,14 @@ int main(int argc, char* argv[])
     boost::program_options::variables_map vm;
     try
     {
-        vm = inglenook::core::application::arguments_parser(argc, argv, description, version,  __DATE__, __TIME__, options, positions);
-        //vm = inglenook::core::application::arguments_parser(argc, argv, description, version,  __DATE__, __TIME__);
+        vm = inglenook::core::application::arguments_parser(argc, argv, options, positions);
     }
-    catch(inglenook::core::application::exceptions::process_exit_success_exception &ex)
+    catch(inglenook::core::exceptions::application_exit_success_exception &ex)
     {
         success = EXIT_SUCCESS;
         parser_exit = true;
     }
-    catch(inglenook::core::application::exceptions::process_exit_fail_exception &ex)
+    catch(inglenook::core::exceptions::application_exit_fail_exception &ex)
     {
         parser_exit = true;
     }

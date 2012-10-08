@@ -26,7 +26,6 @@ add_executable(
 target_link_libraries(
 	ign_locate
 	ign_directories
-	boost_program_options
 )
 
 # Specify the install location.

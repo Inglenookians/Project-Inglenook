@@ -1,5 +1,5 @@
 /*
- * main.cpp: @todo fill out!
+ * main.cpp: A tool for locating various special inglenook directories.
  * Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,8 @@
  */
 
 // inglenook includes
+#include <ign_core/application.h>
+#include <ign_core/application_exceptions.h>
 #include <ign_directories/directories.h>
 
 // standard library includes
@@ -24,6 +26,7 @@
 
 // boost (http://boost.org) includes
 #include <boost/filesystem.hpp>
+#include <boost/locale.hpp>
 #include <boost/program_options.hpp>
 
 int main(int argc, char* argv[])
@@ -31,128 +34,150 @@ int main(int argc, char* argv[])
     // Keep track of our success.
     int success = EXIT_FAILURE;
     
-    // Keep track of user switches.
-    bool switch_directory = false;
-    bool verbose_output = false;
+    // Program description.
+    std::string description("a tool for locating various special inglenook directories");
     
-    /*
-    /// @todo implement proper option handling.
-    // ign_locate directory [options]
-    // -s switch Automatically change directory once the directory is found, equivent of 'cd (ign_locate directory)'.
-    // -v verbose Detailed output indicate how it came to its conclusion (detailing where it looked to find the directory).
-    
-    // Generic options (help and version).
-    boost::program_options::options_description generic("Generic options");
-    generic.add_options()
-        ("version,v", "produce version information")
-        ("help,h", "produce help message")
-    ;
+    // Program version
+    /// @todo calculate version from somewhere?
+    std::string version("0.0.1a");
     
     // Program specific options.
-    boost::program_options::options_description config("Configuration");
-    config.add_options()
-        ("switch,s", "switch description")
-        ("verbose,V", "verbose description")
+    boost::program_options::options_description options("Program options");
+    options.add_options()
+        ("dir,d", boost::program_options::value<std::string>()->required(),
+            "REQUIRED: The directory to locate. Available options are:\n\n"
+            "cli     \tThe location of inglenook's command line tools\n"
+            "config  \tThe location of inglenook's configuration files\n"
+            "data    \tThe location of inglenook's data files\n"
+            "lib     \tThe location of inglenook's internal libraries\n"
+            "log     \tThe location of inglenook's log files\n"
+            "sbin    \tThe location of inglenook's system administrator tools\n"
+            "man     \tThe location of inglenook's manual pages\n"
+            "tmp     \tThe location of inglenook's temporary files\n"
+            "user    \tThe location of user's home directory\n")
+        ("switch,s", "Automatically change directory once it is found, equivent of the system call:\n\ncd $(ign_locate directory)\n")
+        ("verbose,v", "Detailed output indicate how it came to its conclusion (detailing where it looked to find the directory)")
     ;
     
     // Set the positional options.
-    boost::program_options::positional_options_description p;
-    p.add("input-file", -1);
+    boost::program_options::positional_options_description positions;
+    positions.add("dir", 1);
     
-    // Setup the program options (Joins options together).
-    boost::program_options::options_description cmdline_options;
-    cmdline_options.add(generic).add(config);
-    
-    // Parse the arguments!
+    // Try and parse the command line arguments.
+    bool parser_exit = false;
     boost::program_options::variables_map vm;
-    //boost::program_options::store(boost::program_options::parse_command_line(argc, argv, cmdline_options), vm);
-    boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(cmdline_options).positional(p).run(), vm);
-    boost::program_options::notify(vm);
-    
-    if (vm.count("help"))
+    try
     {
-        std::cout << cmdline_options;
+        vm = inglenook::core::application::arguments_parser(argc, argv, description, version,  __DATE__, __TIME__, options, positions);
+        //vm = inglenook::core::application::arguments_parser(argc, argv, description, version,  __DATE__, __TIME__);
     }
-    */
-    
-    // Check we have the right number of arguments.
-    if(argc != 2)
+    catch(inglenook::core::application::exceptions::process_exit_success_exception &ex)
     {
-        // Incorrect number!
-        std::cerr << "You must specify an option" << std::endl;
+        success = EXIT_SUCCESS;
+        parser_exit = true;
     }
-    else
+    catch(inglenook::core::application::exceptions::process_exit_fail_exception &ex)
     {
-        // Correct number of arguments.
-        boost::filesystem::path value;
+        parser_exit = true;
+    }
+    
+    // Has the parser indicated we should continue.
+    if(!parser_exit)
+    {
+        // Keep track of user switches.
+        bool option_switch(false);
+        bool option_verbose(false);
+        std::string option_directory("");
         
-        // Retrieve the option chosen.
-        std::string option = argv[1];
+        // Did the user request automatic directory switching?
+        if(vm.count("switch"))
+        {
+            option_switch = true;
+        }
+        // Did the user request verbose output?
+        if(vm.count("verbose"))
+        {
+            option_verbose = true;
+        }
+        // Did the user specify a directory.
+        if(vm.count("dir") > 0)
+        {
+            // Correct number of arguments specified, continue.
+            boost::filesystem::path directory_value;
+            
+            // Get the actual directory selected.
+            option_directory = vm["dir"].as<std::string>();
         
-        // Fetch the correct value based on the specified option.
-        if(option == "cli")
-        {
-            value = inglenook::directories::cli(true);
-        }
-        else if(option == "config")
-        {
-            value = inglenook::directories::config();
-        }
-        else if(option == "data")
-        {
-            value = inglenook::directories::data();
-        }
-        else if(option == "lib")
-        {
-            value = inglenook::directories::lib();
-        }
-        else if(option == "log")
-        {
-            value = inglenook::directories::log();
-        }
-        else if(option == "sbin")
-        {
-            value = inglenook::directories::sbin();
-        }
-        else if(option == "man")
-        {
-            value = inglenook::directories::man();
-        }
-        else if(option == "tmp")
-        {
-            value = inglenook::directories::tmp();
-        }
-        else if(option == "user")
-        {
-            value = inglenook::directories::user();
-        }
-        
-        // Did we find a valid option?
-        if(value.empty())
-        {
-            // Invalid option!
-            std::cerr << "Unrecognised option: '" << option << "'" << std::endl;
-        }
-        else
-        {
-            // See if we need to switch directory.
-            if(switch_directory)
+            // Fetch the correct directory_value based on the specified option.
+            if(option_directory == "cli")
             {
-                // Switch directory.
-                /// @todo implement!
-                chdir(value.string().c_str());
+                directory_value = inglenook::directories::cli(option_verbose);
+            }
+            else if(option_directory == "config")
+            {
+                directory_value = inglenook::directories::config(option_verbose);
+            }
+            else if(option_directory == "data")
+            {
+                directory_value = inglenook::directories::data(option_verbose);
+            }
+            else if(option_directory == "lib")
+            {
+                directory_value = inglenook::directories::lib(option_verbose);
+            }
+            else if(option_directory == "log")
+            {
+                directory_value = inglenook::directories::log(option_verbose);
+            }
+            else if(option_directory == "sbin")
+            {
+                directory_value = inglenook::directories::sbin(option_verbose);
+            }
+            else if(option_directory == "man")
+            {
+                directory_value = inglenook::directories::man(option_verbose);
+            }
+            else if(option_directory == "tmp")
+            {
+                directory_value = inglenook::directories::tmp(option_verbose);
+            }
+            else if(option_directory == "user")
+            {
+                directory_value = inglenook::directories::user(option_verbose);
+            }
+            
+            // Did we find a valid option?
+            if(!directory_value.empty())
+            {
+                // See if we need to switch directory.
+                if(option_switch)
+                {
+                    // Switch directory.
+                    /// @todo discuss as we cannot change the calling shell's directory, only our own processes directory.
+                    chdir(directory_value.string().c_str());
+                    
+                    // Sucess!
+                    success = EXIT_SUCCESS;
+                }
+                else
+                {
+                    // Sucess!
+                    success = EXIT_SUCCESS;
+                }
                 
-                // Sucess!
-                success = EXIT_SUCCESS;
+                // Return the directory_value.
+                std::cout << directory_value.string() << std::endl;
             }
             else
             {
-                // Sucess!
-                success = EXIT_SUCCESS;
+                // Invalid option!
+                std::cerr << "Unrecognised directory option: '" << option_directory << "'" << std::endl;
             }
-            
-            // Return the value.
-            std::cout << value.string() << std::endl;
+        }
+        else
+        {
+            // Invalid option!
+            std::cerr << "No directory option specified" << std::endl;
         }
     }
     

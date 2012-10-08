@@ -29,13 +29,33 @@
 // application test case.
 BOOST_AUTO_TEST_CASE(application)
 {
+    // Test the application description, version and build before creation.
+    BOOST_CHECK(inglenook::core::application::description() == "");
+    BOOST_CHECK(inglenook::core::application::version() == "");
+    BOOST_CHECK(inglenook::core::application::build() == "");
+    
+    // Create the application.
+    inglenook::core::application app("description", "version", "build_time", "build_date");
+    
+    // Test the application description, version and build after creation.
+    BOOST_CHECK(inglenook::core::application::description() == "description");
+    BOOST_CHECK(inglenook::core::application::version() == "version");
+    BOOST_CHECK(inglenook::core::application::build() == "build_time build_date");
+    
+    // Test the configuration file.
+    BOOST_CHECK(inglenook::core::application::config_file() == "");
+    inglenook::core::application::config_file("config_file");
+    BOOST_CHECK(inglenook::core::application::config_file() == "config_file");
+    inglenook::core::application::config_file("");
+    BOOST_CHECK(inglenook::core::application::config_file() == "");
+    
     // Test the application name (we know this!)
     BOOST_CHECK(inglenook::core::application::name() == "ign_core_tests");
     
     // It's difficult to test whether the pid is correct, just check a valid pid is returned (ie: pid > 0)
     BOOST_CHECK(inglenook::core::application::pid() > 0);
     
-    /// @todo test for program options.
+    /// @todo test for arguments parser.
 }
 
 // environment test case.

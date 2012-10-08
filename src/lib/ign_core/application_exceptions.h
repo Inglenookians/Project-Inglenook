@@ -30,46 +30,43 @@ namespace inglenook
 {
     namespace core
     {  
-        namespace application
+        namespace exceptions
         {
-            namespace exceptions
+                
+            /// Added to exceptions when a process cmdline file handle couldn't be opened..
+            typedef boost::error_info<struct __application_cmdline_file, boost::filesystem::path> application_cmdline_file;
+            
+            /**
+             * application_name_exception
+             * This exception is thrown when issues are encountered with a process name, this might occur
+             * if the process name cannot be determined, or is not valid.
+             */
+            struct application_name_exception : virtual inglenook::core::exceptions::inglenook_exception
             {
-                
-                /// Added to exceptions when a process cmdline file handle couldn't be opened..
-                typedef boost::error_info<struct __process_cmdline_file, boost::filesystem::path> process_cmdline_file;
-                
-                /**
-                 * process_name_exception
-                 * This exception is thrown when issues are encountered with a process name, this might occur
-                 * if the process name cannot be determined, or is not valid.
-                 */
-                struct process_name_exception : virtual inglenook::core::exceptions::inglenook_exception
-                {
-                    /// provides a boiler plate explanation of the exception.
-                    const char* what() const throw() {
-                        return boost::locale::translate("There was a problem determining the processes real name").str().c_str();
-                    }
-                };
-                
-                /**
-                 * process_exit_success_exception
-                 * This exception is thrown when the command line parser wants to exit the program with a success return value,
-                 * this might occur if the user specifies the --help or --version argumentsd.
-                 */
-                struct process_exit_success_exception : virtual inglenook::core::exceptions::inglenook_exception
-                {
-                };
-                
-                /**
-                 * process_exit_fail_exception
-                 * This exception is thrown when the command line parser wants to exit the program with a failed return value,
-                 * this might occur if any of the arguments are not valid.
-                 */
-                struct process_exit_fail_exception : virtual inglenook::core::exceptions::inglenook_exception
-                {
-                };
-                
-            }
+                /// provides a boiler plate explanation of the exception.
+                const char* what() const throw() {
+                    return boost::locale::translate("There was a problem determining the processes real name").str().c_str();
+                }
+            };
+            
+            /**
+             * application_exit_success_exception
+             * This exception is thrown when the command line parser wants to exit the program with a success return value,
+             * this might occur if the user specifies the --help or --version argumentsd.
+             */
+            struct application_exit_success_exception : virtual inglenook::core::exceptions::inglenook_exception
+            {
+            };
+            
+            /**
+             * application_exit_fail_exception
+             * This exception is thrown when the command line parser wants to exit the program with a failed return value,
+             * this might occur if any of the arguments are not valid.
+             */
+            struct application_exit_fail_exception : virtual inglenook::core::exceptions::inglenook_exception
+            {
+            };
+            
         }
     }
 }

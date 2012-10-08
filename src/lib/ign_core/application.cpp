@@ -37,9 +37,70 @@ using namespace inglenook::core;
 //--------------------------------------------------------//
 namespace
 {
-    /// Cache of process information so we only fetch it once.
+    /// Cache of application information.
+    std::string m_description("");
+    std::string m_version("");
+    std::string m_build("");
+    boost::filesystem::path m_config_file("");
     pid_t m_pid(0);
     std::string m_name("");
+}
+//--------------------------------------------------------//
+
+//--------------------------------------------------------//
+application::application(const std::string& description, const std::string& version, const std::string& build_date, const std::string& build_time)
+{
+    // Store the required information.
+    m_description = description;
+    m_version = version;
+    m_build = build_date + " " + build_time;
+}
+//--------------------------------------------------------//
+
+//--------------------------------------------------------//
+application::~application()
+{
+    // Nothing to do here.
+}
+//--------------------------------------------------------//
+
+//--------------------------------------------------------//
+std::string application::description()
+{
+    // Return the description.
+    return m_description;
+}
+//--------------------------------------------------------//
+
+//--------------------------------------------------------//
+std::string application::version()
+{
+    // Return the version number.
+    return m_version;
+}
+//--------------------------------------------------------//
+
+//--------------------------------------------------------//
+std::string application::build()
+{
+    // Return the build information.
+    return m_build;
+}
+//--------------------------------------------------------//
+
+//--------------------------------------------------------//
+boost::filesystem::path application::config_file()
+{
+    // Return the config file.
+    return m_config_file;
+}
+//--------------------------------------------------------//
+
+//--------------------------------------------------------//
+void application::config_file(const boost::filesystem::path& config_file)
+{
+    // Set the config file.
+    m_config_file = config_file;
 }
 //--------------------------------------------------------//
 
@@ -72,32 +133,32 @@ std::string application::name()
     #if defined(__linux__) // the following block is for LINUX and is both tested and maintained.
         
         // Build path to the cmdline file for this process.
-        boost::filesystem::path process_cmdline_file_path((boost::format("/proc/%1%/cmdline") % pid() ).str());
+        boost::filesystem::path application_cmdline_file_path((boost::format("/proc/%1%/cmdline") % pid() ).str());
         
         try
         {
             // Make sure this file actually exists before proceeding.
-            if(boost::filesystem::exists(process_cmdline_file_path))
+            if(boost::filesystem::exists(application_cmdline_file_path))
             {
                 // File exists... try and open it.
-                std::ifstream process_cmdline_file(process_cmdline_file_path.native().c_str());
+                std::ifstream application_cmdline_file(application_cmdline_file_path.native().c_str());
                 
                 // Check if we managed to open the file, throw exception on failure.
-                if(!process_cmdline_file.is_open())
+                if(!application_cmdline_file.is_open())
                 {
-                    BOOST_THROW_EXCEPTION(application::exceptions::process_name_exception());
+                    BOOST_THROW_EXCEPTION(exceptions::application_name_exception());
                 }
                 
                 // We have opened the file, set up a scoped exit clause to ensure the file is closed.
-                BOOST_SCOPE_EXIT((&process_cmdline_file))
+                BOOST_SCOPE_EXIT((&application_cmdline_file))
                 {
-                    process_cmdline_file.close();
+                    application_cmdline_file.close();
                 } BOOST_SCOPE_EXIT_END
                 
                 // Create commandLine and copy file contents in to it. DO NOT remove braces around the
                 // first argument - c++11 resolution for potential most-vexing-parse issues
                 std::string command_line(
-                                         { std::istreambuf_iterator<char>(process_cmdline_file) },
+                                         { std::istreambuf_iterator<char>(application_cmdline_file) },
                                          std::istreambuf_iterator<char>()
                                          );
                 
@@ -113,74 +174,74 @@ std::string application::name()
             // The cmdline file doesn't appear to exist?
             else
             {
-                BOOST_THROW_EXCEPTION(application::exceptions::process_name_exception());
+                BOOST_THROW_EXCEPTION(exceptions::application_name_exception());
             }
         }
         catch(boost::exception& ex)
         {
             // Unknown error.
-            ex << application::exceptions::process_cmdline_file(process_cmdline_file_path);
+            ex << exceptions::application_cmdline_file(application_cmdline_file_path);
             throw;
         }
         
     #elif defined(__APPLE__) // the following block is for OSX and is both tested and maintained.
         
         // Define a buffer to store path.
-        char process_name[PROC_PIDPATHINFO_MAXSIZE] = {};
+        char application_name[PROC_PIDPATHINFO_MAXSIZE] = {};
         
         // Attempt to fetch the process path using the pid.
-        if(proc_pidpath(pid(), process_name, sizeof(process_name)) <= 0)
+        if(proc_pidpath(pid(), application_name, sizeof(application_name)) <= 0)
         {
             // Failed to get process path!
-            BOOST_THROW_EXCEPTION(application::exceptions::process_name_exception()
-                                  << core::exceptions::c_error_number(errno)
-                                  << core::exceptions::c_error_message(strerror(errno))
+            BOOST_THROW_EXCEPTION(exceptions::application_name_exception()
+                                  << exceptions::c_error_number(errno)
+                                  << exceptions::c_error_message(strerror(errno))
                                   );
         }
         else
         {
             // We have the process name.
-            binary_path = process_name;
+            binary_path = application_name;
         }
         
     #elif defined(_WIN32) // The following block is for WINDOWS and is NOT tested or maintained.
         #warning INGLENOOK: WIN32 code has never been tested. This might not even compile. Good luck brave warrior.
         
         // Define a buffer to store path.
-        char process_name[MAX_PATH] = {};
+        char application_name[MAX_PATH] = {};
         
         try
         {
             // Attempt to open the our own process with read access rights.
-            HANDLE process_handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, get_real_process_id());
+            HANDLE application_handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, get_real_process_id());
             
             // Check if anything went wrong.
-            if(!process_handle)
+            if(!application_handle)
             {
-                BOOST_THROW_EXCEPTION(application::exceptions::process_name_exception());
+                BOOST_THROW_EXCEPTION(exceptions::application_name_exception());
             }
             
             // Attempt to open handle was successful, set up a scoped exit clause to
             // ensure that the process handle is closed when we are done.
-            BOOST_SCOPE_EXIT((&process_handle))
+            BOOST_SCOPE_EXIT((&application_handle))
             {
-                CloseHandle(process_handle);
+                CloseHandle(application_handle);
             } BOOST_SCOPE_EXIT_END
             
             // Query the name of the process using the handle acquired.
-            if(!GetModuleFileNameEx(process_handle, 0, process_name, sizeof(process_name) - 1))
+            if(!GetModuleFileNameEx(application_handle, 0, application_name, sizeof(application_name) - 1))
             {
                 // Something went wrong, abort and sulk
-                BOOST_THROW_EXCEPTION(application::exceptions::process_name_exception() << core::exceptions::win32_error_number(GetLastError()));
+                BOOST_THROW_EXCEPTION(exceptions::application_name_exception() << exceptions::win32_error_number(GetLastError()));
             }
             
             // We have the process name.
-            binary_path = process_name;
+            binary_path = application_name;
         }
         catch(boost::exception& ex)
         {
             // In the event of any errors note that this is windows code.
-            ex << core::exceptions::is_win32_error(true);
+            ex << exceptions::is_win32_error(true);
             throw;
         }
         
@@ -198,7 +259,7 @@ std::string application::name()
 //--------------------------------------------------------//
 
 //--------------------------------------------------------//
-boost::program_options::variables_map application::arguments_parser(int argc, char* argv[], const std::string& description, const std::string& version, const std::string& build_date, const std::string& build_time, const boost::program_options::options_description& options, const boost::program_options::positional_options_description& positions)
+boost::program_options::variables_map application::arguments_parser(int argc, char* argv[], const boost::program_options::options_description& options, const boost::program_options::positional_options_description& positions)
 {
     // Return structure.
     boost::program_options::variables_map variables_map;
@@ -212,7 +273,7 @@ boost::program_options::variables_map application::arguments_parser(int argc, ch
     ;
     
     // Setup the program options, this joins the options together and sets the program description.
-    boost::program_options::options_description cmdline_options(name() + ", " + description);
+    boost::program_options::options_description cmdline_options(name() + ", " + description());
     
     // Have any additional options been specified?
     if(options.options().size() > 0)
@@ -236,13 +297,13 @@ boost::program_options::variables_map application::arguments_parser(int argc, ch
             std::cout << cmdline_options;
             
             // Throw that we want the application to exit.
-            BOOST_THROW_EXCEPTION(application::exceptions::process_exit_success_exception());
+            BOOST_THROW_EXCEPTION(exceptions::application_exit_success_exception());
         }
         // Did the user request version information?
         else if(variables_map.count("version"))
         {
             // Print out the version information.
-            std::cout << inglenook::core::application::name() << " " << version << " (compiled " << build_date << " " << build_time << ")" << std::endl << std::endl;
+            std::cout << name() << " " << version() << " (compiled " << build() << ")" << std::endl << std::endl;
             
             std::cout << "Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)" << std::endl << std::endl;
             
@@ -260,7 +321,7 @@ boost::program_options::variables_map application::arguments_parser(int argc, ch
             << "along with this program. If not, see <http://www.gnu.org/licenses/>." << std::endl;
             
             // Throw that we want the application to exit.
-            BOOST_THROW_EXCEPTION(application::exceptions::process_exit_success_exception());
+            BOOST_THROW_EXCEPTION(exceptions::application_exit_success_exception());
         }
         else
         {
@@ -271,11 +332,11 @@ boost::program_options::variables_map application::arguments_parser(int argc, ch
         // Did the user specify a config file.
         if(variables_map.count("config-file"))
         {
-            /// @todo replace config variable.
-            //application::command_line_config_file = variables_map["config-file"].as<std::string>();
+            // Set the specified config file.
+            config_file(variables_map["config-file"].as<std::string>());
         }
     }
-    catch(application::exceptions::process_exit_success_exception &ex)
+    catch(exceptions::application_exit_success_exception &ex)
     {
         // Continue to throw this up to the callee.
         throw;
@@ -289,7 +350,7 @@ boost::program_options::variables_map application::arguments_parser(int argc, ch
         std::cerr << boost::locale::translate("ERROR: ") << ex.what() << std::endl;
         
         // Throw that we want the application to exit.
-        BOOST_THROW_EXCEPTION(application::exceptions::process_exit_fail_exception());
+        BOOST_THROW_EXCEPTION(exceptions::application_exit_fail_exception());
     }
     
     // Return the parsed variable map.

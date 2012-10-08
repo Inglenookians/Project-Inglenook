@@ -34,9 +34,6 @@
 
 using namespace inglenook;
 
-/// @todo sort how this is being done.
-//boost::filesystem::path config::command_line_config_file = "";
-
 //--------------------------------------------------------//
 boost::optional<std::string> config::get(const std::string& key, bool skip_blank, const boost::optional<std::string>& default_value)
 {
@@ -63,9 +60,9 @@ boost::optional<std::string> config::app::get(const std::string& key, const boos
     boost::filesystem::path file_path(directories::config() / (core::application::name() +  "_config.xml"));
     
     // Do we need to override file_path with the command line config file.
-    if(!core::application::command_line_config_file.empty())
+    if(!core::application::config_file().empty())
     {
-        file_path = core::application::command_line_config_file;
+        file_path = core::application::config_file();
     }
     
     // Fetch and return the key value from the application config file.
@@ -80,9 +77,9 @@ bool config::app::set(const std::string& key, const std::string& value)
     boost::filesystem::path file_path(directories::config() / (core::application::name() +  "_config.xml"));
     
     // Do we need to override file_path with the command line config file.
-    if(!core::application::command_line_config_file.empty())
+    if(!core::application::config_file().empty())
     {
-        file_path = core::application::command_line_config_file;
+        file_path = core::application::config_file();
     }
     
     // Set the value for the key in the application config file and return success.
@@ -97,9 +94,9 @@ bool config::app::remove(const std::string& key)
     boost::filesystem::path file_path(directories::config() / (core::application::name() +  "_config.xml"));
     
     // Do we need to override file_path with the command line config file.
-    if(!core::application::command_line_config_file.empty())
+    if(!core::application::config_file().empty())
     {
-        file_path = core::application::command_line_config_file;
+        file_path = core::application::config_file();
     }
     
     // Remove the value for the key in the application config file and return success.
@@ -114,9 +111,9 @@ boost::optional<std::string> config::global::get(const std::string& key, const b
     boost::filesystem::path file_path(directories::config() / "config.xml");
     
     // Do we need to override file_path with the command line config file.
-    if(!core::application::command_line_config_file.empty())
+    if(!core::application::config_file().empty())
     {
-        file_path = core::application::command_line_config_file;
+        file_path = core::application::config_file();
     }
     
     // Fetch and return the key value from the global config file.
@@ -131,9 +128,9 @@ bool config::global::set(const std::string& key, const std::string& value)
     boost::filesystem::path file_path(directories::config() / "config.xml");
     
     // Do we need to override file_path with the command line config file.
-    if(!core::application::command_line_config_file.empty())
+    if(!core::application::config_file().empty())
     {
-        file_path = core::application::command_line_config_file;
+        file_path = core::application::config_file();
     }
     
     // Set the value for the key in the global config file and return success.
@@ -148,9 +145,9 @@ bool config::global::remove(const std::string& key)
     boost::filesystem::path file_path(directories::config() / "config.xml");
     
     // Do we need to override file_path with the command line config file.
-    if(!core::application::command_line_config_file.empty())
+    if(!core::application::config_file().empty())
     {
-        file_path = core::application::command_line_config_file;
+        file_path = core::application::config_file();
     }
     
     // Remove the value for the key in the global config file and return success.

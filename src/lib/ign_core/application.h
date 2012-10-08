@@ -61,40 +61,79 @@ namespace inglenook
 {
     namespace core
     {  
-        namespace application
+        class application
         {
+        public:
+            
+            /**
+             * Constructor.
+             * @param description The application description.
+             * @param version The application version.
+             * @param build_date The build date of the application.
+             * @param build_time The build time of the application.
+             */
+            application(const std::string& description, const std::string& version, const std::string& build_date, const std::string& build_time);
+            
+            /**
+             * Deconstructor.
+             */
+            ~application();
+            
+            /**
+             * Fetch the application description.
+             * @retutn the description.
+             */
+            static std::string description();
+            
+            /**
+             * Fetch the application version number.
+             * @retutn the version number.
+             */
+            static std::string version();
+            
+            /**
+             * Fetch the application build information.
+             * @retutn the build information.
+             */
+            static std::string build();
+            
+            /**
+             * Fetch the application overriding config file, which can be set 
+             * using the default argument parser as well as manually.
+             * @retutn the config file.
+             */
+            static boost::filesystem::path config_file();
+            
+            /**
+             * Set the overriding config file for the application.
+             * @param config_file The config file to set.
+             */
+            static void config_file(const boost::filesystem::path& config_file);
             
             /**
              * Fetch the application's process id (pid).
              * @return The application's pid.
              */
-            pid_t pid();
+            static pid_t pid();
             
             /**
              * Fetch the application's process name.
              * @return The application's process name.
              */
-            std::string name();
+            static std::string name();
             
             /**
              * Parse the command line arguments with the default help, version and config-file options.
              * @param argc The argument count.
              * @param argv The argument vector.
-             * @param description The application description.
-             * @param version The application version.
-             * @param build_date The build date of the application.
-             * @param build_time The build time of the application.
              * @param options The additional program options to parse.
              * @param positions The specified positions for options that don't have to be named.
              * @return The parsed arguments as a variable map.
              * @note This will throw if the help or version options are specified to try and stop the application loop from continuing.
              */
-            boost::program_options::variables_map arguments_parser(int argc, char* argv[], const std::string& description, const std::string& version, const std::string& build_date, const std::string& build_time, const boost::program_options::options_description& options = boost::program_options::options_description(), const boost::program_options::positional_options_description& positions = boost::program_options::positional_options_description());
+            static boost::program_options::variables_map arguments_parser(int argc, char* argv[], const boost::program_options::options_description& options = boost::program_options::options_description(), const boost::program_options::positional_options_description& positions = boost::program_options::positional_options_description());
             
-            /// Storage of command line config file, if specified.
-            /// @todo sort how this is being done.
-            boost::filesystem::path command_line_config_file;
-            //extern boost::filesystem::path command_line_config_file;
-        }
+        };
+        
     }
 }

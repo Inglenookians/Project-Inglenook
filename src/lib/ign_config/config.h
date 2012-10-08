@@ -31,7 +31,8 @@ namespace inglenook
     {
         
         /// Storage of command line config file, if specified.
-        extern boost::filesystem::path command_line_config_file;
+        /// @todo sort how this is being done.
+        //extern boost::filesystem::path command_line_config_file;
         
         /**
          * Get a config value. 

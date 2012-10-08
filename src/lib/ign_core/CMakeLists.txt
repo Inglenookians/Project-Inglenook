@@ -33,6 +33,7 @@ target_link_libraries(
 	ign_core
 	boost_filesystem
 	boost_locale
+	boost_program_options
 	boost_system
 )
 

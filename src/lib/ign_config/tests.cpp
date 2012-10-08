@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(config)
     BOOST_CHECK(inglenook::config::global::set("key", "global"));
     BOOST_CHECK(inglenook::config::app::set("key", "application"));
     // Set the command line config.
-    inglenook::config::command_line_config_file = command_line_file_path;
+    inglenook::core::application::command_line_config_file = command_line_file_path;
     // Test getting, command line config file should override with no values.
     BOOST_CHECK(inglenook::config::get("key") == boost::optional<std::string>());
     // Test setting, command line config file should override be altered.
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(config)
     BOOST_CHECK(inglenook::config::global::set("key", "command_line_global"));
     BOOST_CHECK(inglenook::config::get("key") == boost::optional<std::string>("command_line_global"));
     // Disable the command line config file, all our previous global and application values should reappear.
-    inglenook::config::command_line_config_file = "";
+    inglenook::core::application::command_line_config_file = "";
     BOOST_CHECK(inglenook::config::get("key") == boost::optional<std::string>("application"));
     BOOST_CHECK(inglenook::config::app::remove("key"));
     BOOST_CHECK(inglenook::config::get("key") == boost::optional<std::string>("global"));

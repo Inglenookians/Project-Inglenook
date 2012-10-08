@@ -51,6 +51,24 @@ namespace inglenook
                     }
                 };
                 
+                /**
+                 * process_exit_success_exception
+                 * This exception is thrown when the command line parser wants to exit the program with a success return value,
+                 * this might occur if the user specifies the --help or --version argumentsd.
+                 */
+                struct process_exit_success_exception : virtual inglenook::core::exceptions::inglenook_exception
+                {
+                };
+                
+                /**
+                 * process_exit_fail_exception
+                 * This exception is thrown when the command line parser wants to exit the program with a failed return value,
+                 * this might occur if any of the arguments are not valid.
+                 */
+                struct process_exit_fail_exception : virtual inglenook::core::exceptions::inglenook_exception
+                {
+                };
+                
             }
         }
     }

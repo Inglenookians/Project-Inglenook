@@ -61,8 +61,6 @@ pid_t application::pid()
 //--------------------------------------------------------//
 std::string application::name()
 {
-    /// @todo Investigate whether this should raise a log entry.
-    
     // Have we already fetched the value?
     if(m_name.empty())
     {
@@ -196,5 +194,105 @@ std::string application::name()
     
     // Return the name.
     return m_name;
+}
+//--------------------------------------------------------//
+
+//--------------------------------------------------------//
+boost::program_options::variables_map application::arguments_parser(int argc, char* argv[], const std::string& description, const std::string& version, const std::string& build_date, const std::string& build_time, const boost::program_options::options_description& options, const boost::program_options::positional_options_description& positions)
+{
+    // Return structure.
+    boost::program_options::variables_map variables_map;
+    
+    // Generic options (help, version and config file).
+    boost::program_options::options_description generic("Other options");
+    generic.add_options()
+        ("help", "produce help message")
+        ("version", "produce version information")
+        ("config-file", boost::program_options::value<std::string>(), "override the global/application configuration file")
+    ;
+    
+    // Setup the program options, this joins the options together and sets the program description.
+    boost::program_options::options_description cmdline_options(name() + ", " + description);
+    
+    // Have any additional options been specified?
+    if(options.options().size() > 0)
+    {
+        // Add the additional options first.
+        cmdline_options.add(options);
+    }
+    
+    // Add the generic options.
+    cmdline_options.add(generic);
+    
+    try
+    {
+        // Parse the arguments!
+        boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(cmdline_options).positional(positions).run(), variables_map);
+        
+        // Did the user request help?
+        if(variables_map.count("help"))
+        {
+            // Print out the available options.
+            std::cout << cmdline_options;
+            
+            // Throw that we want the application to exit.
+            BOOST_THROW_EXCEPTION(application::exceptions::process_exit_success_exception());
+        }
+        // Did the user request version information?
+        else if(variables_map.count("version"))
+        {
+            // Print out the version information.
+            std::cout << inglenook::core::application::name() << " " << version << " (compiled " << build_date << " " << build_time << ")" << std::endl << std::endl;
+            
+            std::cout << "Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)" << std::endl << std::endl;
+            
+            std::cout << "This program is free software: you can redistribute it and/or modify" << std::endl
+            << "it under the terms of the GNU General Public License as published by" << std::endl
+            << "the Free Software Foundation, either version 3 of the License, or" << std::endl
+            << "(at your option) any later version." << std::endl << std::endl;
+            
+            std::cout << "This program is distributed in the hope that it will be useful," << std::endl
+            << "but WITHOUT ANY WARRANTY; without even the implied warranty of" << std::endl
+            << "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the" << std::endl
+            << "GNU General Public License for more details." << std::endl << std::endl;
+            
+            std::cout << "You should have received a copy of the GNU General Public License" << std::endl
+            << "along with this program. If not, see <http://www.gnu.org/licenses/>." << std::endl;
+            
+            // Throw that we want the application to exit.
+            BOOST_THROW_EXCEPTION(application::exceptions::process_exit_success_exception());
+        }
+        else
+        {
+            // Perform the final validation of the other options, will throw if there are issues.
+            boost::program_options::notify(variables_map);
+        }
+        
+        // Did the user specify a config file.
+        if(variables_map.count("config-file"))
+        {
+            /// @todo replace config variable.
+            //application::command_line_config_file = variables_map["config-file"].as<std::string>();
+        }
+    }
+    catch(application::exceptions::process_exit_success_exception &ex)
+    {
+        // Continue to throw this up to the callee.
+        throw;
+    }
+    catch(std::exception &ex)
+    {
+        // Print out help to remind them.
+        std::cout << cmdline_options << std::endl;
+        
+        // Failed to parse arguments!
+        std::cerr << boost::locale::translate("ERROR: ") << ex.what() << std::endl;
+        
+        // Throw that we want the application to exit.
+        BOOST_THROW_EXCEPTION(application::exceptions::process_exit_fail_exception());
+    }
+    
+    // Return the parsed variable map.
+    return variables_map;
 }
 //--------------------------------------------------------//

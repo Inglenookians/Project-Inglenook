@@ -53,6 +53,10 @@
 // standard library includes
 #include <string>
 
+// boost (http://boost.org) includes
+#include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
+
 namespace inglenook
 {
     namespace core
@@ -72,9 +76,25 @@ namespace inglenook
              */
             std::string name();
             
+            /**
+             * Parse the command line arguments with the default help, version and config-file options.
+             * @param argc The argument count.
+             * @param argv The argument vector.
+             * @param description The application description.
+             * @param version The application version.
+             * @param build_date The build date of the application.
+             * @param build_time The build time of the application.
+             * @param options The additional program options to parse.
+             * @param positions The specified positions for options that don't have to be named.
+             * @return The parsed arguments as a variable map.
+             * @note This will throw if the help or version options are specified to try and stop the application loop from continuing.
+             */
+            boost::program_options::variables_map arguments_parser(int argc, char* argv[], const std::string& description, const std::string& version, const std::string& build_date, const std::string& build_time, const boost::program_options::options_description& options = boost::program_options::options_description(), const boost::program_options::positional_options_description& positions = boost::program_options::positional_options_description());
             
-            /// @todo add a default command line options parser (for help/version/etc...)
-            
+            /// Storage of command line config file, if specified.
+            /// @todo sort how this is being done.
+            boost::filesystem::path command_line_config_file;
+            //extern boost::filesystem::path command_line_config_file;
         }
     }
 }

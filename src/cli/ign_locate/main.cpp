@@ -42,6 +42,11 @@ int main(int argc, char* argv[])
     
     // Program version
     /// @todo calculate version from somewhere?
+    /// Format: VersionMajor.VersionMinor.VersionPatch+build.GitBranch-BuildNumber
+    /// Eg: 1.2.3+build.cmake.67
+    /// current version = ''
+    /// current git build number = ''
+    /// current git branch = 'git rev-parse --abbrev-ref HEAD'
     std::string version("0.0.1a");
     
     // Create the application store.

@@ -5,7 +5,7 @@
 .SH NAME
 .BR "IGNMAN.NAME" " -- return the required inglenook directory."
 .SH SYNOPSIS
-.B IGNMAN.NAME COMMAND [OPTIONS]
+.B IGNMAN.NAME [OPTIONS] dir
 .SH DESCRIPTION
 .BR "IGNMAN.NAME" " is a tool to locate various special inglenook directories."
 .SH OPTIONS

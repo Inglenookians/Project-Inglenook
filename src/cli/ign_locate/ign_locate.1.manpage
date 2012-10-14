@@ -1,7 +1,7 @@
 \." manpage for IGNMAN.NAME
 \." This manpage is part of Project Inglenook (http://www.project-inglenook.co.uk).
 \." Please report errors, typos and any other mistakes on the projects issue tracker.
-.TH IGNMAN.NAME IGNMAN.SECTION "09 October, 2012" "GNU" "Project Inglenook Manual"
+.TH IGNMAN.NAME IGNMAN.SECTION "IGNMAN.DATE" "GNU" "Project Inglenook Manual"
 .SH NAME
 .BR "IGNMAN.NAME" " -- return the required inglenook directory."
 .SH SYNOPSIS
@@ -30,11 +30,6 @@ man     The location of inglenook's manual pages.
 tmp     The location of inglenook's temporary files.
 .br
 user    The location of user's home directory.
-.TP
-.B \-s, \-\-switch
-Automatically change directory once it is found, equivent of the system call: 
-
-cd $(ign_locate directory)
 .TP                        
 .B \-v, \-\-verbose
 Detailed output indicate how it came to its conclusion (detailing where it looked to find the directory).

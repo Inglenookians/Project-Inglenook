@@ -28,6 +28,18 @@ target_link_libraries(
 	ign_directories
 )
 
-# Specify the install location.
-install(TARGETS ign_locate DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+# Configure the automatic version header generation.
+set(TARGET_VERSION 0.1)
+add_custom_target(ign_locate_version ALL 
+	COMMAND ${CMAKE_COMMAND} 
+	-D TARGET_VERSION=${TARGET_VERSION}
+	-P ${PROJECT_SOURCE_DIR}/cmake/version_git.cmake
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+add_dependencies(ign_locate ign_locate_version)
 
+# Specify the install location.
+install(
+	TARGETS ign_locate 
+	DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
+)

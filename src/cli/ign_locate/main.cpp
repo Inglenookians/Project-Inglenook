@@ -17,18 +17,17 @@
  */
 
 // inglenook includes
+#include "version.h"
 #include <ign_core/application.h>
 #include <ign_core/application_exceptions.h>
 #include <ign_directories/directories.h>
-
-#include <ign_config/config.h>
-
 
 // standard library includes
 #include <iostream>
 
 // boost (http://boost.org) includes
 #include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 #include <boost/locale.hpp>
 #include <boost/program_options.hpp>
 
@@ -38,19 +37,10 @@ int main(int argc, char* argv[])
     int success = EXIT_FAILURE;
     
     // Program description.
-    std::string description("a tool for locating various special inglenook directories");
-    
-    // Program version
-    /// @todo calculate version from somewhere?
-    /// Format: VersionMajor.VersionMinor.VersionPatch+build.GitBranch-BuildNumber
-    /// Eg: 1.2.3+build.cmake.67
-    /// current version = ''
-    /// current git build number = ''
-    /// current git branch = 'git rev-parse --abbrev-ref HEAD'
-    std::string version("0.0.1a");
+    std::string description(boost::locale::translate("a tool for locating various special inglenook directories"));
     
     // Create the application store.
-    inglenook::core::application app(description, version,  __DATE__, __TIME__);
+    inglenook::core::application app(description, VERSION,  __DATE__, __TIME__);
     
     // Program specific options.
     boost::program_options::options_description options("Program options");
@@ -66,7 +56,6 @@ int main(int argc, char* argv[])
             "man     \tThe location of inglenook's manual pages\n"
             "tmp     \tThe location of inglenook's temporary files\n"
             "user    \tThe location of user's home directory\n")
-        ("switch,s", "Automatically change directory once it is found, equivent of the system call:\n\ncd $(ign_locate directory)\n")
         ("verbose,v", "Detailed output indicate how it came to its conclusion (detailing where it looked to find the directory)")
     ;
     
@@ -94,100 +83,71 @@ int main(int argc, char* argv[])
     // Has the parser indicated we should continue.
     if(!parser_exit)
     {
-        // Keep track of user switches.
-        bool option_switch(false);
-        bool option_verbose(false);
-        std::string option_directory("");
+        // Correct number of arguments specified, continue.
         
-        // Did the user request automatic directory switching?
-        if(vm.count("switch"))
-        {
-            option_switch = true;
-        }
         // Did the user request verbose output?
+        bool option_verbose(false);
         if(vm.count("verbose"))
         {
+            // They did!
             option_verbose = true;
         }
-        // Did the user specify a directory.
-        if(vm.count("dir") > 0)
-        {
-            // Correct number of arguments specified, continue.
-            boost::filesystem::path directory_value;
-            
-            // Get the actual directory selected.
-            option_directory = vm["dir"].as<std::string>();
         
-            // Fetch the correct directory_value based on the specified option.
-            if(option_directory == "cli")
-            {
-                directory_value = inglenook::directories::cli(option_verbose);
-            }
-            else if(option_directory == "config")
-            {
-                directory_value = inglenook::directories::config(option_verbose);
-            }
-            else if(option_directory == "data")
-            {
-                directory_value = inglenook::directories::data(option_verbose);
-            }
-            else if(option_directory == "lib")
-            {
-                directory_value = inglenook::directories::lib(option_verbose);
-            }
-            else if(option_directory == "log")
-            {
-                directory_value = inglenook::directories::log(option_verbose);
-            }
-            else if(option_directory == "sbin")
-            {
-                directory_value = inglenook::directories::sbin(option_verbose);
-            }
-            else if(option_directory == "man")
-            {
-                directory_value = inglenook::directories::man(option_verbose);
-            }
-            else if(option_directory == "tmp")
-            {
-                directory_value = inglenook::directories::tmp(option_verbose);
-            }
-            else if(option_directory == "user")
-            {
-                directory_value = inglenook::directories::user(option_verbose);
-            }
+        // Get the actual directory selected.
+        std::string option_directory(vm["dir"].as<std::string>());
+        boost::filesystem::path directory_value;
+    
+        // Fetch the correct directory_value based on the specified option.
+        if(option_directory == "cli")
+        {
+            directory_value = inglenook::directories::cli(option_verbose);
+        }
+        else if(option_directory == "config")
+        {
+            directory_value = inglenook::directories::config(option_verbose);
+        }
+        else if(option_directory == "data")
+        {
+            directory_value = inglenook::directories::data(option_verbose);
+        }
+        else if(option_directory == "lib")
+        {
+            directory_value = inglenook::directories::lib(option_verbose);
+        }
+        else if(option_directory == "log")
+        {
+            directory_value = inglenook::directories::log(option_verbose);
+        }
+        else if(option_directory == "sbin")
+        {
+            directory_value = inglenook::directories::sbin(option_verbose);
+        }
+        else if(option_directory == "man")
+        {
+            directory_value = inglenook::directories::man(option_verbose);
+        }
+        else if(option_directory == "tmp")
+        {
+            directory_value = inglenook::directories::tmp(option_verbose);
+        }
+        else if(option_directory == "user")
+        {
+            directory_value = inglenook::directories::user(option_verbose);
+        }
+        
+        // Did we find a valid option?
+        if(!directory_value.empty())
+        {
+            // Return the directory_value.
+            std::cout << directory_value.string() << std::endl;
             
-            // Did we find a valid option?
-            if(!directory_value.empty())
-            {
-                // See if we need to switch directory.
-                if(option_switch)
-                {
-                    // Switch directory.
-                    /// @todo discuss as we cannot change the calling shell's directory, only our own processes directory.
-                    chdir(directory_value.string().c_str());
-                    
-                    // Sucess!
-                    success = EXIT_SUCCESS;
-                }
-                else
-                {
-                    // Sucess!
-                    success = EXIT_SUCCESS;
-                }
-                
-                // Return the directory_value.
-                std::cout << directory_value.string() << std::endl;
-            }
-            else
-            {
-                // Invalid option!
-                std::cerr << "Unrecognised directory option: '" << option_directory << "'" << std::endl;
-            }
+            // Sucess!
+            success = EXIT_SUCCESS;
         }
         else
         {
             // Invalid option!
-            std::cerr << "No directory option specified" << std::endl;
+            std::cerr << boost::format(boost::locale::translate("ERROR: unrecognised directory option: '%1%'")) % option_directory << std::endl;
         }
     }
     

@@ -33,13 +33,16 @@ BOOST_AUTO_TEST_CASE(directories)
     // Ensure the DIR_CLI environment variable is not set first.
     inglenook::core::environment::set(inglenook::core::environment::variables::DIR_CLI, "");
 
-#ifndef _WIN32
-    // Linux support (officially tested and maintained).
+    // Set the default directory based on current platform.
+#if defined(__linux__) || defined(__APPLE__)
+    // Linux and OSX support (officially tested and maintained).
     boost::filesystem::path default_path = "/usr/local/bin";
-#else
+#elif defined(_WIN32)
     // Windows support (not tested or maintained).
-#error Default CLI directory for Windows not defined.
+#error Default local user directory for Windows not defined.
     boost::filesystem::path default_path = "";
+#else // Unsupported platform
+#error INGLENOOK: Unsupported platform.
 #endif
     
     // Check the system default path is returned.

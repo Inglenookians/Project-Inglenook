@@ -25,13 +25,21 @@ message(STATUS "Configuring project settings")
 
 # Set the project name and versioning details
 project(PROJECT_INGLENOOK)
-set(PROJECT_INGLENOOK_VERSION_MAJOR 1)
+set(PROJECT_INGLENOOK_VERSION_MAJOR 0)
 set(PROJECT_INGLENOOK_VERSION_MINOR 0)
-set(PROJECT_INGLENOOK_VERSION_PATCH 0)
+set(PROJECT_INGLENOOK_VERSION_PATCH 1)
 set(PROJECT_INGLENOOK_VERSION_SPECIALTAG "")
 
 message("Project")
 message("	Project-Inglenook	v${PROJECT_INGLENOOK_VERSION_MAJOR}.${PROJECT_INGLENOOK_VERSION_MINOR}.${PROJECT_INGLENOOK_VERSION_PATCH}${PROJECT_INGLENOOK_VERSION_SPECIALTAG}")
+
+
+# Check we are not performing an in-source build.
+string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" INSOURCE)
+if(INSOURCE)
+	message(FATAL_ERROR "${PROJECT_NAME} requires an out of source build. Please use the 'setup_builds.pl' script in the project root directory to create separate build directories and run make there. Beware, this will have automatically generated the CMakeCache.txt and CMakeFiles directories!" )
+endif(INSOURCE)
+
 
 # Setup build type if not already set.
 if(NOT CMAKE_BUILD_TYPE)
@@ -99,8 +107,17 @@ find_program(GZIP_EXECUTABLE gzip)
 if(NOT GZIP_EXECUTABLE)
 	message(FATAL_ERROR "Unable to find 'gzip'")
 endif(NOT GZIP_EXECUTABLE)
+find_program(DATE_EXECUTABLE date)
+if(NOT DATE_EXECUTABLE)
+	message(FATAL_ERROR "Unable to find 'date'")
+endif(NOT DATE_EXECUTABLE)
 
-# Loop through each manpage section. 
+# Loop through each manpage section.
+execute_process(
+	COMMAND ${DATE_EXECUTABLE} +"%d %B, %Y"
+	OUTPUT_VARIABLE MANPAGE_DATE
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 foreach(MANPAGE_NUM RANGE 1 9)
 
 	# Search for any files that match the following pattern '*.${MANPAGE_NUM}.manpage'
@@ -123,6 +140,7 @@ foreach(MANPAGE_NUM RANGE 1 9)
 			COMMAND ${CAT_EXECUTABLE} ${MANPAGE_FILE}
 				| ${SED_EXECUTABLE} s/IGNMAN.NAME/${MANPAGE_NAME}/g
 				| ${SED_EXECUTABLE} s/IGNMAN.SECTION/${MANPAGE_NUM}/g
+				| ${SED_EXECUTABLE} s/IGNMAN.DATE/${MANPAGE_DATE}/g
 				| ${GZIP_EXECUTABLE} -qc > ${MAN_OUTPUT_DIRECTORY}/${MANPAGE_GZ}
 			DEPENDS ${MANPAGE_FILE}
 			COMMENT "Generating manual page '${MANPAGE_GZ}'"

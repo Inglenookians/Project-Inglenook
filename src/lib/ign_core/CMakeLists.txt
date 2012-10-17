@@ -40,7 +40,7 @@ target_link_libraries(
 # Set the properties
 set_target_properties(
 	ign_core PROPERTIES
-	VERSION 1.0.0
+	VERSION 0.0.1
 	SOVERSION 1
 )
 

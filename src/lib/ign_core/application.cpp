@@ -149,12 +149,6 @@ std::string application::name()
                     BOOST_THROW_EXCEPTION(exceptions::application_name_exception());
                 }
                 
-                // We have opened the file, set up a scoped exit clause to ensure the file is closed.
-                BOOST_SCOPE_EXIT((&application_cmdline_file))
-                {
-                    application_cmdline_file.close();
-                } BOOST_SCOPE_EXIT_END
-                
                 // Create commandLine and copy file contents in to it. DO NOT remove braces around the
                 // first argument - c++11 resolution for potential most-vexing-parse issues
                 std::string command_line(
@@ -259,10 +253,10 @@ std::string application::name()
 //--------------------------------------------------------//
 
 //--------------------------------------------------------//
-boost::program_options::variables_map application::arguments_parser(int argc, char* argv[], const boost::program_options::options_description& options, const boost::program_options::positional_options_description& positions)
+bool application::arguments_parser(boost::program_options::variables_map& variables_map, int argc, char* argv[], const boost::program_options::options_description& options, const boost::program_options::positional_options_description& positions)
 {
-    // Return structure.
-    boost::program_options::variables_map variables_map;
+    // Keep track of whether we should suggest exit the application.
+    bool should_exit(false);
     
     // Generic options (help, version and config file).
     boost::program_options::options_description generic("Other options");
@@ -296,8 +290,8 @@ boost::program_options::variables_map application::arguments_parser(int argc, ch
             // Print out the available options.
             std::cout << cmdline_options;
             
-            // Throw that we want the application to exit.
-            BOOST_THROW_EXCEPTION(exceptions::application_exit_success_exception());
+            // Suggest that the application should exit.
+            should_exit = true;
         }
         // Did the user request version information?
         else if(variables_map.count("version"))
@@ -320,8 +314,8 @@ boost::program_options::variables_map application::arguments_parser(int argc, ch
             std::cout << "You should have received a copy of the GNU General Public License" << std::endl
             << "along with this program. If not, see <http://www.gnu.org/licenses/>." << std::endl;
             
-            // Throw that we want the application to exit.
-            BOOST_THROW_EXCEPTION(exceptions::application_exit_success_exception());
+            // Suggest that the application should exit.
+            should_exit = true;
         }
         else
         {
@@ -336,11 +330,6 @@ boost::program_options::variables_map application::arguments_parser(int argc, ch
             config_file(variables_map["config-file"].as<std::string>());
         }
     }
-    catch(exceptions::application_exit_success_exception &ex)
-    {
-        // Continue to throw this up to the callee.
-        throw;
-    }
     catch(std::exception &ex)
     {
         // Print out help to remind them.
@@ -349,11 +338,11 @@ boost::program_options::variables_map application::arguments_parser(int argc, ch
         // Failed to parse arguments!
         std::cerr << boost::locale::translate("ERROR: ") << ex.what() << std::endl;
         
-        // Throw that we want the application to exit.
-        BOOST_THROW_EXCEPTION(exceptions::application_exit_fail_exception());
+        // Throw that there has been an error.
+        BOOST_THROW_EXCEPTION(exceptions::application_arguments_parser_exception());
     }
     
-    // Return the parsed variable map.
-    return variables_map;
+    // Return the exit suggestion.
+    return should_exit;
 }
 //--------------------------------------------------------//

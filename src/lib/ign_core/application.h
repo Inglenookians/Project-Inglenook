@@ -124,14 +124,15 @@ namespace inglenook
             
             /**
              * Parse the command line arguments with the default help, version and config-file options.
+             * @param variables_map The parsed arguments are added to this.
              * @param argc The argument count.
              * @param argv The argument vector.
              * @param options The additional program options to parse.
              * @param positions The specified positions for options that don't have to be named.
-             * @return The parsed arguments as a variable map.
-             * @note This will throw if the help or version options are specified to try and stop the application loop from continuing.
+             * @return Whether the user has specified the help/version option, as usually we want to stop the application from executing any further.
+             * @note This will throw if invalid arguments are specified on the command line.
              */
-            static boost::program_options::variables_map arguments_parser(int argc, char* argv[], const boost::program_options::options_description& options = boost::program_options::options_description(), const boost::program_options::positional_options_description& positions = boost::program_options::positional_options_description());
+            static bool arguments_parser(boost::program_options::variables_map& variables_map, int argc, char* argv[], const boost::program_options::options_description& options = boost::program_options::options_description(), const boost::program_options::positional_options_description& positions = boost::program_options::positional_options_description());
             
         };
         

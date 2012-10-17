@@ -34,7 +34,7 @@
 int main(int argc, char* argv[])
 {
     // Keep track of our success.
-    int success = EXIT_FAILURE;
+    int success(EXIT_FAILURE);
     
     // Program description.
     std::string description(boost::locale::translate("a tool for locating various special inglenook directories"));
@@ -64,27 +64,32 @@ int main(int argc, char* argv[])
     positions.add("dir", 1);
     
     // Try and parse the command line arguments.
-    bool parser_exit = false;
+    bool parser_exit(false);
+    bool parser_failure(false);
     boost::program_options::variables_map vm;
     try
     {
-        vm = inglenook::core::application::arguments_parser(argc, argv, options, positions);
+        parser_exit = inglenook::core::application::arguments_parser(vm, argc, argv, options, positions);
     }
-    catch(inglenook::core::exceptions::application_exit_success_exception &ex)
+    catch(inglenook::core::exceptions::application_arguments_parser_exception &ex)
     {
-        success = EXIT_SUCCESS;
-        parser_exit = true;
-    }
-    catch(inglenook::core::exceptions::application_exit_fail_exception &ex)
-    {
-        parser_exit = true;
+        parser_failure = true;
     }
     
-    // Has the parser indicated we should continue.
-    if(!parser_exit)
+    // Has the options parser indicated we should exit.
+    if(parser_exit)
     {
-        // Correct number of arguments specified, continue.
-        
+        // Set as a success execution before we finish.
+        success = EXIT_SUCCESS;
+    }
+    // Did the parser fail (It would have already printed out the issue .
+    else if(parser_failure)
+    {
+        // Set as a failure execution before we finish.
+        success = EXIT_FAILURE;
+    }
+    else
+    {
         // Did the user request verbose output?
         bool option_verbose(false);
         if(vm.count("verbose"))

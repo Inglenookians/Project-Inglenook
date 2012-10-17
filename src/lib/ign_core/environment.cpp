@@ -35,10 +35,10 @@ std::string environment::get(const std::string& variable, const std::string& def
     auto return_value(default_value);
     
     // Try to fetch the environment variable.
-    const char* raw_value = std::getenv(variable.c_str());
+    const auto raw_value = std::getenv(variable.c_str());
     
     // Check whether we was successful.
-    if(raw_value != NULL)
+    if(raw_value != nullptr)
     {
         // Sucessful fetch, store the value to be returned.
         return_value = std::string(raw_value);
@@ -53,7 +53,7 @@ std::string environment::get(const std::string& variable, const std::string& def
 bool environment::set(const std::string& variable, const std::string& value, bool overwrite)
 {
     // Keep track of the success.
-    auto success = false;
+    bool success(false);
     
     // Try to set the environment variable.
     if(setenv(variable.c_str(), value.c_str(), overwrite) == 0)

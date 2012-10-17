@@ -70,11 +70,11 @@ const boost::filesystem::path directories::cli(bool explain)
     // Set the default directory based on current platform.
 #if defined(__linux__) || defined(__APPLE__)
     // Linux and OSX support (officially tested and maintained).
-    boost::filesystem::path default_path = "/usr/local/bin";
+    boost::filesystem::path default_path("/usr/local/bin");
 #elif defined(_WIN32)
     // Windows support (not tested or maintained).
     #error Default local user directory for Windows not defined.
-    boost::filesystem::path default_path = "";
+    boost::filesystem::path default_path("");
 #else // Unsupported platform
     #error INGLENOOK: Unsupported platform.
 #endif
@@ -90,11 +90,11 @@ const boost::filesystem::path directories::config(bool explain)
     // Set the default directory based on current platform.
 #if defined(__linux__) || defined(__APPLE__)
     // Linux and OSX support (officially tested and maintained).
-    boost::filesystem::path default_path = "/etc/inglenook";
+    boost::filesystem::path default_path("/etc/inglenook");
 #elif defined(_WIN32)
     // Windows support (not tested or maintained).
     #error Default local user directory for Windows not defined.
-    boost::filesystem::path default_path = "";
+    boost::filesystem::path default_path("");
 #else // Unsupported platform
     #error INGLENOOK: Unsupported platform.
 #endif
@@ -110,11 +110,11 @@ const boost::filesystem::path directories::data(bool explain)
     // Set the default directory based on current platform.
 #if defined(__linux__) || defined(__APPLE__)
     // Linux and OSX support (officially tested and maintained).
-    boost::filesystem::path default_path = "/var/lib/inglenook";
+    boost::filesystem::path default_path("/var/lib/inglenook");
 #elif defined(_WIN32)
     // Windows support (not tested or maintained).
     #error Default local user directory for Windows not defined.
-    boost::filesystem::path default_path = "";
+    boost::filesystem::path default_path("");
 #else // Unsupported platform
     #error INGLENOOK: Unsupported platform.
 #endif
@@ -130,11 +130,11 @@ const boost::filesystem::path directories::lib(bool explain)
     // Set the default directory based on current platform.
 #if defined(__linux__) || defined(__APPLE__)
     // Linux and OSX support (officially tested and maintained).
-    boost::filesystem::path default_path = "/usr/local/lib";
+    boost::filesystem::path default_path("/usr/local/lib");
 #elif defined(_WIN32)
     // Windows support (not tested or maintained).
     #error Default local user directory for Windows not defined.
-    boost::filesystem::path default_path = "";
+    boost::filesystem::path default_path("");
 #else // Unsupported platform
     #error INGLENOOK: Unsupported platform.
 #endif
@@ -150,11 +150,11 @@ const boost::filesystem::path directories::log(bool explain)
     // Set the default directory based on current platform.
 #if defined(__linux__) || defined(__APPLE__)
     // Linux and OSX support (officially tested and maintained).
-    boost::filesystem::path default_path = "/var/log/inglenook";
+    boost::filesystem::path default_path("/var/log/inglenook");
 #elif defined(_WIN32)
     // Windows support (not tested or maintained).
     #error Default local user directory for Windows not defined.
-    boost::filesystem::path default_path = "";
+    boost::filesystem::path default_path("");
 #else // Unsupported platform
     #error INGLENOOK: Unsupported platform.
 #endif
@@ -170,11 +170,11 @@ const boost::filesystem::path directories::sbin(bool explain)
     // Set the default directory based on current platform.
 #if defined(__linux__) || defined(__APPLE__)
     // Linux and OSX support (officially tested and maintained).
-    boost::filesystem::path default_path = "/usr/local/sbin";
+    boost::filesystem::path default_path("/usr/local/sbin");
 #elif defined(_WIN32)
     // Windows support (not tested or maintained).
     #error Default local user directory for Windows not defined.
-    boost::filesystem::path default_path = "";
+    boost::filesystem::path default_path("");
 #else // Unsupported platform
     #error INGLENOOK: Unsupported platform.
 #endif
@@ -190,11 +190,11 @@ const boost::filesystem::path directories::man(bool explain)
     // Set the default directory based on current platform.
 #if defined(__linux__) || defined(__APPLE__)
     // Linux and OSX support (officially tested and maintained).
-    boost::filesystem::path default_path = "/usr/local/share/man";
+    boost::filesystem::path default_path("/usr/local/share/man");
 #elif defined(_WIN32)
     // Windows support (not tested or maintained).
     #error Default local user directory for Windows not defined.
-    boost::filesystem::path default_path = "";
+    boost::filesystem::path default_path("");
 #else // Unsupported platform
     #error INGLENOOK: Unsupported platform.
 #endif
@@ -210,11 +210,11 @@ const boost::filesystem::path directories::tmp(bool explain)
     // Set the default directory based on current platform.
 #if defined(__linux__) || defined(__APPLE__)
     // Linux and OSX support (officially tested and maintained).
-    boost::filesystem::path default_path = "/var/tmp/inglenook";
+    boost::filesystem::path default_path("/var/tmp/inglenook");
 #elif defined(_WIN32)
     // Windows support (not tested or maintained).
     #error Default local user directory for Windows not defined.
-    boost::filesystem::path default_path = "";
+    boost::filesystem::path default_path("");
 #else // Unsupported platform
     #error INGLENOOK: Unsupported platform.
 #endif
@@ -230,11 +230,11 @@ const boost::filesystem::path directories::user(bool explain)
     // Set the default directory based on current platform.
 #if defined(__linux__) || defined(__APPLE__)
     // Linux and OSX support (officially tested and maintained).
-    boost::filesystem::path default_path = core::environment::get("HOME");
+    boost::filesystem::path default_path(core::environment::get("HOME"));
 #elif defined(_WIN32)
     // Windows support (not tested or maintained).
     #error Default local user directory for Windows not defined.
-    boost::filesystem::path default_path = "";
+    boost::filesystem::path default_path("");
 #else // Unsupported platform
     #error INGLENOOK: Unsupported platform.
 #endif

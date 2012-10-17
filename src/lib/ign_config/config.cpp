@@ -39,7 +39,7 @@ boost::optional<std::string> config::get(const std::string& key, bool skip_blank
 {
     // First check the application config file.
     // We do not pass the default value, as we want to know specifically if it has been set.
-    auto return_value = config::app::get(key, boost::optional<std::string>());
+    auto return_value(config::app::get(key, boost::optional<std::string>()));
     
     // Did we not get a value or have we specified to skip blank values.
     if(!return_value || (skip_blank && (*return_value).empty()))
@@ -210,7 +210,8 @@ boost::optional<std::string> config::file::get(const boost::filesystem::path& fi
 //--------------------------------------------------------//
 bool config::file::set(const boost::filesystem::path& file_path, const std::string& key, const std::string& value)
 {
-    bool success = false;
+    // Set the default return value.
+    bool success(false);
     
     // Generate a new ptree to store the configuration structure.
     boost::property_tree::ptree ptree;
@@ -232,7 +233,7 @@ bool config::file::set(const boost::filesystem::path& file_path, const std::stri
     else
     {
         // Track whether there is a read error.
-        bool read_error = false;
+        auto read_error(false);
         
         // Check whether the file exists, we need to touch it if it does for the file lock.
         if(!boost::filesystem::exists(file_path))
@@ -299,13 +300,14 @@ bool config::file::set(const boost::filesystem::path& file_path, const std::stri
 //--------------------------------------------------------//
 bool config::file::remove(const boost::filesystem::path& file_path, const std::string& key)
 {
-    bool success = false;
+    // Set the default return value.
+    bool success(false);
     
     // Generate a new ptree to store the modified configuration structure.
     boost::property_tree::ptree ptree;
     
     // Keep track of whether we have an issue reading in the current congfiguration file.
-    bool read_error = false;
+    auto read_error(false);
     
     // Check whether the file exists.
     if(boost::filesystem::exists(file_path))

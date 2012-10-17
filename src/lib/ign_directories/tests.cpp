@@ -36,11 +36,11 @@ BOOST_AUTO_TEST_CASE(directories)
     // Set the default directory based on current platform.
 #if defined(__linux__) || defined(__APPLE__)
     // Linux and OSX support (officially tested and maintained).
-    boost::filesystem::path default_path = "/usr/local/bin";
+    boost::filesystem::path default_path("/usr/local/bin");
 #elif defined(_WIN32)
     // Windows support (not tested or maintained).
 #error Default local user directory for Windows not defined.
-    boost::filesystem::path default_path = "";
+    boost::filesystem::path default_path("");
 #else // Unsupported platform
 #error INGLENOOK: Unsupported platform.
 #endif
@@ -62,6 +62,5 @@ BOOST_AUTO_TEST_CASE(directories)
     BOOST_CHECK(inglenook::directories::cli() == default_path);
     BOOST_CHECK(inglenook::directories::cli() != "test");
     
-    
-    /// @todo complete tests for each directory type?
+    /// @todo Add checks for each directory type or does the above tests suffice?
 }

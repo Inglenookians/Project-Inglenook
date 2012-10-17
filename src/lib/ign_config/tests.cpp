@@ -32,14 +32,14 @@
 BOOST_AUTO_TEST_CASE(config)
 {
     // Get the location of the system temp directory.
-    auto temp_directory = boost::filesystem::temp_directory_path();
+    auto temp_directory(boost::filesystem::temp_directory_path());
     // Get the global, application and command line config file names.
-    auto global_file_path = temp_directory / "config.xml";
-    auto application_file_path = temp_directory / (inglenook::core::application::name() + "_config.xml");
-    auto command_line_file_path = temp_directory / "command_line.xml";
+    auto global_file_path(temp_directory / "config.xml");
+    auto application_file_path(temp_directory / (inglenook::core::application::name() + "_config.xml"));
+    auto command_line_file_path(temp_directory / "command_line.xml");
     
     // Test the direct file interface.
-    auto temp_file_path = temp_directory / "direct_file.xml";
+    auto temp_file_path(temp_directory / "direct_file.xml");
     // Test getting with defaults, should return an empty boost::optional.
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key") == boost::optional<std::string>());
     // Test getting with specified default value, return specified default value.

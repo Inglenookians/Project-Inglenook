@@ -18,12 +18,13 @@
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE ign_core_tests
-
+#include <iostream>
 // boost includes
 #include <boost/test/unit_test.hpp>
 
 // inglenook includes
 #include "application.h"
+#include "application_exceptions.h"
 #include "environment.h"
 
 // application test case.
@@ -56,6 +57,46 @@ BOOST_AUTO_TEST_CASE(application)
     BOOST_CHECK(inglenook::core::application::pid() > 0);
     
     /// @todo test for arguments parser.
+    
+    // Test the arguments parser.
+    // Setup some required variables.
+    boost::program_options::variables_map variables_map_one;
+    char* argv_one[] { const_cast<char*>("--help"), const_cast<char*>("--help"), const_cast<char*>("--custom") };
+    boost::program_options::variables_map variables_map_two;
+    char* argv_two[] { const_cast<char*>("appname"), const_cast<char*>("--version"), const_cast<char*>("custom") };
+    boost::program_options::variables_map variables_map_three;
+    char* argv_three[] { const_cast<char*>("appname"), const_cast<char*>("--config-file"), const_cast<char*>("conf_file.xml") };
+    boost::program_options::options_description options;
+    options.add_options() ("custom", "Custom Option");
+    boost::program_options::positional_options_description positions;
+    positions.add("custom", 1);
+    
+    // Test no arguments, all options should be ignored.
+    BOOST_CHECK(inglenook::core::application::arguments_parser(variables_map_one, 0, argv_one) == false);
+    // Test one argument, all options should still be ignored even though help option specified.
+    BOOST_CHECK(inglenook::core::application::arguments_parser(variables_map_one, 1, argv_one) == false);
+    // Test two arguments, with the --help option specified.
+    BOOST_CHECK(inglenook::core::application::arguments_parser(variables_map_one, 2, argv_one) == true);
+    
+    // Test two arguments, with the --version option specified.
+    BOOST_CHECK(inglenook::core::application::arguments_parser(variables_map_two, 2, argv_two) == true);
+    
+    // Test two arguments, with the --config-file specified but with no value, should throw.
+    BOOST_CHECK_THROW(inglenook::core::application::arguments_parser(variables_map_three, 2, argv_three), inglenook::core::exceptions::application_arguments_parser_exception);
+    // Test three arguments, with the --config-file specifed with a value.
+    BOOST_CHECK(inglenook::core::application::arguments_parser(variables_map_three, 3, argv_three) == false);
+    
+    // Test three arguments, with the --custom option specified but not added as an option, should throw.
+    BOOST_CHECK_THROW(inglenook::core::application::arguments_parser(variables_map_one, 3, argv_one), inglenook::core::exceptions::application_arguments_parser_exception);
+    // Test three arguments, with the --custom option specified and it has been added as an option.
+    BOOST_CHECK_NO_THROW(inglenook::core::application::arguments_parser(variables_map_one, 3, argv_one, options));
+    
+    // Test three arguments, with the positional custom option specified but not added as a option/positional option, should throw.
+    BOOST_CHECK_THROW(inglenook::core::application::arguments_parser(variables_map_two, 3, argv_two), inglenook::core::exceptions::application_arguments_parser_exception);
+    // Test three arguments, with the positional custom option specified and it has been added as an option but not positional, show throw.
+    BOOST_CHECK_THROW(inglenook::core::application::arguments_parser(variables_map_two, 3, argv_two, options), inglenook::core::exceptions::application_arguments_parser_exception);
+    // Test three arguments, with the positional custom option specifeid and it has been added as an option/positional.
+    BOOST_CHECK_NO_THROW(inglenook::core::application::arguments_parser(variables_map_two, 3, argv_two, options, positions));
 }
 
 // environment test case.

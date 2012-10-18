@@ -16,4 +16,38 @@ Project-Inglenook will provide:
 
 Development
 ---------------------
-[Please visit the wiki pages to see our current development progress...](https://github.com/Inglenookians/Project-Inglenook/wiki)
+Please visit the wiki pages to see our current development progress... (Currently being migrated)
+
+How to build
+---------------------
+First, checkout the git repository:
+
+    git clone git://github.com/Inglenookians/Project-Inglenook.git
+    cd Project-Inglenook
+
+By default, you can just build the project using your default C++ compiler:
+
+    ./setup-builds.sh
+    cd build/debug (change to build/release for a release build)
+    make 
+
+To specify a compiler, use the CC and CXX flags (eg: for clang/clang++)
+
+    export CC=/usr/bin/clang
+    export CXX=/usr/bin/clang++
+    ./setup-builds.sh
+    cd build/debug (change to build/release for a release build)
+    make 
+
+To run the unit/integration tests:
+
+    make test 
+
+To perform an install:
+
+    sudo make install 
+
+To generate a RPM software package:
+
+	cpack -G RPM CPackConfig.cmake
+

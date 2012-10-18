@@ -1,0 +1,62 @@
+\." manpage for IGNMAN.NAME
+\." This manpage is part of Project Inglenook (http://www.project-inglenook.co.uk).
+\." Please report errors, typos and any other mistakes on the projects issue tracker.
+.TH IGNMAN.NAME IGNMAN.SECTION "IGNMAN.DATE" "GNU" "Project Inglenook Manual"
+.SH NAME
+.BR "IGNMAN.NAME" " -- return the required inglenook directory."
+.SH SYNOPSIS
+.B IGNMAN.NAME [OPTIONS] dir
+.SH DESCRIPTION
+.BR "IGNMAN.NAME" " is a tool to locate various special inglenook directories."
+.SH OPTIONS
+.TP
+.BI "\-d, \-\-dir " arg
+The REQUIRED inglenook directory to locate. Available options are:
+
+cli     The location of inglenook's command line tools.
+.br
+config  The location of inglenook's configuration files.
+.br
+data    The location of inglenook's data files.
+.br
+lib     The location of inglenook's internal libraries.
+.br
+log     The location of inglenook's log files.
+.br
+sbin    The location of inglenook's system administrator tools.
+.br
+man     The location of inglenook's manual pages.
+.br
+tmp     The location of inglenook's temporary files.
+.br
+user    The location of user's home directory.
+.TP                        
+.B \-v, \-\-verbose
+Detailed output indicate how it came to its conclusion (detailing where it looked to find the directory).
+.TP
+.B \-\-help
+shows the program description and possible command line options.
+.TP
+.B \-\-version
+shows the version number and compiled timestamp.
+.TP
+.BI "\-\-config-file" " arg"
+override the global configuration file with the specified argument file path.
+.SH EXIT STATUS
+.RB "The " "IGNMAN.NAME" " utility exits 0 on success, and >0 if an error occurs."
+.SH NOTES
+None.
+.SH BUGS
+No known bugs. Report new bugs at: <https://github.com/inglenookians/project-inglenook/issues>
+.SH AUTHOR
+Project Inglenook (http://www.project\-inglenook.co.uk).
+.SH COPYRIGHT
+Copyright \(co 2012, Project Inglenook (http://www.project\-inglenook.co.uk).
+.PP
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+.PP
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
+.SH SEE ALSO
+None.

@@ -36,6 +36,7 @@ target_link_libraries(
 	boost_thread
 	boost_filesystem
 	ign_core
+	ign_directories
 )
 
 # Set the properties

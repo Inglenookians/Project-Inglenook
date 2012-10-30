@@ -19,6 +19,7 @@
 // inglenook includes
 #include "log_writer.h"
 #include "log_exceptions.h"
+#include <ign_directories/directories.h>
 
 // standard library includes
 #include <fstream>
@@ -56,8 +57,8 @@ log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream) :
 	m_log_serialization_shutdown_mutex(new boost::timed_mutex()),
 	m_log_serialization_queue_mutex(new boost::mutex()),
 	m_log_serialization_element_queuing_mutex(new boost::mutex()),
-	m_process_id(get_real_process_id()),
-	m_process_name(get_real_process_name()),
+	m_process_id(inglenook::core::application::pid()),
+	m_process_name(inglenook::core::application::name()),
 	m_output_stream(output_stream),
 	m_xml_serialization_threshold(category::information),
 	m_console_serialization_threshold(category::information),
@@ -85,14 +86,18 @@ log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream) :
  * Creates a new log_writer instance based on inglenooks logging directory structure. This can be impacted by a variety of factors
  * including but not limited to; global configuration, application configuration and environment.
  */
-std::shared_ptr<log_writer> log_writer::create() {
+std::shared_ptr<log_writer> log_writer::create()
+{
+
+	using namespace inglenook::core;
+
 	std::stringstream filename_buffer;
 
 	// todo ild-locate here, for now hard code the inglenook directory
-	filename_buffer << "/var/log/inglenook" << "/";
+	filename_buffer << inglenook::directories::log().native() << "/";
 
 	// append the process name
-	filename_buffer << log_writer::get_real_process_name() << "/";
+	filename_buffer << application::name() << "/";
 
 	// append a reverse time stamp to the pid so file name format becomes
 	// pid_yyyymmdd_hhmmss.xml, as per the specifications. time is UTC.
@@ -101,7 +106,7 @@ std::shared_ptr<log_writer> log_writer::create() {
 	filename_buffer << boost::posix_time::second_clock::universal_time();
 
 	// get the current process id.
-	filename_buffer << "-" << log_writer::get_real_process_id();
+	filename_buffer << "-" << application::pid();
 
 	// add file extension
 	filename_buffer << ".xml";
@@ -320,129 +325,6 @@ else				// the file does not exist, and we were not instructed to create it.
 		return m_process_name;
 	}
 
-	/**
-	 * Get the current process ID [NOTE: Platform Specified Code].
-	 * This method resorts to platform specific code to attempt to self determine the process id.
-	 * @returns The ID of the current process.
-	 */
-	const pid_type log_writer::get_real_process_id()
-	{
-		// return the process id for the current process using the
-		// platform specific method call.
-		return INGLENOOK_CURRENT_PID();
-	}
-
-	/**
-	 * Get the current process name [NOTE: Platform Specified Code].
-	 * This method resorts to platform specific code to attempt to self determine the process name.
-	 * @returns The name of the current process, or empty string on failure.
-	 */
-	const std::string log_writer::get_real_process_name()
-	{
-
-		//
-		// shortly we'll delve in to some platform specific stuff. these blocks are designed such that
-		// they should place a path to this processes entry assembly (relative or absolute) in to this boost
-		// path object. we will then trim this to get the assembly name.
-		boost::filesystem::path binary_path("");
-
-#ifndef _WIN32 // the following block is for LINUX and is both tested and maintained.
-		// build path to the cmdline file for this process.
-		boost::filesystem::path process_cmdline_file_path(
-				( boost::format("/proc/%1%/cmdline") % get_real_process_id() ).str()
-		);
-
-		try
-		{
-
-			// make sure this file actually exists before proceeding
-			if( boost::filesystem::exists(process_cmdline_file_path) )
-			{
-
-				// file  exists... try and open it.
-				std::ifstream process_cmdline_file ( process_cmdline_file_path.native() );
-
-				// check if we managed to open the file, throw exception on failure.
-				if(!process_cmdline_file.is_open()) BOOST_THROW_EXCEPTION( process_name_exception() );
-
-				// we have opened the file, set up a scoped exit clause to ensure the file is closed.
-				BOOST_SCOPE_EXIT( (&process_cmdline_file) )
-				{	process_cmdline_file.close();
-				}BOOST_SCOPE_EXIT_END
-
-				// create commandLine and copy file contents in to it. DO NOT remove braces around the
-				// first argument - c++11 resolution for potential most-vexing-parse issues
-				std::string command_line(
-						{	std::istreambuf_iterator<char>(process_cmdline_file)},
-						std::istreambuf_iterator<char>()
-				);
-
-				// create a string stream to delimit the file
-				std::stringstream parser(command_line);
-				std::string buffer;
-
-				// read a line in to the buffer, and then convert to path.
-				std::getline(parser, buffer, ' ');
-				binary_path = buffer;
-
-			}
-
-			// the cmdline file doesn't appear to exist?
-			else BOOST_THROW_EXCEPTION( process_name_exception() );
-		}
-		catch(boost::exception& ex)
-		{
-			ex << process_cmdline_file(process_cmdline_file_path);
-			throw;
-		}
-
-#else // the following block is for WINDOWS and is NOT tested or maintained.
-#  warning INGLENOOK: WIN32 code has never been tested. This might not even compile. Good luck brave warrior.
-
-		// define a buffer to store path
-		char process_name[MAX_PATH] = {};
-
-		try
-		{
-
-			// attempt to open the our own process with read access rights.
-			HANDLE process_handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, get_real_process_id());
-
-			// check if anything went wrong
-			if (!process_handle) BOOST_THROW_EXCEPTION(
-					ProcessNameException());
-
-			// attempt to open handle was successful, set up a scoped exit clause to
-			// ensure that the process handle is closed when we are done.
-			BOOST_SCOPE_EXIT( (&process_handle) )
-			{	CloseHandle(process_handle);
-			}BOOST_SCOPE_EXIT_END
-
-			// query the name of the process using the handle acquired.
-			if (!GetModuleFileNameEx(process_handle, 0, process_name, sizeof(process_name) - 1))
-			{
-				// something went wrong, abort and sulk
-				BOOST_THROW_EXCEPTION( process_name_exception()
-						<< inglenook_win32_error( GetLastError() ));
-			}
-
-			// return the process name
-			binary_path = process_name;
-
-		}
-		catch(boost::exception& ex)
-		{
-			// in the event of any errors note that this is windows code.
-			ex << inglenook_win32(true);
-			throw;
-		}
-
-#endif
-
-		// hopefully we have a path to pass back by now (empty string on failure).
-		return binary_path.filename().native();
-
-	}
 
 	/**
 	 * This method writes out the XML header.

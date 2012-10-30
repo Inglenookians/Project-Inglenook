@@ -50,6 +50,12 @@ typedef std::shared_ptr<log_entry_buffered> log_buffer;
 /// thread specific data is held entirely within this data type.
 typedef boost::thread_specific_ptr<log_buffer> ts_log_buffer;
 
+// type defintion needed of a standard stream (cout, cerr, stringstream, etc)
+typedef std::basic_ostream<char, std::char_traits<char> > stream_type;
+
+// function signature of std stream manipulators (std::endl, std::end, etc)
+typedef stream_type& (*std_stream_manipulator)(stream_type&);
+
 /**
  * The log_client class provides a thread safe log writing interface for client applications.
  * The log_class class acts as a thread safe intermediate between the log_writer and client applications. It can be used
@@ -160,6 +166,8 @@ public:
     log_client& operator<<(lf _lf);
     log_client& operator<<(const ns& _ns);
     log_client& operator<<(const log_data& _log_data);
+    log_client& operator<<(std_stream_manipulator _manipulator);
+
     /////////////////////////////////////////////////////////////////
     //
 };

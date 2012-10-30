@@ -20,3 +20,4 @@
 add_subdirectory(ign_core)
 add_subdirectory(ign_config)
 add_subdirectory(ign_directories)
+add_subdirectory(ign_logging)

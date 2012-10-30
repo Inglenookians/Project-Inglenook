@@ -19,33 +19,6 @@
 #ifndef LOG_WRITER_H_
 #define LOG_WRITER_H_
 
-//
-// The following pre-compiler should:
-// create a new type definition of 'pid_type' which is appropriate to store the platform specific process identifier.
-// create a new definition of 'INGLENOOK_CURRENT_PID' which can be invoked to get the current process id.
-// Example:
-//	 // get and store current process id.
-//   pid_type mypid = INGLENOOK_CURRENT_PID();
-//
-#ifndef _WIN32
-
-// Linux support (officially tested and maintained).
-#  include <sys/types.h>
-#  include <unistd.h>
-#  include <stdlib.h>
-#  define INGLENOOK_CURRENT_PID ( getpid )
-   typedef pid_t pid_type;
-
-#else
-
-// Windows support (not tested or maintained).
-#  include <windows.h>
-#  warning INGLENOOK: WIN32 code has never been tested. This might not even compile. Good luck brave warrior.
-#  define INGLENOOK_CURRENT_PID ( GetCurrentProcessId )
-   typedef DWORD pid_type;
-
-#endif
-
 // standard library includes
 #include <ostream>
 
@@ -56,6 +29,7 @@
 #include <boost/circular_buffer.hpp>
 
 // inglenook includes
+#include <ign_core/application.h>
 #include "log_entry.h"
 
 namespace inglenook
@@ -142,12 +116,6 @@ class log_writer
 
 
 	private:
-
-		/// Gets and returns the current process id.
-		static const pid_type get_real_process_id();
-
-		/// Gets and returns the current process name.
-		static const std::string get_real_process_name();
 
 		/// Writes the xml header out to the stream.
 		void write_xml_header();

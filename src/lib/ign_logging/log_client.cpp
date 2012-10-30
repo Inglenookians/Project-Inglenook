@@ -320,6 +320,11 @@ log_client& log_client::operator<<(std::string* _string_ptr)
 log_client& log_client::operator<<(std::stringstream _stringstream)
 { return send_to_stream(_stringstream) ;}
 
+log_client& log_client::operator<<(std_stream_manipulator _manipulator)
+{ return send_to_stream(_manipulator) ;}
+
+
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // end of the operator overload block
 //

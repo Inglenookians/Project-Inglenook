@@ -18,6 +18,8 @@
 
 cmake_minimum_required (VERSION 2.8)
 
+option(WITH_EXAMPLES "Build Inglenook example code." TRUE)
+
 #
 # Project Settings
 #

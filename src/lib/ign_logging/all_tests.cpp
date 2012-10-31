@@ -1,5 +1,5 @@
 /*
-* logging_test.h: Test routines to make sure the logging mechanisms are working.
+* all_tests.h: Runs all logging tests to make sure the logging mechanism is working
 * Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
 *
 * This program is free software: you can redistribute it and/or modify
@@ -16,41 +16,16 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef LOGGING_TESTS_
-#define LOGGING_TESTS_
+#define LOG_TEST_NAME ign_logging_tests
 
+//
+// This is the manifest for logging tests, please note that the following
+// elements are currently outside of the test coverage:
+//		log_exceptions.h 	- defines logging exception structures.
+//		logging.h			- include file for dependants to initialize logging easily.
+//
 
-#define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE common_logging
-
-// boost (http://boost.org) includes
-#include <boost/test/unit_test.hpp>
-
-namespace inglenook
-{
-
-namespace logging
-{
-
-BOOST_AUTO_TEST_CASE ( log_writer_tests )
-{
-	// pending cmake
-}
-
-BOOST_AUTO_TEST_CASE ( log_client_tests )
-{
-	// pending cmake
-}
-
-BOOST_AUTO_TEST_CASE ( log_entry )
-{
-	// pending cmake
-}
-
-
-
-} // namespace inglenook::logging
-
-} // namespace inglenook
-
-#endif LOGGING_TESTS_
+#include "log_entry_tests.h"
+#include "log_entry_buffered_tests.h"
+#include "log_entry_modifiers_tests.h"
+#include "log_client_tests.h"

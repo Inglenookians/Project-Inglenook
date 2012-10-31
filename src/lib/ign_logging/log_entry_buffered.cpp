@@ -78,8 +78,12 @@ const std::string& log_entry_buffered::message()
  */
 void log_entry_buffered::message(const std::string& value)
 {
+	// reset string stream
 	m_message_buffer.clear();
-	m_message_buffer.str(value);
+	m_message_buffer.str(std::string());
+
+	// update with new value
+	m_message_buffer << value;
 	log_entry::message(value);
 }
 

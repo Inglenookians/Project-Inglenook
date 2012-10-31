@@ -57,20 +57,20 @@ install(
 #########
 
 # Make the test.
-#add_executable(
-#	ign_directories_tests 
-#	tests.cpp
-#)
+add_executable(
+	ign_logging_tests 
+	all_tests.cpp
+)
 
 # Link to required libraries
-#target_link_libraries(
-#	ign_directories_tests
-#	ign_directories
-#	boost_unit_test_framework
-#) 
+target_link_libraries(
+	ign_logging_tests
+	ign_logging
+	boost_unit_test_framework
+) 
 
 # Add the test.
-#add_test(
-#	NAME ign_directories_tests
-#	COMMAND ign_directories_tests
-#)
+add_test(
+	NAME ign_logging_tests
+	COMMAND ign_logging_tests
+)

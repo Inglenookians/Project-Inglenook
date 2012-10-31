@@ -50,10 +50,10 @@ class log_entry_buffered: public log_entry
 		std::stringstream& message_buffer();
 
 		/// virtual member of log_entry
-		const std::string& message();
+		virtual const std::string& message() override;
 
 		/// sets the log message
-		void message(const std::string& value);
+		virtual void message(const std::string& value) override;
 
 	private:
 

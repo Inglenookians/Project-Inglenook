@@ -50,13 +50,13 @@ typedef boost::circular_buffer<std::shared_ptr<log_entry>> log_message_queue;
 class log_writer
 {
 
-	private:
+	protected:
 
 		// (there is no default constructor for the LogWriter)
 		log_writer() = delete;
 
 		// Creates a new LogWriter instance which will emit logs to the specified output stream.
-		log_writer(const std::shared_ptr<std::ostream>& output_stream);
+		log_writer(const std::shared_ptr<std::ostream>& output_stream, bool write_header = true, bool write_footer = true);
 
 
 
@@ -66,13 +66,16 @@ class log_writer
 		log_writer(const log_writer&) = delete;
 
 		// Creates a new log_writer instance.
-		static std::shared_ptr<log_writer> create();
+		static std::shared_ptr<log_writer> create(bool write_header = true, bool write_footer = true);
 
 		// Creates a new log_writer instance which will emit logs to the specified file.
-		static std::shared_ptr<log_writer> create_from_file_path(const boost::filesystem::path& output_file, const bool& create = true);
+		static std::shared_ptr<log_writer> create_from_file_path(const boost::filesystem::path& output_file, const bool& create = true, bool write_header = true, bool write_footer = true);
 
 		// Creates a new log_writer instance which will emit logs to a specified stream
-		static std::shared_ptr<log_writer> create_from_stream(const std::shared_ptr<std::ostream>& output_stream);
+		static std::shared_ptr<log_writer> create_from_stream(const std::shared_ptr<std::ostream>& output_stream, bool write_header = true, bool write_footer = true);
+
+		// gets the default log path for this run of the software.
+		static boost::filesystem::path default_log_path();
 
 		// Destroys the LogWriter, releasing any associated resources.
 		virtual ~log_writer();
@@ -210,6 +213,12 @@ class log_writer
 
 	    /// global default name space.
 	    std::string m_default_namespace;
+
+	    /// inidicates if a header should be written on startup.
+	    bool m_write_header;
+
+	    /// inidicates if a footer should be written on shutdown.
+	    bool m_write_footer;
 
 
 };

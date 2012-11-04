@@ -55,10 +55,6 @@ void log_client::initialize_buffer()
 {
 	// create a new log entry (this is now a tls_ptr to a shared_ptr to a buffer).
 	m_buffer.reset(new std::shared_ptr<log_entry_buffered>(new log_entry_buffered()));
-
-	// set the initial category
-	m_buffer->get()->entry_type(default_entry_type());
-	m_buffer->get()->log_namespace(default_namespace());
 }
 
 /**
@@ -82,19 +78,25 @@ const std::string& log_client::default_namespace() const
 }
 
 /**
+ * Clears the default namespace, forcing the log client to fall back on to its associated
+ * log writers default namespace
+ */
+void log_client::clear_default_namespace()
+{
+	// update default namespace
+	m_ts_default_namespace.reset(nullptr);
+}
+
+/**
  * Sets the value of the default name space for this thread.
  * @params value new value for this property
  */
 void log_client::default_namespace(const std::string& value)
 {
-	check_buffer();
-
-	// update default and current namespace
+	// update default namespace
 	if(m_ts_default_namespace.get() == nullptr)
 		m_ts_default_namespace.reset(new std::string());
 	*m_ts_default_namespace = value;
-
-	m_buffer->get()->log_namespace(value);
 }
 
 /**
@@ -114,6 +116,16 @@ const category& log_client::default_entry_type() const
 	}
 }
 
+/**
+ * Clears the default entry type, forcing the log client to fall back on to its associated
+ * log writers default value
+ */
+void log_client::clear_default_entry_type()
+{
+	// update default entry types
+	m_ts_default_entry_type.reset(nullptr);
+}
+
 
 /**
  * Sets the value of the default entry type for this thread.
@@ -121,14 +133,10 @@ const category& log_client::default_entry_type() const
  */
 void log_client::default_entry_type(const category& value)
 {
-	check_buffer();
-
-	// update default and current entry types
+	// update default entry types
 	if(m_ts_default_entry_type.get() == nullptr)
 		m_ts_default_entry_type.reset(new category);
 	*m_ts_default_entry_type = value;
-
-	m_buffer->get()->entry_type(value);
 }
 
 /**
@@ -166,6 +174,17 @@ log_client& log_client::create_log_stream(category _category)
 	// working with it is the most relevant, usable std::ostream.
 	return *this;
 }
+
+/**
+ * Gets the internal log entry buffer.
+ * @returns  internal log entry buffer.
+ */
+log_buffer log_client::buffer()
+{
+	check_buffer();
+	return *m_buffer.get();
+}
+
 
 /// Create a debug log entry
 log_client& log_client::debug() { return create_log_stream(category::debugging); }
@@ -240,6 +259,12 @@ log_client& log_client::operator<<(lf _lf)
 			// add the entry to the log schedule and create next entry.
 			auto converted_buffer = std::dynamic_pointer_cast<log_entry>(*m_buffer);
 
+			// ensure that the entry type and namespace are set.
+			if(converted_buffer->entry_type() == category::unspecified)
+				converted_buffer->entry_type(default_entry_type());
+			if(converted_buffer->log_namespace() == "")
+				converted_buffer->log_namespace(default_namespace());
+
 			// schedule the entry for serialization and re-initialize buffer
 			m_output_interface->add_entry(converted_buffer);
 			initialize_buffer();
@@ -285,6 +310,9 @@ log_client& log_client::operator<<(int _int)
 
 log_client& log_client::operator<<(unsigned int _unsigned_int)
 { return send_to_stream(_unsigned_int) ;}
+
+log_client& log_client::operator<<(char _char)
+{ return send_to_stream(_char) ;}
 
 #ifdef _GLIBCXX_USE_LONG_LONG
 

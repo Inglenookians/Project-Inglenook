@@ -43,7 +43,8 @@ enum category : unsigned int
 	information = 0x03,		/**< Information. Standard output messages related to key events within the software. */
 	warning 	= 0x04,		/**< Warning. Notification of potentially erroneous or unexpected behavior. Usually not fatal . */
 	error 		= 0x05,		/**< Error. Significant deviation of expected behavior. */
-	fatal		= 0x06		/**< Fatal Error. Unrecoverable deviation from expected behaviour. This will usually be the last entry. */
+	fatal		= 0x06,		/**< Fatal Error. Unrecoverable deviation from expected behaviour. This will usually be the last entry. */
+	no_log		= 0x99		/**< No logging. (log_writer use only). */
 };
 
 /**

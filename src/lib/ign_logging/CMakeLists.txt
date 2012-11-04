@@ -67,6 +67,7 @@ target_link_libraries(
 	ign_logging_tests
 	ign_logging
 	boost_unit_test_framework
+	boost_regex
 ) 
 
 # Add the test.

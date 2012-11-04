@@ -16,16 +16,24 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef LOGGING_TESTS_
+#define LOGGING_TESTS_
+
+// name to apply to all tests
 #define LOG_TEST_NAME ign_logging_tests
 
 //
 // This is the manifest for logging tests, please note that the following
-// elements are currently outside of the test coverage:
-//		log_exceptions.h 	- defines logging exception structures.
+// elements are currently outside of test coverage:
+//		log_exceptions.h 	- defines logging exception structures, no real functional code.
 //		logging.h			- include file for dependants to initialize logging easily.
+//		all examples		- these items are not tested and are not considered *functional* code.
 //
 
 #include "log_entry_tests.h"
 #include "log_entry_buffered_tests.h"
 #include "log_entry_modifiers_tests.h"
+#include "log_writer_tests.h"
 #include "log_client_tests.h"
+
+#endif // LOGGING_TESTS_

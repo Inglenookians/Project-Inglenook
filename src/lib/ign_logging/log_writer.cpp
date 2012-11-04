@@ -29,7 +29,6 @@
 #include <boost/locale.hpp>
 #include <boost/format.hpp>
 #include <boost/exception/all.hpp>
-#include <boost/scope_exit.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/posix_time/posix_time_io.hpp>
 #include <boost/thread/locks.hpp>
@@ -52,7 +51,7 @@ const boost::posix_time::ptime timeout_ms(int ms) {
  * @param output_stream std::ostream to write XML to.
  * @see ~log_writer()
  */
-log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream) :
+log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream, bool write_header, bool write_footer) :
 	m_log_serialization_thread(nullptr),
 	m_log_serialization_shutdown_mutex(new boost::timed_mutex()),
 	m_log_serialization_queue_mutex(new boost::mutex()),
@@ -63,7 +62,9 @@ log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream) :
 	m_xml_serialization_threshold(category::information),
 	m_console_serialization_threshold(category::information),
 	m_default_entry_type(category::information),
-	m_default_namespace("inglenook.anonymous")
+	m_default_namespace("inglenook.anonymous"),
+	m_write_header(write_header),
+	m_write_footer(write_footer)
 	{
 
 	// check the output streams health
@@ -85,8 +86,22 @@ log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream) :
 /**
  * Creates a new log_writer instance based on inglenooks logging directory structure. This can be impacted by a variety of factors
  * including but not limited to; global configuration, application configuration and environment.
+ * @param write_header indicates if the XML preamble should be written on startup
+ * @param write_footer indicates if the XML closure tags should be written on shutdown.
  */
-std::shared_ptr<log_writer> log_writer::create()
+std::shared_ptr<log_writer> log_writer::create(bool write_header, bool write_footer)
+{
+
+	return log_writer::create_from_file_path(default_log_path(), write_header, write_footer);
+
+}
+
+/**
+ * Determines the default log path, note that the file path is time dependant and will
+ * change with every call made to it.
+ * @returns the suggested log path.
+ */
+boost::filesystem::path log_writer::default_log_path()
 {
 
 	using namespace inglenook::core;
@@ -111,18 +126,22 @@ std::shared_ptr<log_writer> log_writer::create()
 	// add file extension
 	filename_buffer << ".xml";
 
-	return log_writer::create_from_file_path(filename_buffer.str());
-
+	return filename_buffer.str();
 }
 
 /**
  * Creates a new log_writer instance which will emit output to the specified file.
  * @param output_file Path identifying file to write XML to.
  * @param create If output_file doesn't exist, indicates whether to create it on the fly. Defaults to true.
+ * @param write_header indicates if the XML preamble should be written on startup
+ * @param write_footer indicates if the XML closure tags should be written on shutdown.
  */
 std::shared_ptr<log_writer> log_writer::create_from_file_path(
-		const boost::filesystem::path& output_file, const bool& create) {
-	try {
+		const boost::filesystem::path& output_file, const bool& create,
+		bool write_header, bool write_footer)
+{
+	try
+	{
 		using namespace boost::filesystem;
 
 		// determine if the file exists
@@ -161,8 +180,8 @@ else				// the file does not exist, and we were not instructed to create it.
 			// at this point either the log exists, or we are good to create it
 			// so attempt to open the specified file path for appending data.
 			return std::shared_ptr<log_writer>(new log_writer(std::shared_ptr<std::ofstream>(
-									new std::ofstream(output_file.native(), std::ios::app))
-					));
+									new std::ofstream(output_file.native(), std::ios::app)),
+									write_header, write_footer));
 
 		}
 		catch(boost::exception& ex)
@@ -176,12 +195,15 @@ else				// the file does not exist, and we were not instructed to create it.
 	/**
 	 * Creates a new log_writer instance which will emit output to the specified output stream.
 	 * @param output_stream stream to write XML to.
+	 * @param write_header indicates if the XML preamble should be written on startup
+	 * @param write_footer indicates if the XML closure tags should be written on shutdown.
 	 */
-	std::shared_ptr<log_writer> log_writer::create_from_stream(const std::shared_ptr<std::ostream>& output_stream)
+	std::shared_ptr<log_writer> log_writer::create_from_stream(const std::shared_ptr<std::ostream>& output_stream,
+			bool write_header, bool write_footer)
 	{
 		// at this point either the log exists, or we are good to create it
 		// so attempt to open the specified file path for appending data.
-		return std::shared_ptr<log_writer>(new log_writer(output_stream));
+		return std::shared_ptr<log_writer>(new log_writer(output_stream, write_header, write_footer));
 	}
 
 	/**
@@ -240,7 +262,7 @@ else				// the file does not exist, and we were not instructed to create it.
 		{
 			// correct empty name spaces.
 			if(entry->log_namespace().length() == 0)
-			entry->log_namespace(boost::locale::translate("none"));
+				entry->log_namespace(default_namespace());
 
 			int schedule_attempts = 0;
 			const int MAX_SCHEDULE_ATTEMPTS = 10;
@@ -382,7 +404,7 @@ else				// the file does not exist, and we were not instructed to create it.
 					<< inglenook_error_number(unable_to_aquire_queue_notification_lock) );
 
 			// start the log file.
-			write_xml_header();
+			if(m_write_header) write_xml_header();
 
 			while(true)
 			{
@@ -398,11 +420,15 @@ else				// the file does not exist, and we were not instructed to create it.
 
 					// make sure the entry is filled out.
 					if(entry->entry_type() != category::unspecified &&
+					   entry->entry_type() != category::no_log &&
 					   entry->log_namespace().length() > 0 &&
 					   entry->message().length() > 0)
 					{
-						_log_serialization_worker_serialize(entry);
-						_log_serialization_worker_screen(entry);
+						if(entry->entry_type() >= xml_threshold())
+							_log_serialization_worker_serialize(entry);
+
+						if(entry->entry_type() >= console_threshold())
+							_log_serialization_worker_screen(entry);
 					}
 				}
 
@@ -452,8 +478,12 @@ else				// the file does not exist, and we were not instructed to create it.
 		//
 		try
 		{
-			(*m_output_stream.get()) << "</log-entries>";
-			(*m_output_stream.get()) << "</inglenook-log-file>";
+			// if the header is set to be written.
+			if(m_write_footer)
+			{
+				(*m_output_stream.get()) << "</log-entries>";
+				(*m_output_stream.get()) << "</inglenook-log-file>";
+			}
 		}
 		catch(...) { /* if we crashed because of a bad stream, don't make the problem worse */}
 
@@ -468,73 +498,71 @@ else				// the file does not exist, and we were not instructed to create it.
 	void log_writer::_log_serialization_worker_serialize(std::shared_ptr<log_entry> entry)
 	{
 
-		// check serialization filter.
-		if(entry->entry_type() >= xml_threshold())
+
+		// should only need to initialize this stuff once for performance
+		auto output_stream = m_output_stream.get();
+		auto timestamp_formatter = std::locale(output_stream->getloc(),
+				new boost::posix_time::time_facet("%Y-%m-%dT%H:%M:%sZ"));
+
+		/*
+		 * This is what we are aiming for:
+
+		 <log-entry timestamp="2012-12-21T00:00:00.00Z" severity="4" ns="inglenook.sample.process">
+		 <message><![CDATA[Yikes! Something incredibly Mayan happened to the process - cannot continue.]]></message>
+		 <extended-data>
+		 <item key="sample.specific"><![CDATA[Kittens]]></item>
+		 <item key="sample.host"><![CDATA[127.0.0.1]]></item>
+		 <extended-data>
+		 </log-entry>
+
+		 */
+
+		// sanitize message this can contain user input
+		std::string message = entry->message();
+		boost::replace_all(message, "<", "&lt;");
+		boost::replace_all(message, ">", "&gt;");
+
+		// get the extended data (pre-doing this to keep xml writing as clean as possible).
+		auto extended_data = entry->extended_data();
+
+		// open the <log-entry> dom element
+		*output_stream << "<log-entry timestamp=\"";
+		output_stream->imbue(timestamp_formatter);
+		*output_stream << boost::posix_time::second_clock::universal_time();
+		*output_stream << "\" severity=\"" << entry->entry_type() << "\" ns=\"" << entry->log_namespace() << "\">";
+
+		// output the message body
+		*output_stream << "<message><![CDATA[" << message << "]]></message>";
+
+		// check for extended data
+		if(extended_data.size() > 0)
 		{
-			// should only need to initialize this stuff once for performance
-			auto output_stream = m_output_stream.get();
-			auto timestamp_formatter = std::locale(output_stream->getloc(),
-					new boost::posix_time::time_facet("%Y-%m-%dT%H:%M:%sZ"));
 
-			/*
-			 * This is what we are aiming for:
+			// start the <extended-data> dom item
+			*output_stream << "<extended-data>";
 
-			 <log-entry timestamp="2012-12-21T00:00:00.00Z" severity="4" ns="inglenook.sample.process">
-			 <message><![CDATA[Yikes! Something incredibly Mayan happened to the process - cannot continue.]]></message>
-			 <extended-data>
-			 <item key="sample.specific"><![CDATA[Kittens]]></item>
-			 <item key="sample.host"><![CDATA[127.0.0.1]]></item>
-			 <extended-data>
-			 </log-entry>
-
-			 */
-
-			// sanitize message this can contain user input
-			std::string message = entry->message();
-			boost::replace_all(message, "<", "&lt;");
-			boost::replace_all(message, ">", "&gt;");
-
-			// get the extended data (pre-doing this to keep xml writing as clean as possible).
-			auto extended_data = entry->extended_data();
-
-			// open the <log-entry> dom element
-			*output_stream << "<log-entry timestamp=\"";
-			output_stream->imbue(timestamp_formatter);
-			*output_stream << boost::posix_time::second_clock::universal_time();
-			*output_stream << "\" severity=\"" << entry->entry_type() << "\" ns=\"" << entry->log_namespace() << "\">";
-
-			// output the message body
-			*output_stream << "<message><![CDATA[" << message << "]]></message>";
-
-			// check for extended data
-			if(extended_data.size() > 0)
+			// iterate through all the data in the map
+			for(auto data = extended_data.begin(); data != extended_data.end(); data++)
 			{
 
-				// start the <extended-data> dom item
-				*output_stream << "<extended-data>";
+				// sanitize the data provided (not only value is sanitized).
+				std::string value = data->second;
+				boost::replace_all(value, "<", "&lt;");
+				boost::replace_all(value, ">", "&gt;");
 
-				// iterate through all the data in the map
-				for(auto data = extended_data.begin(); data != extended_data.end(); data++)
-				{
-
-					// sanitize the data provided (not only value is sanitized).
-					std::string value = data->second;
-					boost::replace_all(value, "<", "&lt;");
-					boost::replace_all(value, ">", "&gt;");
-
-					// and write it out.
-					*output_stream << "<item key=\"" << data->first << "\"><![CDATA[" << value << "]]></item>";
-
-				}
-
-				// end the <extended-data> dom item
-				*output_stream << "</extended-data>";
+				// and write it out.
+				*output_stream << "<item key=\"" << data->first << "\"><![CDATA[" << value << "]]></item>";
 
 			}
 
-			// close the <log-entry>
-			*output_stream << "</log-entry>";
+			// end the <extended-data> dom item
+			*output_stream << "</extended-data>";
+
 		}
+
+		// close the <log-entry>
+		*output_stream << "</log-entry>";
+
 	}
 
 	/**
@@ -546,44 +574,39 @@ else				// the file does not exist, and we were not instructed to create it.
 	void log_writer::_log_serialization_worker_screen(std::shared_ptr<log_entry> entry)
 	{
 
-		// check serialization filter.
-		if(entry->entry_type() >= console_threshold())
-		{
+		/*
+		 // both cout and ceer should have the same locale...
+		 auto timestamp_formatter = std::locale(std::cout.getloc(),
+		 new boost::posix_time::time_facet("%d-%M-%Y-%H:%M:%S"));
 
-			/*
-			 // both cout and ceer should have the same locale...
-			 auto timestamp_formatter = std::locale(std::cout.getloc(),
-			 new boost::posix_time::time_facet("%d-%M-%Y-%H:%M:%S"));
+		 // short names for all the entry types localized for user.
+		 std::string categories[] =
+		 {
+		 boost::locale::translate("     "),
+		 boost::locale::translate("debug"),
+		 boost::locale::translate("trace"),
+		 boost::locale::translate(" info"),
+		 boost::locale::translate(" warn"),
+		 boost::locale::translate("error"),
+		 boost::locale::translate("fatal")
+		 };
 
-			 // short names for all the entry types localized for user.
-			 std::string categories[] =
-			 {
-			 boost::locale::translate("     "),
-			 boost::locale::translate("debug"),
-			 boost::locale::translate("trace"),
-			 boost::locale::translate(" info"),
-			 boost::locale::translate(" warn"),
-			 boost::locale::translate("error"),
-			 boost::locale::translate("fatal")
-			 };
+		 // choose a category string for the entry
+		 std::string category = entry->entry_type() < sizeof(categories) ?
+		 categories[entry->entry_type()] : categories[0];
+		 */
 
-			 // choose a category string for the entry
-			 std::string category = entry->entry_type() < sizeof(categories) ?
-			 categories[entry->entry_type()] : categories[0];
-			 */
-
-			// determine which stream we need to push this message to.
-			std::ostream *output_stream = entry->entry_type() >= LOG_CATEGORY_CERR_BOUNTRY ?
-			&std::cerr : &std::cout;
-			/*
-			 // push it all out to console.
-			 *output_stream << "[";
-			 output_stream->imbue(timestamp_formatter);
-			 *output_stream << boost::posix_time::second_clock::local_time();
-			 *output_stream << " " << category << "] ";
-			 */
-			*output_stream << entry->message() << std::endl;
-		}
+		// determine which stream we need to push this message to.
+		std::ostream *output_stream = entry->entry_type() >= LOG_CATEGORY_CERR_BOUNTRY ?
+		&std::cerr : &std::cout;
+		/*
+		 // push it all out to console.
+		 *output_stream << "[";
+		 output_stream->imbue(timestamp_formatter);
+		 *output_stream << boost::posix_time::second_clock::local_time();
+		 *output_stream << " " << category << "] ";
+		 */
+		*output_stream << entry->message() << std::endl;
 
 	}
 

@@ -16,8 +16,8 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef LOGGING_LOG_ENTRY_MODIFIERS_TESTS_
-#define LOGGING_LOG_ENTRY_MODIFIERS_TESTS_
+#ifndef LOGGING_LOG_CLIENT_TESTS_
+#define LOGGING_LOG_CLIENT_TESTS_
 
 
 #define BOOST_TEST_DYN_LINK
@@ -27,7 +27,7 @@
 #include <boost/test/unit_test.hpp>
 
 // inglenook includes
-#include "log_entry_modifiers.h"
+#include "log_client.h"
 
 namespace inglenook
 {
@@ -36,31 +36,203 @@ namespace logging
 {
 
 //
-// log_entry_tests__defaults
-// checks all the default values for correctness. This should ensure that
-// the default values are predictable, and that the read accessors appear
-// to be working as expected (these will be further tested).
-BOOST_AUTO_TEST_CASE ( log_entry_modifiers_tests__construction )
+// log_client_tests__ctor
+// log client construction tests, ensure that property initialization
+// remains predictable and doesn't change unintentionally.
+BOOST_AUTO_TEST_CASE ( log_client_tests__ctor )
+{
+
+	// create logging client interface
+	auto test_stream = std::shared_ptr<std::stringstream>(new std::stringstream());
+	auto _log_writer = log_writer::create_from_stream(test_stream);
+	log_client _log_client(_log_writer);
+	
+	// ensure all the defaults are exactly what we expected
+	BOOST_CHECK(_log_client.default_namespace() 	== _log_writer->default_namespace());
+	BOOST_CHECK(_log_client.default_entry_type() 	== _log_writer->default_entry_type());
+
+}
+
+//
+// log_client_tests__assignment
+// log client property assignment tests, ensure that property assignments work
+// as expected and that read / write assignments are working.
+BOOST_AUTO_TEST_CASE ( log_client_tests__assignment )
 {
 
 	// resources
-	const std::string ns_test_value = "inglenook.logging.test";
-	const std::string log_data_test_key = "inglenook.key";
-	const std::string log_data_test_value = "a value";
-	
-	// check ns construction 
-	ns _ns(ns_test_value);
-	BOOST_CHECK(_ns.m_ns == ns_test_value);
+	const std::string fallback_namespace = "fallback";
+	const category fallback_category = category::fatal;
+	const std::string fallback_namespace_restored = "kcabllaf";
+	const category fallback_category_restored = category::debugging;
+	const std::string first_namespace = "first.namespace";
+	const category first_category = category::warning;
+	const std::string second_namespace = "second.namespace";;
+	const category second_category = category::information;
 
-	// check log_data construction
-	log_data _log_data(log_data_test_key, log_data_test_value);
-	BOOST_CHECK(_log_data.m_key == log_data_test_key);
-	BOOST_CHECK(_log_data.m_value == log_data_test_value);
+	// create logging client interface
+	auto test_stream = std::shared_ptr<std::stringstream>(new std::stringstream());
+	auto _log_writer = log_writer::create_from_stream(test_stream);
+	log_client _log_client(_log_writer);
+
+	// change the expected defaults
+	_log_writer->default_namespace(fallback_namespace);
+	_log_writer->default_entry_type(fallback_category);
+	BOOST_CHECK(_log_client.default_namespace() 	== fallback_namespace);
+	BOOST_CHECK(_log_client.default_entry_type() 	== fallback_category);
+
+	// change the client level settings
+	_log_client.default_namespace(first_namespace);
+	_log_client.default_entry_type(first_category);
+	BOOST_CHECK(_log_client.default_namespace() 	== first_namespace);
+	BOOST_CHECK(_log_client.default_entry_type() 	== first_category);
+
+	// change the client level settings again (to catch reassignment bugs)
+	_log_client.default_namespace(second_namespace);
+	_log_client.default_entry_type(second_category);
+	BOOST_CHECK(_log_client.default_namespace() 	== second_namespace);
+	BOOST_CHECK(_log_client.default_entry_type() 	== second_category);
+
+	// clear client level assignments, then tweak fallback values to ensure
+	// settings are properly cleared.
+	_log_client.clear_default_namespace();
+	_log_client.clear_default_entry_type();
+	_log_writer->default_namespace(fallback_namespace_restored);
+	_log_writer->default_entry_type(fallback_category_restored);
+	BOOST_CHECK(_log_client.default_namespace() 	== fallback_namespace_restored);
+	BOOST_CHECK(_log_client.default_entry_type() 	== fallback_category_restored);
 
 }
+
+//
+// log_client_tests__stream
+// stream operator tests to ensure that the stream operators are impacting the
+// log client as they are expected to.
+BOOST_AUTO_TEST_CASE ( log_client_tests__stream )
+{
+	// create logging client interface
+	auto test_stream = std::shared_ptr<std::stringstream>(new std::stringstream());
+
+	{ //scoping to discard log_client when done and check results
+
+		auto _log_writer = log_writer::create_from_stream(test_stream);
+		log_client _log_client(_log_writer);
+
+		/////////////////////////////////
+		// check switches and stream operators
+		//////////////////////////////////
+
+		// check debug switch and string insertion
+		_log_client.debug() << "1";
+		BOOST_CHECK(_log_client.buffer()->entry_type() == category::debugging);
+		BOOST_CHECK(_log_client.buffer()->message() == "1");
+
+		// check trace switch and integer insertion
+		_log_client.trace() << 2;
+		BOOST_CHECK(_log_client.buffer()->entry_type() == category::verbose);
+		BOOST_CHECK(_log_client.buffer()->message() == "12");
+
+		// check information switch and float insertion
+		_log_client.info() << 3.4;
+		BOOST_CHECK(_log_client.buffer()->entry_type() == category::information);
+		BOOST_CHECK(_log_client.buffer()->message() == "123.4");
+
+		// check warning switch and long insertion
+		_log_client.warning() << (long)5;
+		BOOST_CHECK(_log_client.buffer()->entry_type() == category::warning);
+		BOOST_CHECK(_log_client.buffer()->message() == "123.45");
+
+		// check error switch and char insertion
+		_log_client.error() << '6';
+		BOOST_CHECK(_log_client.buffer()->entry_type() == category::error);
+		BOOST_CHECK(_log_client.buffer()->message() == "123.456");
+
+		// check zero switch and bool  insertion
+		_log_client << true;
+		BOOST_CHECK(_log_client.buffer()->entry_type() == category::error);
+		BOOST_CHECK(_log_client.buffer()->message() == "123.4561");
+
+		// check fatal switch and fn() insertion
+		_log_client.fatal() << std::endl;
+		BOOST_CHECK(_log_client.buffer()->entry_type() == category::fatal);
+		BOOST_CHECK(_log_client.buffer()->message() == "123.4561\n");
+
+		/////////////////////////////////
+		// check extended data
+		//////////////////////////////////
+
+		// make sure the extended data buffer is still empty
+		BOOST_CHECK(_log_client.buffer()->extended_data().size() == 0);
+
+		// set up some data to feed in to extended data, and build a
+		// reference dictionary we can use to check the one we build up.
+		const std::string key1 = "key1";
+		const std::string value1 = "value1";
+		const std::string key2 = "key2";
+		const std::string value2 = "value2";
+		std::map<std::string, std::string> check_data;
+		check_data[key1] = value1;
+		check_data[key2] = value2;
+
+		// add the first item.
+		_log_client << log_data(key1, value1);
+
+		// check buffer is as we expect
+		auto buffer = _log_client.buffer()->extended_data();
+		BOOST_CHECK(buffer.size() == 1);
+		for(auto data = buffer.begin(); data != buffer.end(); data++)
+			BOOST_CHECK(data->second == check_data[data->first]);
+
+		// add the second item
+		_log_client << log_data(key2, value2);
+
+		// check buffer is as we expect
+		buffer = _log_client.buffer()->extended_data();
+		BOOST_CHECK(buffer.size() == 2);
+		for(auto data = buffer.begin(); data != buffer.end(); data++)
+			BOOST_CHECK(data->second == check_data[data->first]);
+
+		// remote the second item
+		_log_client << log_data(key2, "");
+
+		// check buffer is as we expect
+		buffer = _log_client.buffer()->extended_data();
+		BOOST_CHECK(buffer.size() == 1);
+		for(auto data = buffer.begin(); data != buffer.end(); data++)
+			BOOST_CHECK(data->second == check_data[data->first]);
+
+		/////////////////////////////////
+		// check namespace
+		//////////////////////////////////
+
+		const std::string first_log_namespace = "inglenook.logging.test.rewrite";
+		const std::string second_log_namespace = "rewrite.test.logging.inglenook";
+
+		// assign and check
+		_log_client << ns(first_log_namespace);
+		BOOST_CHECK(_log_client.buffer()->log_namespace() == first_log_namespace);
+
+		// assign and check
+		_log_client << ns(second_log_namespace);
+		BOOST_CHECK(_log_client.buffer()->log_namespace() == second_log_namespace);
+
+		// try to ensure that the log writer has chance to write anything it feels it should
+		boost::this_thread::yield(); BOOST_CHECK(test_stream->str().length() == 0);
+
+		// check flush operator
+		_log_client << lf::end;
+
+	} // at end of scope log_client and log_writer should be discarded, forcing log_writer
+	  // to flush all content and rejoin primary execution thread.
+
+	// check result.
+	BOOST_CHECK(test_stream->str().length() > 0);
+}
+
 
 } // namespace inglenook::logging
 
 } // namespace inglenook
 
-#endif // LOGGING_LOG_ENTRY_MODIFIERS_TESTS_
+#endif // LOGGING_LOG_CLIENT_TESTS_
+

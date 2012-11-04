@@ -82,14 +82,25 @@ public:
 	// gets the default name space for this thread.
 	const std::string& default_namespace() const;
 
+	// unsets the default namespace for this log client (forcing it to
+	// fall back on to the log writers default namespace)
+	void clear_default_namespace();
+
 	// sets the default name space for this thread.
 	void default_namespace(const std::string& value);
 
 	// gets the default entry type for this thread.
 	const category& default_entry_type() const;
 
+	// unsets the default entry type for this log client (forcing it to
+	// fall back on to the log writers default type)
+	void clear_default_entry_type();
+
  	/// sets the default entry type for this thread.
 	void default_entry_type(const category& value);
+
+	/// The internal log entry buffer for this client.
+	log_buffer buffer();
 
     /// Creates a debug log entry
     log_client& debug();
@@ -152,6 +163,7 @@ public:
     log_client& operator<<(short _short);
     log_client& operator<<(unsigned short _unsigned_short);
     log_client& operator<<(unsigned int _unsigned_int);
+    log_client& operator<<(char _char);
 #ifdef _GLIBCXX_USE_LONG_LONG
     log_client& operator<<(long long _long_long);
     log_client& operator<<(unsigned long long _unsigned_long_long);

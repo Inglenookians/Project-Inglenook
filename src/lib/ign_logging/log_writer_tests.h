@@ -52,7 +52,8 @@ BOOST_AUTO_TEST_CASE ( log_writer_tests__ctor_dtor )
 {
 	// resources
 	const std::string expected_xml_part1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><inglenook-log-file xmlns=\"http://schemas.project-inglenook.co.uk/0.00-DEVELOPMENT/schemas/file-formats/inglenook-log-file.xsd\"><process-id pid=\"";
-	const std::string expected_xml_part2 = "\"><binary-name><![CDATA[ign_logging_tests]]></binary-name><binary-version><![CDATA[#.## DEVELOPMENT]]></binary-version><log-writer-version><![CDATA[#.## DEVELOPMENT]]></log-writer-version></process-id><log-entries></log-entries></inglenook-log-file>";
+	const std::string expected_xml_part2 = "\"><binary-name><![CDATA[ign_logging_tests]]></binary-name><binary-version><![CDATA[";
+	const std::string expected_xml_part3 = "]]></binary-version><log-writer-version><![CDATA[v1.0.0000]]></log-writer-version></process-id><log-entries></log-entries></inglenook-log-file>";
 			
 	// create logging interface
 	auto test_stream = std::shared_ptr<std::stringstream>(new std::stringstream());
@@ -74,7 +75,9 @@ BOOST_AUTO_TEST_CASE ( log_writer_tests__ctor_dtor )
 	
 	// verify that the logging mechanism started, and closed the file correctly.
 	auto expected_xml = std::shared_ptr<std::stringstream>(new std::stringstream());
-	(*expected_xml.get()) << expected_xml_part1 << pid << expected_xml_part2;
+	(*expected_xml.get()) << expected_xml_part1 << pid << expected_xml_part2
+			<< inglenook::core::application::version() << expected_xml_part3;
+
 	BOOST_CHECK(test_stream->str() == expected_xml->str());
 	
 }

@@ -355,6 +355,9 @@ else				// the file does not exist, and we were not instructed to create it.
 	void log_writer::write_xml_header()
 	{
 
+		// acquire the binaries version information
+		std::string version_string = inglenook::core::application::version();
+
 		// locate the logging xsd
 		std::stringstream xsd_location;
 		xsd_location << "http://schemas.project-inglenook.co.uk/" // domain for schema's
@@ -377,8 +380,8 @@ else				// the file does not exist, and we were not instructed to create it.
 		// write out binary information block.
 		(*m_output_stream.get()) << "<process-id pid=\"" << pid() << "\">";
 		(*m_output_stream.get()) << "<binary-name><![CDATA[" << safe_process_name << "]]></binary-name>";
-		(*m_output_stream.get()) << "<binary-version><![CDATA[" << "#.## DEVELOPMENT" << "]]></binary-version>";
-		(*m_output_stream.get()) << "<log-writer-version><![CDATA[" << "#.## DEVELOPMENT" << "]]></log-writer-version>";
+		(*m_output_stream.get()) << "<binary-version><![CDATA[" << version_string << "]]></binary-version>";
+		(*m_output_stream.get()) << "<log-writer-version><![CDATA[" << "v1.0.0000" << "]]></log-writer-version>";
 		(*m_output_stream.get()) << "</process-id>";
 		(*m_output_stream.get()) << "<log-entries>";
 	}

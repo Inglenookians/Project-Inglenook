@@ -64,7 +64,7 @@ void loud_thread(int id, int no_outputs)
 }
 
 /**
- * Logging daemon software entry point.
+ * Threading logging samples entry point.
  * Execution starts at this method. Everything the daemon is begins here.
  * @param arg_c number of command line arguments.
  * @param arg_v character array delimited software arguments

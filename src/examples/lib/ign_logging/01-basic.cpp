@@ -58,23 +58,20 @@ int main(int arg_c, char* arg_v[])
 	ilog << c << lf::end;
 
 	// Note: when we write the answer to the log (the c variable), because the category is already
-	//    set to info() we do not need to specify this again until we start the next message.
+	//    set to info() we do not need to specify this again.
 
-	// IMPORTANT: technically no category needs to be assigned until the message is "flushed" with
-	//    a lf::end stream manipulator. It is however a strongly recommended inglenook convention
-	//    however to always start a log entry with the category set as it make the log easier to read.
-	//    Failure to set the namespace at all before sending a lf::end, will cause the message to be
-	//    rejected.
+	// IMPORTANT: technically no category needs to be assigned however a strongly recommended inglenook
+	//	  convention to always start a log entry with the category set as it make the code easier to read.
+	//    if you don't set a category at all a default one will be assigned.
 
 	// you can also use this behaviour to change the log category, the following message will be
 	// written to the log as an error entry because the last write was to the error category.
 	ilog.info() << "Attempting to remove cute from Kittens: ";
 	ilog.error() << "Don't be ridiculous" << lf::end;
 
-	// up until now we've been naughty. every message we have written has not been namespaced.
-	// inglenook groups messages in namespaces to help group associated logs. We can specify the
-	// namespace of an log entry with the ns() stream manipulator. The following example writes
-	// to the examples.logging.01 namespace
+	// every message we have written has not been namespaced. inglenook groups messages in namespaces
+	// to help group associated logs. We can specify the namespace of an log entry with the ns()
+	// stream manipulator. The following example writes to the examples.logging.01 namespace
 	ilog.info() << ns("examples.logging.01") << "A well mannered \"Hello World\"" << lf::end;
 
 	// obviously, this will get tedious if we do this on every message, most functionality should

@@ -38,6 +38,9 @@ namespace inglenook {
 
 namespace logging {
 
+/// defines the value that expresses no PID
+const pid_type log_writer::NO_PID = 0;
+
 /**
  * Creates a POSIX time item out of a milisecond duration..
  * @param ms milliseconds until event.
@@ -49,15 +52,20 @@ const boost::posix_time::ptime timeout_ms(int ms) {
 /**
  * Creates a new log_writer instance which will emit output to the specified std::ostream.
  * @param output_stream std::ostream to write XML to.
+ * @param write_header indicates if the XML preamble should be written on startup
+ * @param write_footer indicates if the XML closure tags should be written on shutdown.
+ * @param specific_pid specify the PID to create log for (else use self determined pid)
+ * @param specific_application_name specify the application name to create log for (else use self determined name)
  * @see ~log_writer()
  */
-log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream, bool write_header, bool write_footer) :
+log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream, const bool& write_header, const bool& write_footer,
+		 const pid_type& specific_pid, const std::string& specific_application_name) :
 	m_log_serialization_thread(nullptr),
 	m_log_serialization_shutdown_mutex(new boost::timed_mutex()),
 	m_log_serialization_queue_mutex(new boost::mutex()),
 	m_log_serialization_element_queuing_mutex(new boost::mutex()),
-	m_process_id(inglenook::core::application::pid()),
-	m_process_name(inglenook::core::application::name()),
+	m_process_id(specific_pid),
+	m_process_name(specific_application_name),
 	m_output_stream(output_stream),
 	m_xml_serialization_threshold(category::information),
 	m_console_serialization_threshold(category::information),
@@ -66,6 +74,12 @@ log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream, bool 
 	m_write_header(write_header),
 	m_write_footer(write_footer)
 	{
+
+	// if the process id is not determined - self assign it.
+	if(pid() == log_writer::NO_PID) m_process_id = inglenook::core::application::pid();
+
+	// if the process name is not determined - self assign it.
+	if(process_name() == "") m_process_name = inglenook::core::application::name();
 
 	// check the output streams health
 	if (m_output_stream == nullptr || m_output_stream->fail()) {
@@ -88,31 +102,46 @@ log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream, bool 
  * including but not limited to; global configuration, application configuration and environment.
  * @param write_header indicates if the XML preamble should be written on startup
  * @param write_footer indicates if the XML closure tags should be written on shutdown.
+ * @param specific_pid specify the PID to create log for (else use self determined pid)
+ * @param specific_application_name specify the application name to create log for (else use self determined name)
  */
-std::shared_ptr<log_writer> log_writer::create(bool write_header, bool write_footer)
+std::shared_ptr<log_writer> log_writer::create(const bool& write_header, const bool& write_footer,
+		const pid_type& specific_pid, const std::string& specific_application_name)
 {
 
-	return log_writer::create_from_file_path(default_log_path(), write_header, write_footer);
+	return log_writer::create_from_file_path(
+			default_log_path(specific_pid, specific_application_name), true,
+			write_header, write_footer, specific_pid, specific_application_name);
 
 }
 
 /**
  * Determines the default log path, note that the file path is time dependant and will
  * change with every call made to it.
+ * @param specific_pid specify the PID to create log for (else use self determined pid)
+ * @param specific_application_name specify the application name to create log for (else use self determined name)
  * @returns the suggested log path.
  */
-boost::filesystem::path log_writer::default_log_path()
+boost::filesystem::path log_writer::default_log_path(const pid_type& specific_pid, const std::string& specific_application_name)
 {
 
 	using namespace inglenook::core;
 
 	std::stringstream filename_buffer;
 
+	// determine what PID to use
+	pid_type _pid 	= specific_pid != NO_PID ?
+			specific_pid : application::pid();
+
+	// determine what name to use
+	std::string _name = specific_application_name != "" ?
+			specific_application_name : application::name();
+
 	// todo ild-locate here, for now hard code the inglenook directory
 	filename_buffer << inglenook::directories::log().native() << "/";
 
 	// append the process name
-	filename_buffer << application::name() << "/";
+	filename_buffer << _name << "/";
 
 	// append a reverse time stamp to the pid so file name format becomes
 	// pid_yyyymmdd_hhmmss.xml, as per the specifications. time is UTC.
@@ -121,7 +150,7 @@ boost::filesystem::path log_writer::default_log_path()
 	filename_buffer << boost::posix_time::second_clock::universal_time();
 
 	// get the current process id.
-	filename_buffer << "-" << application::pid();
+	filename_buffer << "-" << _pid;
 
 	// add file extension
 	filename_buffer << ".xml";
@@ -135,10 +164,13 @@ boost::filesystem::path log_writer::default_log_path()
  * @param create If output_file doesn't exist, indicates whether to create it on the fly. Defaults to true.
  * @param write_header indicates if the XML preamble should be written on startup
  * @param write_footer indicates if the XML closure tags should be written on shutdown.
+ * @param specific_pid specify the PID to create log for (else use self determined pid)
+ * @param specific_application_name specify the application name to create log for (else use self determined name)
  */
 std::shared_ptr<log_writer> log_writer::create_from_file_path(
 		const boost::filesystem::path& output_file, const bool& create,
-		bool write_header, bool write_footer)
+		const bool& write_header, const bool& write_footer,
+		const pid_type& specific_pid, const std::string& specific_application_name)
 {
 	try
 	{
@@ -181,7 +213,8 @@ else				// the file does not exist, and we were not instructed to create it.
 			// so attempt to open the specified file path for appending data.
 			return std::shared_ptr<log_writer>(new log_writer(std::shared_ptr<std::ofstream>(
 									new std::ofstream(output_file.native(), std::ios::app)),
-									write_header, write_footer));
+									write_header, write_footer, specific_pid,
+									specific_application_name));
 
 		}
 		catch(boost::exception& ex)
@@ -197,13 +230,16 @@ else				// the file does not exist, and we were not instructed to create it.
 	 * @param output_stream stream to write XML to.
 	 * @param write_header indicates if the XML preamble should be written on startup
 	 * @param write_footer indicates if the XML closure tags should be written on shutdown.
+	 * @param specific_pid specify the PID to create log for (else use self determined pid)
+	 * @param specific_application_name specify the application name to create log for (else use self determined name)
 	 */
 	std::shared_ptr<log_writer> log_writer::create_from_stream(const std::shared_ptr<std::ostream>& output_stream,
-			bool write_header, bool write_footer)
+			const bool& write_header, const bool& write_footer, const pid_type& specific_pid, const std::string& specific_application_name)
 	{
 		// at this point either the log exists, or we are good to create it
 		// so attempt to open the specified file path for appending data.
-		return std::shared_ptr<log_writer>(new log_writer(output_stream, write_header, write_footer));
+		return std::shared_ptr<log_writer>(new log_writer(output_stream, write_header, write_footer,
+				specific_pid, specific_application_name));
 	}
 
 	/**

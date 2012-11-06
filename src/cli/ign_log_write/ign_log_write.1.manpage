@@ -1,0 +1,44 @@
+\." manpage for IGNMAN.NAME
+\." This manpage is part of Project Inglenook (http://www.project-inglenook.co.uk).
+\." Please report errors, typos and any other mistakes on the projects issue tracker.
+.TH IGNMAN.NAME IGNMAN.SECTION "IGNMAN.DATE" "GNU" "Project Inglenook Manual"
+.SH NAME
+.BR "IGNMAN.NAME" " -- facilitates writing of log files from a CLI or script."
+.SH SYNOPSIS
+.B IGNMAN.NAME [OPTIONS] ...
+.SH DESCRIPTION
+.BR "IGNMAN.NAME" " is a tool to create and write log files from the CLI. It main use is logging to the standard Inglenook log format from a shell script."
+.SH OPTIONS
+.TP
+.B "\-c, \-\-create "
+creates a new log transaction for a process with the specific pid and name. this call will return the file name that the log has been created under.
+.TP                        
+.B \-w, \-\-write logpath  message
+message to write to the log file specified by logpath.
+.TP
+.B \-f \-\-finish logpath
+closes the log specified by logpath.
+.TP
+.B \-\-help
+shows the program description and possible command line options.
+.TP
+.B \-\-version
+shows the version number and compiled timestamp.
+.SH EXIT STATUS
+.RB "The " "IGNMAN.NAME" " utility exits 0 on success, and >0 if an error occurs."
+.SH NOTES
+None.
+.SH BUGS
+No known bugs. Report new bugs at: <https://github.com/inglenookians/project-inglenook/issues>
+.SH AUTHOR
+Project Inglenook (http://www.project\-inglenook.co.uk).
+.SH COPYRIGHT
+Copyright \(co 2012, Project Inglenook (http://www.project\-inglenook.co.uk).
+.PP
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+.PP
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
+.SH SEE ALSO
+None.

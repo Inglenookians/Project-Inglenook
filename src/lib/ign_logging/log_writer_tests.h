@@ -83,6 +83,45 @@ BOOST_AUTO_TEST_CASE ( log_writer_tests__ctor_dtor )
 }
 
 //
+// log_writer_tests__ctor_dtor_specific
+// checks construction using specific PID and application names.
+BOOST_AUTO_TEST_CASE ( log_writer_tests__ctor_dtor_specific )
+{
+	// resources
+	const std::string expected_xml_part1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><inglenook-log-file xmlns=\"http://schemas.project-inglenook.co.uk/0.00-DEVELOPMENT/schemas/file-formats/inglenook-log-file.xsd\"><process-id pid=\"";
+	const std::string expected_xml_part2 = "\"><binary-name><![CDATA[";
+	const std::string expected_xml_part3 = "]]></binary-name><binary-version><![CDATA[";
+	const std::string expected_xml_part4 = "]]></binary-version><log-writer-version><![CDATA[v1.0.0000]]></log-writer-version></process-id><log-entries></log-entries></inglenook-log-file>";
+
+	const pid_type application_pid = 1234;
+	const std::string application_name = "test-script-name";
+
+	// create logging interface
+	auto test_stream = std::shared_ptr<std::stringstream>(new std::stringstream());
+	auto _log_writer = log_writer::create_from_stream(test_stream, true, true, application_pid, application_name);
+
+	// ensure all the defaults are exactly what we expected
+	BOOST_CHECK(_log_writer->default_namespace() 	== "inglenook.anonymous");
+	BOOST_CHECK(_log_writer->default_entry_type() 	== category::information);
+	BOOST_CHECK(_log_writer->xml_threshold() 		== category::information);
+	BOOST_CHECK(_log_writer->console_threshold() 	== category::information );
+	BOOST_CHECK(_log_writer->process_name() 		== application_name );
+	BOOST_CHECK(_log_writer->pid() 					== application_pid );
+
+	// store pid for next test (validating XML work) and reset
+	int pid = _log_writer->pid();
+	_log_writer.reset();
+
+	// verify that the logging mechanism started, and closed the file correctly.
+	auto expected_xml = std::shared_ptr<std::stringstream>(new std::stringstream());
+	(*expected_xml.get()) << expected_xml_part1 << application_pid << expected_xml_part2
+			<< application_name << expected_xml_part3 << inglenook::core::application::version() << expected_xml_part4;
+
+	BOOST_CHECK(test_stream->str() == expected_xml->str());
+
+}
+
+//
 // log_writer_tests__assignments
 // These tests ensure that the properties associated with this class function as 
 // advertised, that setting and recalling the properties gives expected results.
@@ -449,10 +488,18 @@ void build_and_check_time(int year, int month, int day, int hour, int minute, in
 // Test that the default log file suggested by the software appears to be correct
 BOOST_AUTO_TEST_CASE ( log_writer_tests__default_log_file )
 {	
+
+	// resources
+	const std::string specific_application = "test-script.sh";
+	const pid_type specific_pid = 1234;
+
 	// initialize the stream writer and clear any pre-amble from the output stream
 	boost::filesystem::path result = log_writer::default_log_path();
 	std::string file_path = result.native();
 	
+	result  = log_writer::default_log_path(specific_pid, specific_application);
+	std::string specific_file_path = result.native();
+
 #if defined(__linux__) || defined(__APPLE__)
 	
 	// setup regex elements to check results.

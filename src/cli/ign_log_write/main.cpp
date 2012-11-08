@@ -23,7 +23,9 @@
 #include <boost/locale.hpp>
 
 // inglenook includes
+#include <ign_core/application.h>
 #include "log_write_exceptions.h"
+#include "version.h"
 
 /**
  * This is the main entry point of the ign_log_write application.
@@ -38,7 +40,36 @@ int main(int arg_c, char* arg_v[])
 	
 	try
 	{
+		
+	    // set the program description.
+	    std::string description(boost::locale::translate("A command line utility for writing Inglenook log files."));
 	
+	    // Create the application store.
+	    inglenook::core::application app(description, VERSION,  __DATE__, __TIME__);
+	    /*
+	    // Create program options...
+	    boost::program_options::options_description creation_options("Log creation options");
+	    boost::program_options::options_description writing_options("Log writing options");
+	    boost::program_options::options_description termination_options("Log writing options");
+	    
+	    
+	    
+	    boost::program_options::options_description options("Program options");
+	    options.add_options()
+			("dir,d", boost::program_options::value<std::string>()->required(),
+	            "REQUIRED: The directory to locate. Available options are:\n\n"
+	            "cli     \tThe location of inglenook's command line tools\n"
+	            "config  \tThe location of inglenook's configuration files\n"
+	            "data    \tThe location of inglenook's data files\n"
+	            "lib     \tThe location of inglenook's internal libraries\n"
+	            "log     \tThe location of inglenook's log files\n"
+	            "sbin    \tThe location of inglenook's system administrator tools\n"
+	            "man     \tThe location of inglenook's manual pages\n"
+	            "tmp     \tThe location of inglenook's temporary files\n"
+	            "user    \tThe location of user's home directory\n")
+	        ("verbose,v", "Detailed output indicate how it came to its conclusion (detailing where it looked to find the directory)")
+	    ;
+	    */
 		// the binary has (for all we know) done its job.
 		success = EXIT_SUCCESS;
 	}

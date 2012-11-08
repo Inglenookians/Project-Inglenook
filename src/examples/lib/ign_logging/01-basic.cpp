@@ -1,5 +1,5 @@
 /*
- * main.cpp: Main software entry point for logging demonstrator.
+ * 01-basic.cpp: Main software entry point for logging demonstrator.
  * Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@
 
 // inglenook includes
 #include <ign_logging/logging.h>	// this header is required for all logging.
+#include "version.h"
 
 /**
  * Main software entry point

@@ -15,8 +15,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef LOG_CLIENT_H_
-#define LOG_CLIENT_H_
+#pragma once
 
 // standard library includes
 #include <iostream>
@@ -187,6 +186,3 @@ public:
 } // namespace inglenook::logging
 
 } // namespace inglenook
-
-#endif /* LOG_CLIENT_H_ */
-

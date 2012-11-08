@@ -15,8 +15,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef LOGGING_H_
-#define LOGGING_H_
+#pragma once
 
 #include "log_client.h"
 #include "log_entry_modifiers.h"
@@ -44,5 +43,3 @@ namespace inglenook
 	}
 
 }
-
-#endif /* LOGGING_H_ */

@@ -16,8 +16,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef LOG_WRITER_H_
-#define LOG_WRITER_H_
+#pragma once
 
 // standard library includes
 #include <ostream>
@@ -238,5 +237,3 @@ class log_writer
 } // namespace inglenook::logging
 
 } // namespace inglenook
-
-#endif /* LOG_WRITER_H_ */

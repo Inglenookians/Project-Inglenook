@@ -16,9 +16,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef LOGGING_LOG_ENTRY_BUFFERED_TESTS_
-#define LOGGING_LOG_ENTRY_BUFFERED_TESTS_
-
+#pragma once
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE LOG_TEST_NAME
@@ -91,5 +89,3 @@ BOOST_AUTO_TEST_CASE ( log_entry_buffered_tests__property_assignments )
 } // namespace inglenook::logging
 
 } // namespace inglenook
-
-#endif // LOGGING_LOG_ENTRY_BUFFERED_TESTS_

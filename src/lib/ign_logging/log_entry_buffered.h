@@ -15,8 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LOG_ENTRY_BUFFERED_H_
-#define LOG_ENTRY_BUFFERED_H_
+#pragma once
 
 // standard library includes
 #include <sstream>
@@ -65,5 +64,3 @@ class log_entry_buffered: public log_entry
 } // namespace inglenook::logging
 
 } // namespace inglenook
-
-#endif /* LOG_ENTRY_BUFFERED_H_ */

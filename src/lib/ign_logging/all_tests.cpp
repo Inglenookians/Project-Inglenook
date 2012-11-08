@@ -15,10 +15,6 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-
-#ifndef LOGGING_TESTS_
-#define LOGGING_TESTS_
-
 // name to apply to all tests
 #define LOG_TEST_NAME ign_logging_tests
 
@@ -35,5 +31,3 @@
 #include "log_entry_modifiers_tests.h"
 #include "log_writer_tests.h"
 #include "log_client_tests.h"
-
-#endif // LOGGING_TESTS_

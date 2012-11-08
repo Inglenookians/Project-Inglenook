@@ -16,8 +16,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef LOG_EXCEPTIONS_H_
-#define LOG_EXCEPTIONS_H_
+#pragma once
 
 // standard library includes
 #include <exception>
@@ -122,5 +121,3 @@ struct log_serialization_exception : virtual log_exception
 } // namespace inglenook::logging
 
 } // namespace inglenook
-
-#endif /* LOG_EXCEPTIONS_H_ */

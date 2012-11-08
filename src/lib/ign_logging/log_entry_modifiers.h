@@ -15,8 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LOG_ENTRY_MODIFIERS_H_
-#define LOG_ENTRY_MODIFIERS_H_
+
+#pragma once
 
 // standard library includes
 #include <string>
@@ -79,5 +79,3 @@ class log_data
 } // namespace inglenook::logging
 
 } // namespace inglenook
-
-#endif /* LOG_ENTRY_MODIFIERS_H_ */

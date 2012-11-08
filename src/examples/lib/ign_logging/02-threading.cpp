@@ -1,5 +1,5 @@
 /*
- * main.cpp: Main software entry point for logging demonstrator.
+ * 02-threading.cpp: Main software entry point for logging demonstrator.
  * Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -29,6 +29,7 @@
 
 // inglenook includes
 #include <ign_logging/logging.h>
+#include "version.h"
 
 /**
  * Log testing thread.

@@ -432,6 +432,7 @@ void build_and_check_time(int year, int month, int day, int hour, int minute, in
 
 		// build a tm struct to check time
 		std::tm timestamp_on_filename;
+		memset(&timestamp_on_filename, 0, sizeof(std::tm));
 		timestamp_on_filename.tm_year = year - 1900;
 		timestamp_on_filename.tm_mon = month - 1;
 		timestamp_on_filename.tm_mday = day;

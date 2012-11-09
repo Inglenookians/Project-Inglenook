@@ -149,36 +149,42 @@ private:
     /// log entry is flushed with lf::end;
 	ts_log_buffer m_buffer;
 
+public:
+
+	// the following overrides exhibit specific behaviour for the inglenook log writer
+	log_client& operator<<(const log_data& _log_data);	// appends data to the log file
+	log_client& operator<<(const ns& _ns);				// sets the current message namespace
+	log_client& operator<<(lf _lf);						// ends the current message and submits it for serialization
+
 	//
 	// THERE IS NOTHING SPECIAL BELOW THIS POINT
 	// just a lot of stream operator overloads that redirect (as various types) to the
 	// log_client::send_to_stream() method above. nothing to see here. move along.
-public:
-    log_client& operator<<(std::streambuf* _streambuf_ptr);
     log_client& operator<<(int _int);
     log_client& operator<<(long _long);
     log_client& operator<<(unsigned long _unsigned_long);
-    log_client& operator<<(bool _bool);
     log_client& operator<<(short _short);
     log_client& operator<<(unsigned short _unsigned_short);
     log_client& operator<<(unsigned int _unsigned_int);
-    log_client& operator<<(char _char);
 #ifdef _GLIBCXX_USE_LONG_LONG
     log_client& operator<<(long long _long_long);
     log_client& operator<<(unsigned long long _unsigned_long_long);
 #endif
     log_client& operator<<(double _double);
+    log_client& operator<<(long double _long_double);
     log_client& operator<<(float _float);
-    log_client& operator<<(const void* _const_void_ptr);
-    log_client& operator<<(const char* _const_char_ptr);
+    log_client& operator<<(char _char);
+    log_client& operator<<(unsigned char _unsigned_char);
+    log_client& operator<<(signed char _signed_char);
+    log_client& operator<<(const signed char* _const_signed_char_ptr);
+    log_client& operator<<(const unsigned char* _const_unsigned_char_ptr);
+    log_client& operator<< (std::streambuf* _streambuf_ptr);
     log_client& operator<<(std::string _string);
-    log_client& operator<<(std::string* _string);
-    log_client& operator<<(std::stringstream _stringstream);
-    log_client& operator<<(lf _lf);
-    log_client& operator<<(const ns& _ns);
-    log_client& operator<<(const log_data& _log_data);
-    log_client& operator<<(std_stream_manipulator _manipulator);
-
+	log_client& operator<<(std::string* _string);
+    // function pointer(s)
+    log_client& operator<< (std::ostream& ( *pf )(std::ostream&));
+    log_client& operator<< (std::ios& ( *pf )(std::ios&));
+    log_client& operator<< (std::ios_base& ( *pf )(std::ios_base&));
     /////////////////////////////////////////////////////////////////
     //
 };

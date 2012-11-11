@@ -1,5 +1,5 @@
 /*
-* log_exceptions.cpp: LogWriter exception constants and structures..
+* log_exceptions.cpp: ign_log_write exception constants and structures..
 * Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
 *
 * This program is free software: you can redistribute it and/or modify
@@ -16,8 +16,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef LOG_EXCEPTIONS_H_
-#define LOG_EXCEPTIONS_H_
+#pragma once
 
 // standard library includes
 #include <exception>
@@ -48,5 +47,3 @@ struct log_write_exception: virtual boost::exception, virtual std::exception
 } // namespace inglenook::logging
 
 } // namespace inglenook
-
-#endif /* LOG_EXCEPTIONS_H_ */

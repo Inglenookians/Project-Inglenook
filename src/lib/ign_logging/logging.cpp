@@ -47,7 +47,7 @@ void initialize_logging(const boost::filesystem::path& log_file)
 	ilog = std::shared_ptr<log_client>(new log_client(log_output));
 }
 
-}
+} // namespace logging
 
-}
 
+} // namespace inglenook

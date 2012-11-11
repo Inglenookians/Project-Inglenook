@@ -1,5 +1,5 @@
 /*
-* logging.h: External interface for client applications. Not use in common logging directly.
+* logging.h: External interface for client applications. Full implementation in common logging.
 * Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
 *
 * This program is free software: you can redistribute it and/or modify
@@ -17,29 +17,55 @@
 */
 #pragma once
 
+// boost (http://boost.org) includes
+#include <boost/filesystem.hpp>
+
+// inglenook includes
+#include "log_writer.h"
 #include "log_client.h"
 #include "log_entry_modifiers.h"
+
+// the following precompiler is designed such that the SHARED definition
+// declarations the appropriate export or import keywords relative the
+// compilation context (ign_logging) will export, others will import.
+// it also defines INITIALIZE_TO which is designed to allow ign_logging
+// to initialize global variables to known values but is ignored by "import-ers".
+#ifndef IGN_LOGGING_LIBRARY
+	#ifdef _WIN32
+		#warning "WIN32 is not supported. Preparing the compiler to cry."
+		#define SHARED extern "C++" __declspec(dllimport)
+	#else
+		#define SHARED extern "C++"
+	#endif
+	#define INITIALIZE_TO(x) /* do nothing */
+#else
+	#ifdef _WIN32
+		#warning "WIN32 is not supported. Preparing the compiler to cry."
+		#define SHARED __declspec(dllexport)
+	#else
+		#define SHARED
+	#endif
+	#define INITIALIZE_TO(x) =(x)
+#endif
 
 namespace inglenook
 {
 
-	namespace
-	{
+namespace logging
+{
 
-	#ifndef INGLENOOK_LOG_FILE
+	// initializes the logging system
+	SHARED void initialize_logging();
 
-		/// create the log writer (used by most applications).
-		auto log_output = logging::log_writer::create();
+	// initializes the logging system with a define file path
+	SHARED void initialize_logging(const boost::filesystem::path& log_file);
 
-	#else
+	/// log output interface - default serialization object.
+	SHARED std::shared_ptr<log_writer> log_output INITIALIZE_TO(nullptr);
 
-		/// create the log writer (used by most applications).
-		auto log_output = logging::log_writer::create_from_file_path( (INGLENOOK_LOG_FILE) );
+	/// log client interface - provides stream access to log writing.
+	SHARED std::shared_ptr<log_client> ilog INITIALIZE_TO(nullptr);
 
-	#endif
+} // namespace logging
 
-		/// thread safe logging interface.
-		logging::log_client ilog(log_output);
-	}
-
-}
+} // namespace inglenook

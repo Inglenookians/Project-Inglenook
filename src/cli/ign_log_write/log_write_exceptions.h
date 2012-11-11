@@ -34,6 +34,12 @@ namespace logging
 /// base of all logging exceptions
 const unsigned long module_error_base = 0xff10000;
 
+/// an action expected a parameter that wasn't provided.
+const unsigned long log_write_exception_missing_argument = module_error_base + 0x01;
+
+/// argument that was expected, but not provided.
+typedef boost::error_info<struct __expected_argument, std::string> expected_argument;
+
 //
 // log_write_exception
 // Standard base exception for all exceptions thrown by ign_log_write.
@@ -41,6 +47,16 @@ struct log_write_exception: virtual boost::exception, virtual std::exception
 {/// provides a boiler plate explanation of the exception.
    const char* what() const throw() {
 	   return boost::locale::translate("Unhandled exception in CLI log writer (ign_log_write)").str().c_str();
+   }
+};
+
+//
+// log_write_exception
+// Standard base exception for all exceptions thrown by ign_log_write.
+struct action_required_arguments_missing: virtual log_write_exception
+{/// provides a boiler plate explanation of the exception.
+   const char* what() const throw() {
+	   return boost::locale::translate("An argument required by this action was not specified.").str().c_str();
    }
 };
 

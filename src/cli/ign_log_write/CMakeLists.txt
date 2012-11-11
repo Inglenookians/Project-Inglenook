@@ -20,6 +20,7 @@
 add_executable(
 	ign_log_write
 	main.cpp
+	log_write_actions.cpp
 )
 
 # Link to required libraries
@@ -42,4 +43,29 @@ add_dependencies(ign_log_write ign_log_write_version)
 install(
 	TARGETS ign_log_write 
 	DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
+)
+
+#########
+# Tests #
+#########
+
+# Make the test.
+add_executable(
+	ign_log_write_tests 
+	tests.cpp
+	log_write_actions.cpp
+)
+
+# Link to required libraries
+target_link_libraries(
+	ign_log_write_tests
+	ign_logging
+	boost_unit_test_framework
+	boost_regex
+) 
+
+# Add the test.
+add_test(
+	NAME ign_log_write_tests
+	COMMAND ign_log_write_tests
 )

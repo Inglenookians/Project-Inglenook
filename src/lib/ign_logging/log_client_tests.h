@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE ( log_client_tests__stream )
 
 	{ //scoping to discard log_client when done and check results
 
-		auto _log_writer = log_writer::create_from_stream(test_stream);
+		auto _log_writer = log_writer::create_from_stream(test_stream, false, false);
 		log_client _log_client(_log_writer);
 
 		/////////////////////////////////
@@ -215,7 +215,8 @@ BOOST_AUTO_TEST_CASE ( log_client_tests__stream )
 		BOOST_CHECK(_log_client.buffer()->log_namespace() == second_log_namespace);
 
 		// try to ensure that the log writer has chance to write anything it feels it should
-		boost::this_thread::yield(); BOOST_CHECK(test_stream->str().length() == 0);
+		boost::this_thread::yield(); boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+		BOOST_CHECK(test_stream->str().length() == 0);
 
 		// check flush operator
 		_log_client << lf::end;

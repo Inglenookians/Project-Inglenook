@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE ( log_writer_tests__assignments )
 	
 	// create a writer, operating on a defined stream.
 	auto test_stream = std::shared_ptr<std::stringstream>(new std::stringstream());
-	auto _log_writer = log_writer::create_from_stream(test_stream);
+	auto _log_writer = log_writer::create_from_stream(test_stream, false, false);
 	
 	// reset the test stream
 	test_stream->str(std::string());
@@ -169,6 +169,7 @@ BOOST_AUTO_TEST_CASE ( log_writer_tests__assignments )
 	_log_writer->console_threshold(category::fatal);		BOOST_CHECK(_log_writer->console_threshold() == category::fatal);
 	
 	// nothing should have been written to the stream during this test
+	boost::this_thread::yield(); boost::this_thread::sleep(boost::posix_time::milliseconds(10));
 	BOOST_CHECK(test_stream->str() == "");
 	
 }
@@ -470,6 +471,7 @@ void build_and_check_time(int year, int month, int day, int hour, int minute, in
 
 		// build a tm struct to check time
 		std::tm timestamp_on_filename;
+		memset(&timestamp_on_filename, 0, sizeof(std::tm));
 		timestamp_on_filename.tm_year = year - 1900;
 		timestamp_on_filename.tm_mon = month - 1;
 		timestamp_on_filename.tm_mday = day;

@@ -28,6 +28,7 @@ add_library(
 	log_entry_buffered.cpp
 	log_entry.cpp
 	log_writer.cpp
+	logging.cpp
 )
 
 # Link to required libraries
@@ -44,6 +45,7 @@ set_target_properties(
 	ign_logging PROPERTIES
 	VERSION 0.0.1
 	SOVERSION 1
+	COMPILE_FLAGS -DIGN_LOGGING_LIBRARY
 )
 
 # Specify the install location.

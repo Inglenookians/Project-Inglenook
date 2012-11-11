@@ -45,21 +45,21 @@ void loud_thread(int id, int no_outputs)
 	using namespace inglenook;
 
 	// change the thread specific default category to warning.
-	ilog.default_entry_type(category::warning);
+	ilog->default_entry_type(category::warning);
 
 	// notify caller that we have started.
-	ilog.info() << "thread #" << id << " started." << lf::end;
+	ilog->info() << "thread #" << id << " started." << lf::end;
 
 	// spam a few messages out to the log.
 	for(int i = 0; i < no_outputs; i++)
 	{
 		// write the message, lots of places for bad thread safety to show...
-		ilog << "this is message #" << (i+1) << " of " <<
+		*ilog << "this is message #" << (i+1) << " of " <<
 				no_outputs << " from thread " << id << lf::end;
 	}
 
 	// notify thread complete
-	ilog.info() << "thread #" << id
+	ilog->info() << "thread #" << id
 			<< " has completed!" << lf::end;
 
 }
@@ -84,6 +84,11 @@ int main(int arg_c, char* arg_v[])
 	const int NO_THREADS = 55; // more threads than queue space
 	const int NO_MESSAGES = 100; // lots of messages...
 
+	// every application that requires logging, or that uses libraries that utilize logging must first call
+	// initialize logging. it is the applications responsibility to do this, and it should be done as soon
+	// as possible to ensure it is available.
+	initialize_logging();
+
 	// thread collection
 	std::shared_ptr<boost::thread> threads[NO_THREADS];
 
@@ -91,9 +96,9 @@ int main(int arg_c, char* arg_v[])
 	log_output->default_namespace("inglenook.logging.example");
 
 	// print out a small introduction block...
-	ilog.info()  << "This is an example of logging; and is for demonstration purposes.";
-	ilog << std::endl;
-	ilog	 << "This demo shows the expected use of the inglenook logging and output mechanism (inglenook::ilog)"                     << std::endl
+	ilog->info()  << "This is an example of logging; and is for demonstration purposes.";
+	*ilog 																																   << std::endl;
+	*ilog	 << "This demo shows the expected use of the inglenook logging and output mechanism (inglenook::ilog)"                         << std::endl
 				 << "Its is also a test of thread safety and severe load conditions."                                                      << std::endl
 				 << "Launching "  << NO_THREADS << " threads / " << NO_MESSAGES    << "message per thread" 								   << std::endl
 				 << "================================================================================================"                     << std::endl
@@ -112,6 +117,6 @@ int main(int arg_c, char* arg_v[])
 		threads[i]->join();
 
 	// indicate end of main to ensure all log messages are flushed..
-	ilog.info() << "The main() method has ended." << lf::end;
+	ilog->info() << "The main() method has ended." << lf::end;
 
 }

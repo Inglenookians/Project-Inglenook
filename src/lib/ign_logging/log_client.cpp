@@ -153,7 +153,6 @@ template <class type> log_client& log_client::send_to_stream(type& x)
 	// push element in the message stream
 	(m_buffer->get()->message_buffer()) << x;
 
-	//std::cout << m_buffer.get()->message->str();
 	return *this;
 }
 
@@ -290,14 +289,14 @@ log_client& log_client::operator<<(lf _lf)
 // just a lot of stream operator overloads that redirect (as various types) to the
 // log_client::send_to_stream() method above. nothing to see here. move along.
 ////////////////////////////////////////////////////////////////////////////////////////
+log_client& log_client::operator<<(int _int)
+{ return send_to_stream(_int) ;}
+
 log_client& log_client::operator<<(long _long)
 { return send_to_stream(_long) ;}
 
 log_client& log_client::operator<<(unsigned long _unsigned_long)
 { return send_to_stream(_unsigned_long) ;}
-
-log_client& log_client::operator<<(bool _bool)
-{ return send_to_stream(_bool) ;}
 
 log_client& log_client::operator<<(short _short)
 { return send_to_stream(_short) ;}
@@ -305,14 +304,8 @@ log_client& log_client::operator<<(short _short)
 log_client& log_client::operator<<(unsigned short _unsigned_short)
 { return send_to_stream(_unsigned_short) ;}
 
-log_client& log_client::operator<<(int _int)
-{ return send_to_stream(_int) ;}
-
 log_client& log_client::operator<<(unsigned int _unsigned_int)
 { return send_to_stream(_unsigned_int) ;}
-
-log_client& log_client::operator<<(char _char)
-{ return send_to_stream(_char) ;}
 
 #ifdef _GLIBCXX_USE_LONG_LONG
 
@@ -327,32 +320,44 @@ log_client& log_client::operator<<(unsigned long long _unsigned_long_long)
 log_client& log_client::operator<<(double _double)
 { return send_to_stream(_double) ;}
 
+log_client& log_client::operator<<(long double _long_double)
+{ return send_to_stream(_long_double) ; }
+
 log_client& log_client::operator<<(float _float)
 { return send_to_stream(_float) ;}
 
-log_client& log_client::operator<<(std::streambuf* _streambuf_ptr)
-{ return send_to_stream(_streambuf_ptr) ;}
+log_client& log_client::operator<<(char _char)
+{ return send_to_stream(_char) ;}
+
+log_client& log_client::operator<<(unsigned char _unsigned_char)
+{ return send_to_stream(_unsigned_char) ;}
+
+log_client& log_client::operator<<(signed char _signed_char)
+{ return send_to_stream(_signed_char) ;}
+
+log_client& log_client::operator<<(const signed char* _const_signed_char_ptr)
+{ return send_to_stream(_const_signed_char_ptr) ;}
+
+log_client& log_client::operator<<(const unsigned char* _const_unsigned_char_ptr)
+{ return send_to_stream(_const_unsigned_char_ptr) ;}
 
 log_client& log_client::operator<<(std::string _string)
 { return send_to_stream(_string) ;}
 
-log_client& log_client::operator<<(const void* _const_void_ptr)
-{ return send_to_stream(_const_void_ptr) ;}
-
-log_client& log_client::operator<<(const char* _const_char_ptr)
-{ return send_to_stream(_const_char_ptr); }
-
 log_client& log_client::operator<<(std::string* _string_ptr)
 { return send_to_stream(_string_ptr) ;}
 
-log_client& log_client::operator<<(std::stringstream _stringstream)
-{ return send_to_stream(_stringstream) ;}
+log_client& log_client::operator<< (std::streambuf* _streambuf_ptr)
+{ return send_to_stream(_streambuf_ptr) ;}
 
-log_client& log_client::operator<<(std_stream_manipulator _manipulator)
-{ return send_to_stream(_manipulator) ;}
+log_client& log_client::operator<< (std::ostream& ( *pf )(std::ostream&))
+{ return send_to_stream(pf) ;}
 
+log_client& log_client::operator<< (std::ios& ( *pf )(std::ios&))
+{ return send_to_stream(pf) ;}
 
-
+log_client& log_client::operator<< (std::ios_base& ( *pf )(std::ios_base&))
+{ return send_to_stream(pf) ;}
 ////////////////////////////////////////////////////////////////////////////////////////
 // end of the operator overload block
 //

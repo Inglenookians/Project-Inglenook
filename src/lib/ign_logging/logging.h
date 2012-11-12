@@ -37,7 +37,6 @@
 	#else
 		#define SHARED extern "C++"
 	#endif
-	#define INITIALIZE_TO(x) /* do nothing */
 #else
 	#ifdef _WIN32
 		#warning "WIN32 is not supported. Preparing the compiler to cry."
@@ -45,7 +44,6 @@
 	#else
 		#define SHARED
 	#endif
-	#define INITIALIZE_TO(x) =(x)
 #endif
 
 namespace inglenook
@@ -55,16 +53,16 @@ namespace logging
 {
 
 	// initializes the logging system
-	SHARED void initialize_logging();
+	void initialize_logging();
 
 	// initializes the logging system with a define file path
-	SHARED void initialize_logging(const boost::filesystem::path& log_file);
+	void initialize_logging(const boost::filesystem::path& log_file);
 
 	/// log output interface - default serialization object.
-	SHARED std::shared_ptr<log_writer> log_output INITIALIZE_TO(nullptr);
+	SHARED std::shared_ptr<log_writer> log_output;
 
 	/// log client interface - provides stream access to log writing.
-	SHARED std::shared_ptr<log_client> ilog INITIALIZE_TO(nullptr);
+	SHARED std::shared_ptr<log_client> ilog;
 
 } // namespace logging
 

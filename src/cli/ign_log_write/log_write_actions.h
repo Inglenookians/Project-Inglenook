@@ -17,7 +17,11 @@
 */
 #pragma once
 
+// standard library includes
 #include <string>
+
+// boost (http://boost.org) includes
+#include <boost/program_options.hpp>
 
 namespace inglenook
 {
@@ -51,6 +55,8 @@ enum log_write_action : unsigned int
 
 // parses an action string and returns the corresponding action
 log_write_action parse_action(const std::string& action_string);
+
+//void create_log_file(boost::program_options arguments);
 
 } // namespace logging
 

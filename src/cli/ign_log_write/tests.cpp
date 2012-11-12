@@ -84,6 +84,35 @@ BOOST_AUTO_TEST_CASE ( log_write_tests__parsing_action )
 		
 }
 
+/**
+ * Adds an argument to the specified program options object.
+ * @params arguments arguments collection to add argument to.
+ * @params argument argument to add.
+ * @params value value of argument..
+ */
+template <class T> void add_argument(boost::program_options::variables_map& arguments, std::string argument, T value)
+{
+	// add the argument to the collection
+	arguments.insert(  
+		std::pair<std::string, boost::program_options::variable_value>(
+			argument, boost::program_options::variable_value( boost::any(value), false )
+		)
+	);
+			
+}
+
+//
+// log_write_tests__parsing_action
+// ensures that the library is correctly parsing the action command
+BOOST_AUTO_TEST_CASE ( log_write_tests__invoking_actions )
+{
+	
+	boost::program_options::variables_map commandline_arguments;
+	add_argument<std::string>(commandline_arguments, "action", "bad");
+		
+	
+}
+
 } // namespace inglenook::logging
 
 } // namespace inglenook

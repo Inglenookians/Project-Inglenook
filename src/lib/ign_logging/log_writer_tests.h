@@ -248,8 +248,7 @@ void run_writer(std::shared_ptr<log_entry> _log_entry,
 	console_cout_out = test_console_cout_stream->str();
 	console_cerr_out = test_console_cerr_stream->str();
 	xml_out = test_xml_stream->str();
-	std::cout.rdbuf(cout_buffer);
-	std::cerr.rdbuf(cerr_buffer);
+
 }
 	
 /**
@@ -427,7 +426,7 @@ int time_delta_in_seconds(std::tm& check_date)
 	time_t now = time(0);
 	std::tm* timestamp_for_gmt = std::gmtime(&now);
 			
-	// we are about to use mktime, which is akward.
+	// we are about to use mktime, which is akward. make sure the time zone is checked
 	auto environment_timezone = getenv("TZ");
 	setenv("TZ", "", 1);
 	tzset();

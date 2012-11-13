@@ -1,5 +1,5 @@
 /*
-* all_tests.h: Runs all logging tests to make sure the logging mechanism is working
+* all_tests.cpp: Runs all logging tests to make sure the logging mechanism is working
 * Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
 *
 * This program is free software: you can redistribute it and/or modify

@@ -256,6 +256,7 @@ else				// the file does not exist, and we were not instructed to create it.
 	{
 
 		bool entry_scheduled = false;
+		bool attempt_to_wake_serializer = false;
 
 		// make sure there is a message
 		if(entry->message().length() > 0)
@@ -281,14 +282,10 @@ else				// the file does not exist, and we were not instructed to create it.
 
 					bool boolean_queue = true;
 
-					// if the queue is empty
-					if(m_log_serialization_queue->empty())
-					{
-						// acquire the queue notification mutex
-						boost::mutex::scoped_lock lock_notify((*m_log_serialization_element_queuing_mutex.get()));
-						m_log_serialization_element_queuing.notify_all();
-					}
-					// else we'll attempt to schedule based on the queue size
+					// if the queue is empty, flag that we want to poke the serializer.
+					if(m_log_serialization_queue->empty()) attempt_to_wake_serializer = true;
+
+					// else we can only attempt to serialize if the queue is empty
 					else boolean_queue = !m_log_serialization_queue->full();
 
 					// make sure the queue isn't full
@@ -301,8 +298,7 @@ else				// the file does not exist, and we were not instructed to create it.
 					}
 
 					//
-					// the queue is full. yield time slice to let other threads do some work
-					// (most importantly the log writer thread!).
+					// the queue is full. wait on a notification from the serializer to proceed (or retry in RESCHEDULE_MAX_RETRY_DELAY milliseconds).
 					m_log_serialization_element_serialized.timed_wait(lock_queue, timeout_ms(RESCHEDULE_MAX_RETRY_DELAY));
 				}
 
@@ -316,6 +312,15 @@ else				// the file does not exist, and we were not instructed to create it.
 				std::cerr << "WARNING: failed to schedule log entry." << std::endl;
 			}
 
+		}
+
+		// check if we should attempt to poke the serializer
+		// (entry_scheduled should always true if attempt_to_wake_serializer is, but just in case).
+		if(entry_scheduled && attempt_to_wake_serializer)
+		{
+			// acquire the queue notification mutex
+			boost::mutex::scoped_lock lock_notify((*m_log_serialization_element_queuing_mutex.get()));
+			m_log_serialization_element_queuing.notify_all();
 		}
 
 		// return result
@@ -463,8 +468,6 @@ else				// the file does not exist, and we were not instructed to create it.
 				lock_shutdown.unlock();
 
 				// we are idle, nothing to do so sleep for a bit. siesta!
-				// (I envisage, just waiting around for a few ms to be more efficient than blocking the thread
-				// on a conditional variable and notifying it when the queue has some new contents to process).
 				m_log_serialization_element_queuing.timed_wait(lock_item_waiting, timeout_ms(SERIALIZER_IDLE_TIMEOUT));
 
 			}

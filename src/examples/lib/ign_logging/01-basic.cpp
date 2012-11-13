@@ -41,15 +41,15 @@ int main(int arg_c, char* arg_v[])
 	initialize_logging();
 
 	// the easiest way to use the logging system is to use the stream operators.
-	ilog->info() << "Hello World" << lf::end;
+	log_info() << "Hello World" << lf::end;
 
 	// note in the above line we are writing to the standard information log. in addition,
 	// you can write to the follow other log types
-	ilog->debug() 	<< "Debugging messages should be written to debug()" 		<< lf::end;
-	ilog->trace() 	<< "Verbose messages should be written to trace()" 			<< lf::end;
-	ilog->warning() 	<< "Warning messages should be written to warning()" 		<< lf::end;
-	ilog->error() 	<< "Non-fatal error messages should be written to error()" 	<< lf::end;
-	ilog->fatal()	<< "Fatal error messages should be written to fatal()" 		<< lf::end;
+	log_debug()		<< "Debugging messages should be written to log_debug()" 		<< lf::end;
+	log_trace() 	<< "Verbose messages should be written to log_trace()" 			<< lf::end;
+	log_warning() 	<< "Warning messages should be written to log_warning()" 		<< lf::end;
+	log_error() 	<< "Non-fatal error messages should be written to log_error()" 	<< lf::end;
+	log_fatal()		<< "Fatal error messages should be written to log_fatal()" 		<< lf::end;
 
 	// IMPORTANT: be aware that the logs are filtered, as such despite all the above messages
 	//   being sent to the log manager, they may not be actually written to disk, or displayed
@@ -59,9 +59,9 @@ int main(int arg_c, char* arg_v[])
 	// All messages are finished with an lf::end, this means you can break entries up over lines.
 	// (note: this is thread safe, no additional thread safety work is required on your behalf).
 	int a = 1, b = 2;
-	ilog->info() << "The value of a + b is ";
+	log_info() << "The value of a + b is ";
 	int c = a + b;
-	*ilog << c << lf::end;
+	log() << c << lf::end;
 
 	// Note: when we write the answer to the log (the c variable), because the category is already
 	//    set to info() we do not need to specify this again.
@@ -72,13 +72,13 @@ int main(int arg_c, char* arg_v[])
 
 	// you can also use this behaviour to change the log category, the following message will be
 	// written to the log as an error entry because the last write was to the error category.
-	ilog->info() << "Attempting to remove cute from Kittens: ";
-	ilog->error() << "Don't be ridiculous" << lf::end;
+	log_info() << "Attempting to remove cute from Kittens: ";
+	log_error() << "Don't be ridiculous" << lf::end;
 
 	// every message we have written has not been namespaced. inglenook groups messages in namespaces
 	// to help group associated logs. We can specify the namespace of an log entry with the ns()
 	// stream manipulator. The following example writes to the examples.logging.01 namespace
-	ilog->info() << ns("examples.logging.01") << "A well mannered \"Hello World\"" << lf::end;
+	log_info() << ns("examples.logging.01") << "A well mannered \"Hello World\"" << lf::end;
 
 	// obviously, this will get tedious if we do this on every message, most functionality should
 	// be grouped within a given context. As such we can set a default namespace with:
@@ -102,7 +102,7 @@ int main(int arg_c, char* arg_v[])
 
 	// finally, sometimes it is nice to attach a little more context to a log. To support this we have
 	// the log_data() stream manipulator.
-	ilog->warning() << "This is a 'levels of something' warning!"
+	log_warning() << "This is a 'levels of something' warning!"
 				   << log_data("level of something", "17,000")
 				   << log_data("acceptable level",   "15,000")
 				   << lf::end;

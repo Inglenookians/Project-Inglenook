@@ -178,7 +178,7 @@ log_client& log_client::create_log_stream(category _category)
  * Gets the internal log entry buffer.
  * @returns  internal log entry buffer.
  */
-log_buffer log_client::buffer()
+log_buffer& log_client::buffer()
 {
 	check_buffer();
 	return *m_buffer.get();

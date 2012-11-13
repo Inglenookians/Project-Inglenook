@@ -68,7 +68,7 @@ log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream, bool 
 	{
 
 	// check the output streams health
-	if (m_output_stream == nullptr || m_output_stream->fail()) {
+	if (m_output_stream != nullptr && m_output_stream->fail()) {
 		BOOST_THROW_EXCEPTION(failed_to_create_log_exception()
 				<< inglenook_error_number(log_exception_bad_stream));
 	}
@@ -411,8 +411,8 @@ else				// the file does not exist, and we were not instructed to create it.
 			BOOST_THROW_EXCEPTION( log_serialization_exception()
 					<< inglenook_error_number(unable_to_aquire_queue_notification_lock) );
 
-			// start the log file.
-			if(m_write_header) write_xml_header();
+			// start the log file if required.
+			if(m_write_header && m_output_stream) write_xml_header();
 
 			while(true)
 			{
@@ -432,7 +432,7 @@ else				// the file does not exist, and we were not instructed to create it.
 					   entry->log_namespace().length() > 0 &&
 					   entry->message().length() > 0)
 					{
-						if(entry->entry_type() >= xml_threshold())
+						if(entry->entry_type() >= xml_threshold() && m_output_stream)
 							_log_serialization_worker_serialize(entry);
 
 						if(entry->entry_type() >= console_threshold())
@@ -485,7 +485,7 @@ else				// the file does not exist, and we were not instructed to create it.
 		try
 		{
 			// if the header is set to be written.
-			if(m_write_footer)
+			if(m_write_footer && m_output_stream)
 			{
 				(*m_output_stream.get()) << "</log-entries>";
 				(*m_output_stream.get()) << "</inglenook-log-file>";

@@ -168,7 +168,7 @@ void run_writer(std::shared_ptr<log_entry> _log_entry,
 				const category& xml_filter, const category& console_filter, const std::string& default_namespace,
 				std::string& xml_out, std::string& console_cout_out, std::string& console_cerr_out)
 {
-	
+
 	// initialize the stream writer and clear any pre-amble from the output stream
 	auto test_xml_stream = std::shared_ptr<std::stringstream>(new std::stringstream());
 	auto _log_writer = log_writer::create_from_stream(test_xml_stream, false, false);
@@ -189,7 +189,7 @@ void run_writer(std::shared_ptr<log_entry> _log_entry,
 	// setup scoped exit to ensure we reset std::cout
 	BOOST_SCOPE_EXIT( (&cout_buffer) (&cerr_buffer))
 	{	std::cout.rdbuf(cout_buffer);
-		std::cout.rdbuf(cerr_buffer);
+		std::cerr.rdbuf(cerr_buffer);
 	} 	BOOST_SCOPE_EXIT_END
 	
 	// ensure we are running no output yet

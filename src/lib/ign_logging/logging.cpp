@@ -16,6 +16,9 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+// boost (http://boost.org) includes
+#include <boost/locale.hpp>
+
 // inglenook includes
 #include "logging.h"
 
@@ -39,15 +42,121 @@ void initialize_logging()
 /**
  * Initializes the logging system using a specific file path
  * Initializes logging, emmiting log entries to the specified log file.
+ * @params log_file path to the file in which to store logs. Will be created if does not exist.
  */
 void initialize_logging(const boost::filesystem::path& log_file)
 {
 	// create global variables and output appropriately.
-	log_output = log_writer::create_from_file_path( (log_file) );
+	log_output = log_writer::create_from_file_path( log_file );
 	ilog = std::shared_ptr<log_client>(new log_client(log_output));
+}
+
+/**
+ * Initializes the logging system as "off-the-record"
+ * This intialization method creates a new logging interface that does not write permanent files.
+ */
+void initialize_logging_off_record()
+{
+	// create global variables and output appropriately.
+	log_output = log_writer::create_from_stream( nullptr );
+	ilog = std::shared_ptr<log_client>(new log_client(log_output));
+}
+
+/**
+ * Checks if the logging system is initialized and provides just-in-time initialization.
+ * @params warning indicates if the fallback warning should be shown if just-in-time initialization was required.
+ */
+void logging_initialization_check(const bool& warning)
+{
+
+	// check if logging is properly instanciated.
+	if(log_output == nullptr || ilog == nullptr)
+	{
+		// create fallback logger - do not assume we have disk access.
+		initialize_logging_off_record();
+
+		// check if this fail-safe is silent.
+		if(warning)
+		{
+			// warn implementors that an automatic check just saved them. if you want basic logging no file - call  initialize_logging_off_record() yourself.
+			log_warning() << boost::locale::translate("WARNING: use of inglenook logging prior to initialization. an off-the-record logging mechanism has been") << std::endl;
+			log_warning() << boost::locale::translate("         initialized on your behalf, its strongly recommended you do this yourself.") << lf::end;
+		}
+
+	}
+
+}
+
+/**
+ * Sets the specified category on the log stream and returns the default log interface.
+ * @param new_value new category to assign the writer.
+ * @returns default logging interface.
+ */
+log_client& set_category_and_return(const category& new_value)
+{
+	logging_initialization_check();
+	ilog->buffer()->entry_type(new_value);
+	return *ilog;
+}
+
+/**
+ * Continues an existing log entry.
+ */
+log_client& log()
+{
+	logging_initialization_check();
+	return *ilog;
+}
+
+/**
+ * Continues an existing log entry, switching context to debug.
+ */
+log_client& log_debug()
+{
+	return set_category_and_return(category::debugging);
+}
+
+/**
+ * Continues an existing log entry, switching context to trace.
+ */
+log_client& log_trace()
+{
+	return set_category_and_return(category::verbose);
+}
+
+/**
+ * Continues an existing log entry, switching context to information.
+ */
+log_client& log_info()
+{
+	return set_category_and_return(category::information);
+}
+
+/**
+ * Continues an existing log entry, switching context to warning.
+ */
+log_client& log_warning()
+{
+	return set_category_and_return(category::warning);
+}
+
+/**
+ * Continues an existing log entry, switching context to error.
+ */
+log_client& log_error()
+{
+	return set_category_and_return(category::error);
+}
+
+/**
+ * Continues an existing log entry, switching context to fatal.
+ */
+log_client& log_fatal()
+{
+	return set_category_and_return(category::fatal);
 }
 
 } // namespace logging
 
-
 } // namespace inglenook
+

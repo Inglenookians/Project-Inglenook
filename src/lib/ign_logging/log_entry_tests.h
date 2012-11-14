@@ -1,5 +1,5 @@
 /*
-* logging_entry_tests.h: Test routines for the log_entry class (log_entry.cpp/h)
+* log_entry_tests.h: Test routines for the log_entry class (log_entry.cpp/h)
 * Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
 *
 * This program is free software: you can redistribute it and/or modify

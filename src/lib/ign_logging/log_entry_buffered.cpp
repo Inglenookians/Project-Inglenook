@@ -1,5 +1,5 @@
 /*
- * log_entry_unbuffered.h: Represents a single, buffered, log entry.
+ * log_entry_unbuffered.cpp: Represents a single, buffered, log entry.
  * Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -65,6 +65,7 @@ std::stringstream& log_entry_buffered::message_buffer()
  */
 const std::string& log_entry_buffered::message()
 {
+	// update the underlying buffer, and return as if a normal log_entry
 	log_entry::message(std::string(m_message_buffer.str()));
 	return log_entry::message();
 }

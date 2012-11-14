@@ -58,6 +58,33 @@ namespace logging
 	// initializes the logging system with a define file path
 	void initialize_logging(const boost::filesystem::path& log_file);
 
+	/// creates an "off-the-record" logger (console only).
+	void initialize_logging_off_record();
+
+	/// checks if the logging structures are intialized.
+	void logging_initialization_check(const bool& warning = true);
+
+    /// Continues an existing log entry.
+	log_client& log();
+
+	/// Continues an existing log entry, switching context to debug.
+    log_client& log_debug();
+
+    /// Continues an existing log entry, switching context to trace.
+    log_client& log_trace();
+
+    /// Continues an existing log entry, switching context to info.
+    log_client& log_info();
+
+    /// Continues an existing log entry, switching context to warning.
+    log_client& log_warning();
+
+    /// Continues an existing log entry, switching context to error.
+    log_client& log_error();
+
+    /// Continues an existing log entry, switching context to fatal.
+    log_client& log_fatal();
+
 	/// log output interface - default serialization object.
 	SHARED std::shared_ptr<log_writer> log_output;
 

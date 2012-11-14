@@ -44,6 +44,17 @@ class ns
 			m_ns = value;
 		}
 
+		/**
+		 * log namespace to apply
+		 * @return log namespace
+		 */
+
+		const std::string& log_namespace() const
+		{
+			return m_ns;
+		}
+
+	private:
 		/// the name space to apply
 		std::string m_ns;
 
@@ -67,6 +78,29 @@ class log_data
 			m_value = value;
 			m_key = key;
 		}
+
+
+		/**
+		 * Key of data pair
+		 * @return Data pairs key
+		 */
+		const std::string& key() const
+		{
+			return m_key;
+		}
+
+
+		/**
+		 * Value of data pair
+		 * @return Data pairs value
+		 */
+		const std::string& value() const
+		{
+			return m_value;
+		}
+
+
+	private:
 
 		/// the key of the data
 		std::string m_key;

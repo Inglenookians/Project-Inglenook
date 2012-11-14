@@ -92,10 +92,10 @@ class log_writer
 		///   you probably shouldn't be calling it directly anyhow.
 		bool add_entry(std::shared_ptr<log_entry>& entry);
 
-		/// gets the current process id.
+		/// gets the current process id  (or id of process we are logging on behalf of).
 		const pid_type pid() const;
 
-		/// gets the current process name (or name of process we are logging on behalf of)
+		/// gets the current process name (or name of process we are logging on behalf of).
 		const std::string process_name() const;
 
 		// gets the default name space
@@ -204,11 +204,11 @@ class log_writer
 
 
 
-		/// current process id
-		pid_type m_process_id;
+		/// current process id (as defined during construction).
+		const pid_type m_process_id;
 
-		/// process name (as defined during construction)
-		std::string m_process_name;
+		/// process name (as defined during construction).
+		const std::string m_process_name;
 
 		/// output stream to write log messages to
 		std::shared_ptr<std::ostream> m_output_stream;

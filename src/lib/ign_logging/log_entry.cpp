@@ -151,7 +151,9 @@ void log_entry::extended_data(const std::string& key, const std::string& value)
 
 		// and on success remove it.
 		if(iterator != m_extended.end())
+		{
 			m_extended.erase(iterator);
+		}
 	}
 }
 

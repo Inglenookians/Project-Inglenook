@@ -1,5 +1,5 @@
 /*
-* log_entry_buffered.h: Test routines for the log_entry_buffered class (log_entry_buffered.cpp/h)
+* log_entry_buffered_tests.h: Test routines for the log_entry_buffered class (log_entry_buffered.cpp/h)
 * Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
 *
 * This program is free software: you can redistribute it and/or modify

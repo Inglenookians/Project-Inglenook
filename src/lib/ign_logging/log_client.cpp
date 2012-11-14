@@ -62,19 +62,37 @@ void log_client::initialize_buffer()
  */
 void log_client::check_buffer()
 {
-	// if the buffer has not been initialized for this thread then initialize it.
-	if (m_buffer.get() == nullptr) initialize_buffer();
+	// if the buffer has not been initialized for this thread...
+	if (m_buffer.get() == nullptr)
+	{
+		// ...  then initialize it.
+		initialize_buffer();
+	}
 }
 
 /**
- * Gets the value for the default event type for this thread.
+ * Gets the value for the default log namespace for this thread.
  * @returns value of the property
  */
 const std::string& log_client::default_namespace() const
 {
-	// check if a default is set, else fall back to writers.
-	return (m_ts_default_namespace.get() != nullptr) ?
-		*m_ts_default_namespace : m_output_interface->default_namespace();
+
+	//
+	// don't like multiple returns, but dont want to create
+	// local - as this can't be safely used as out by ref.
+
+	// check if a class level override exists...
+	if (m_ts_default_namespace.get() != nullptr)
+	{
+		// .. and if so use it.
+		return *m_ts_default_namespace;
+	}
+	else
+	{
+		// .. else return the default value
+		return m_output_interface->default_namespace();
+	}
+
 }
 
 /**
@@ -95,7 +113,9 @@ void log_client::default_namespace(const std::string& value)
 {
 	// update default namespace
 	if(m_ts_default_namespace.get() == nullptr)
+	{
 		m_ts_default_namespace.reset(new std::string());
+	}
 	*m_ts_default_namespace = value;
 }
 
@@ -135,7 +155,10 @@ void log_client::default_entry_type(const category& value)
 {
 	// update default entry types
 	if(m_ts_default_entry_type.get() == nullptr)
+	{
 		m_ts_default_entry_type.reset(new category);
+	}
+
 	*m_ts_default_entry_type = value;
 }
 
@@ -157,8 +180,8 @@ template <class type> log_client& log_client::send_to_stream(type& x)
 }
 
 /**
- * Resets the log_client data buffer and initializes it with a message of the specified category.
- * @param _category category (or entry type) to set new message as.
+ * Sets the current message category to the specified category.
+ * @param _category category (or entry type) to set this message as.
  * @returns  always returns *this.
  */
 log_client& log_client::create_log_stream(category _category)
@@ -178,7 +201,7 @@ log_client& log_client::create_log_stream(category _category)
  * Gets the internal log entry buffer.
  * @returns  internal log entry buffer.
  */
-log_buffer log_client::buffer()
+log_buffer& log_client::buffer()
 {
 	check_buffer();
 	return *m_buffer.get();
@@ -204,8 +227,8 @@ log_client& log_client::error() { return create_log_stream(category::error); }
 log_client& log_client::fatal() { return create_log_stream(category::fatal); }
 
 /**
- * processes a name space (ns) stream manipulator.
- * @param ns new name space to apply
+ * processes a log data stream manipulator.
+ * @param _log_data log data to embue this message with.
  * @returns always returns *this
  **/
 log_client& log_client::operator<<(const log_data& _log_data)
@@ -214,7 +237,7 @@ log_client& log_client::operator<<(const log_data& _log_data)
 	check_buffer();
 
 	// update namespace
-	m_buffer->get()->extended_data(_log_data.m_key, _log_data.m_value);
+	m_buffer->get()->extended_data(_log_data.key(), _log_data.value());
 
 	// return the stream
 	return *this;
@@ -231,7 +254,7 @@ log_client& log_client::operator<<(const ns& _ns)
 	check_buffer();
 
 	// update namespace
-	m_buffer->get()->log_namespace(_ns.m_ns);
+	m_buffer->get()->log_namespace(_ns.log_namespace());
 
 	// return the stream
 	return *this;
@@ -239,7 +262,7 @@ log_client& log_client::operator<<(const ns& _ns)
 
 /**
  * processes a log file (lf) stream manipulator.
- * @param output_file Path identifying file to write XML to.
+ * @param _lf Path identifying file to write XML to.
  * @returns always returns *this
  **/
 log_client& log_client::operator<<(lf _lf)
@@ -258,11 +281,19 @@ log_client& log_client::operator<<(lf _lf)
 			// add the entry to the log schedule and create next entry.
 			auto converted_buffer = std::dynamic_pointer_cast<log_entry>(*m_buffer);
 
-			// ensure that the entry type and namespace are set.
+			// ensure that the entry type is set...
 			if(converted_buffer->entry_type() == category::unspecified)
+			{
+				// ... else use the fallback type
 				converted_buffer->entry_type(default_entry_type());
+			}
+
+			// ensure that the entry namespace is set...
 			if(converted_buffer->log_namespace() == "")
+			{
+				// ... else ue the fallback namespace
 				converted_buffer->log_namespace(default_namespace());
+			}
 
 			// schedule the entry for serialization and re-initialize buffer
 			m_output_interface->add_entry(converted_buffer);

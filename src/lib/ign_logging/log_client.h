@@ -93,7 +93,7 @@ public:
 	void default_entry_type(const category& value);
 
 	/// The internal log entry buffer for this client.
-	log_buffer buffer();
+	log_buffer& buffer();
 
     /// Creates a debug log entry
     log_client& debug();

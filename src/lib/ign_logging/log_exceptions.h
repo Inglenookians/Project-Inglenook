@@ -53,9 +53,6 @@ const unsigned long unable_to_aquire_queue_notification_lock = module_error_base
 /// log file that was being written to (or attempted writing to) at time of exception.
 typedef boost::error_info<struct __log_file_name, boost::filesystem::path> log_file_name;
 
-/// file system error code returned by some boost methods (ex. boost::filesystem::create_directories).
-typedef boost::error_info<struct __boost_filesystem_error, boost::system::error_code> boost_filesystem_error;
-
 //
 // log_exception
 // Standard base exception for all exceptions thrown by objects in the logging library.

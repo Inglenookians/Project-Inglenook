@@ -42,6 +42,7 @@ void initialize_logging()
 /**
  * Initializes the logging system using a specific file path
  * Initializes logging, emmiting log entries to the specified log file.
+ * @params log_file path to the file in which to store logs. Will be created if does not exist.
  */
 void initialize_logging(const boost::filesystem::path& log_file)
 {

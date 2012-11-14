@@ -1,5 +1,5 @@
 /*
-* logging_entry_modifiers_test.h: Test routines for the log stream modifier classes (logging_entry_modifiers.h)
+* log_entry_modifiers_test.h: Test routines for the log stream modifier classes (logging_entry_modifiers.h)
 * Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
 *
 * This program is free software: you can redistribute it and/or modify
@@ -48,12 +48,12 @@ BOOST_AUTO_TEST_CASE ( log_entry_modifiers_tests__construction )
 	
 	// check ns construction 
 	ns _ns(ns_test_value);
-	BOOST_CHECK(_ns.m_ns == ns_test_value);
+	BOOST_CHECK(_ns.log_namespace() == ns_test_value);
 
 	// check log_data construction
 	log_data _log_data(log_data_test_key, log_data_test_value);
-	BOOST_CHECK(_log_data.m_key == log_data_test_key);
-	BOOST_CHECK(_log_data.m_value == log_data_test_value);
+	BOOST_CHECK(_log_data.key() == log_data_test_key);
+	BOOST_CHECK(_log_data.value() == log_data_test_value);
 
 }
 

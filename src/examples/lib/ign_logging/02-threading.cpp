@@ -114,7 +114,9 @@ int main(int arg_c, char* arg_v[])
 
 	// wait for all threads to re-join
 	for(int i = 0; i < NO_THREADS; i++)
+	{
 		threads[i]->join();
+	}
 
 	// indicate end of main to ensure all log messages are flushed..
 	log_info() << "The main() method has ended." << lf::end;

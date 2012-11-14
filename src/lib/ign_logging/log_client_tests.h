@@ -179,7 +179,9 @@ BOOST_AUTO_TEST_CASE ( log_client_tests__stream )
 		auto buffer = _log_client.buffer()->extended_data();
 		BOOST_CHECK(buffer.size() == 1);
 		for(auto data = buffer.begin(); data != buffer.end(); data++)
+		{
 			BOOST_CHECK(data->second == check_data[data->first]);
+		}
 
 		// add the second item
 		_log_client << log_data(key2, value2);
@@ -188,7 +190,9 @@ BOOST_AUTO_TEST_CASE ( log_client_tests__stream )
 		buffer = _log_client.buffer()->extended_data();
 		BOOST_CHECK(buffer.size() == 2);
 		for(auto data = buffer.begin(); data != buffer.end(); data++)
+		{
 			BOOST_CHECK(data->second == check_data[data->first]);
+		}
 
 		// remote the second item
 		_log_client << log_data(key2, "");
@@ -197,7 +201,9 @@ BOOST_AUTO_TEST_CASE ( log_client_tests__stream )
 		buffer = _log_client.buffer()->extended_data();
 		BOOST_CHECK(buffer.size() == 1);
 		for(auto data = buffer.begin(); data != buffer.end(); data++)
+		{
 			BOOST_CHECK(data->second == check_data[data->first]);
+		}
 
 		/////////////////////////////////
 		// check namespace
@@ -215,7 +221,8 @@ BOOST_AUTO_TEST_CASE ( log_client_tests__stream )
 		BOOST_CHECK(_log_client.buffer()->log_namespace() == second_log_namespace);
 
 		// try to ensure that the log writer has chance to write anything it feels it should
-		boost::this_thread::yield(); boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+		boost::this_thread::yield();
+		boost::this_thread::sleep(boost::posix_time::milliseconds(10));
 		BOOST_CHECK(test_stream->str().length() == 0);
 
 		// check flush operator

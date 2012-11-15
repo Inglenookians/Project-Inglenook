@@ -45,10 +45,10 @@ class log_entry_buffered: public log_entry
 		/// deconstructs an buffered log entry.
 		virtual ~log_entry_buffered();
 
-		/// sets the log message
+		/// gets the log message stream buffer
 		std::stringstream& message_buffer();
 
-		/// virtual member of log_entry
+		/// overrides message() from log entry to ensure it remains in sync with stream buffer.
 		virtual const std::string& message() override;
 
 		/// sets the log message
@@ -56,7 +56,7 @@ class log_entry_buffered: public log_entry
 
 	private:
 
-		/// log message content
+		/// log message content buffer
 		std::stringstream m_message_buffer;
 
 };

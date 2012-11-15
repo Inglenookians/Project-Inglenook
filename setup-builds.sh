@@ -23,10 +23,16 @@ rm -rf build
 mkdir -p build/debug
 mkdir -p build/release
 
+# we want to pass everything we receive on the command line (excl. the initial path)
+# to cmake, to do that we need to 'stringify' the arguments. 
+additional_args="${*:1}"
+
 # Setup debug
 cd build/debug;
-cmake ../.. -DCMAKE_BUILD_TYPE=debug
+# pass command line arguments first to ensure that the CMAKE_BUILD_TYPE isn't modified.
+cmake ../.. $additional_args -DCMAKE_BUILD_TYPE=debug
 
 # Setup release
 cd ../release
-cmake ../.. -DCMAKE_BUILD_TYPE=release
+# pass command line arguments first to ensure that the CMAKE_BUILD_TYPE isn't modified.
+cmake ../.. $additional_args -DCMAKE_BUILD_TYPE=release

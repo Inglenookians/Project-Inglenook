@@ -18,10 +18,3 @@
 
 # Include subdirectories to process.
 add_subdirectory(lib)
-add_subdirectory(cli)
-add_subdirectory(srv)
-
-# Determine if we want to compile the examples as well
-if(WITH_EXAMPLES)
-  add_subdirectory(examples)
-endif(WITH_EXAMPLES)

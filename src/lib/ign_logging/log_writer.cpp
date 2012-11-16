@@ -55,6 +55,19 @@ const boost::posix_time::ptime timeout_ms(int ms) {
  * @param output_stream std::ostream to write XML to.
  * @param write_header indicates if the XML preamble should be written on startup
  * @param write_footer indicates if the XML closure tags should be written on shutdown.
+ * @see ~log_writer()
+ */
+log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream, const bool& write_header, const bool& write_footer) :
+		log_writer(output_stream, write_header, write_footer, inglenook::core::application::pid(), inglenook::core::application::name())
+ {
+	/* nothing to do in this constructor - all construction should be performed in the constructor below */
+ }
+
+/**
+ * Creates a new log_writer instance which will emit output to the specified std::ostream.
+ * @param output_stream std::ostream to write XML to.
+ * @param write_header indicates if the XML preamble should be written on startup
+ * @param write_footer indicates if the XML closure tags should be written on shutdown.
  * @param specific_pid specify the PID to create log for (else use self determined pid)
  * @param specific_application_name specify the application name to create log for (else use self determined name)
  * @see ~log_writer()
@@ -65,8 +78,8 @@ log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream, const
 	m_log_serialization_shutdown_mutex(new boost::timed_mutex()),
 	m_log_serialization_queue_mutex(new boost::mutex()),
 	m_log_serialization_element_queuing_mutex(new boost::mutex()),
-	m_process_id(specific_pid != NO_PID ? specific_pid : inglenook::core::application::pid()),
-	m_process_name(specific_application_name != "" ? specific_application_name : inglenook::core::application::name()),
+	m_process_id(specific_pid),
+	m_process_name(specific_application_name),
 	m_output_stream(output_stream),
 	m_xml_serialization_threshold(category::information),
 	m_console_serialization_threshold(category::information),
@@ -75,18 +88,6 @@ log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream, const
 	m_write_header(write_header),
 	m_write_footer(write_footer)
 {
-
-	// if the process id is not determined - self assign it.
-	/*if(pid() == log_writer::NO_PID)
-	{
-		m_process_id = inglenook::core::application::pid();
-	}
-
-	// if the process name is not determined - self assign it.
-	if(process_name() == "")
-	{
-		m_process_name = inglenook::core::application::name();
-	}*/
 
 	// check the output streams health
 	if (m_output_stream != nullptr && m_output_stream->fail())
@@ -111,8 +112,22 @@ log_writer::log_writer(const std::shared_ptr<std::ostream>& output_stream, const
  * including but not limited to; global configuration, application configuration and environment.
  * @param write_header indicates if the XML preamble should be written on startup
  * @param write_footer indicates if the XML closure tags should be written on shutdown.
- * @param specific_pid specify the PID to create log for (else use self determined pid)
- * @param specific_application_name specify the application name to create log for (else use self determined name)
+ * @returns shared pointer to newly instanced log_writer.
+ */
+std::shared_ptr<log_writer> log_writer::create(const bool& write_header, const bool& write_footer)
+{
+	return log_writer::create(write_header, write_footer,
+			inglenook::core::application::pid(),
+			inglenook::core::application::name());
+}
+
+/**
+ * Creates a new log_writer instance based on inglenooks logging directory structure. This can be impacted by a variety of factors
+ * including but not limited to; global configuration, application configuration and environment.
+ * @param write_header indicates if the XML preamble should be written on startup
+ * @param write_footer indicates if the XML closure tags should be written on shutdown.
+ * @param specific_pid specify the PID to create log for.
+ * @param specific_application_name specify the application name to create log for.
  * @returns shared pointer to newly instanced log_writer.
  */
 std::shared_ptr<log_writer> log_writer::create(const bool& write_header, const bool& write_footer,
@@ -128,8 +143,20 @@ std::shared_ptr<log_writer> log_writer::create(const bool& write_header, const b
 /**
  * Determines the default log path, note that the file path is time dependant and will
  * change with every call made to it.
- * @param specific_pid specify the PID to create log for (else use self determined pid)
- * @param specific_application_name specify the application name to create log for (else use self determined name)
+ * @returns the suggested log path.
+ */
+boost::filesystem::path log_writer::default_log_path()
+{
+	return default_log_path(
+			inglenook::core::application::pid(),
+			inglenook::core::application::name());
+}
+
+/**
+ * Determines the default log path, note that the file path is time dependant and will
+ * change with every call made to it.
+ * @param specific_pid specify the PID to create log for
+ * @param specific_application_name specify the application name to create log for
  * @returns the suggested log path.
  */
 boost::filesystem::path log_writer::default_log_path(const pid_type& specific_pid, const std::string& specific_application_name)
@@ -187,8 +214,26 @@ boost::filesystem::path log_writer::default_log_path(const pid_type& specific_pi
  * @param create If output_file doesn't exist, indicates whether to create it on the fly. Defaults to true.
  * @param write_header indicates if the XML preamble should be written on startup
  * @param write_footer indicates if the XML closure tags should be written on shutdown.
- * @param specific_pid specify the PID to create log for (else use self determined pid)
- * @param specific_application_name specify the application name to create log for (else use self determined name)
+ * @returns shared pointer to newly instanced log_writer.
+ */
+std::shared_ptr<log_writer> log_writer::create_from_file_path(
+		const boost::filesystem::path& output_file, const bool& create,
+		const bool& write_header, const bool& write_footer)
+{
+	return log_writer::create_from_file_path(output_file,
+			create, write_header, write_footer,
+			inglenook::core::application::pid(),
+			inglenook::core::application::name());
+}
+
+/**
+ * Creates a new log_writer instance which will emit output to the specified file.
+ * @param output_file Path identifying file to write XML to.
+ * @param create If output_file doesn't exist, indicates whether to create it on the fly. Defaults to true.
+ * @param write_header indicates if the XML preamble should be written on startup
+ * @param write_footer indicates if the XML closure tags should be written on shutdown.
+ * @param specific_pid specify the PID to create log for
+ * @param specific_application_name specify the application name to create log for
  * @returns shared pointer to newly instanced log_writer.
  */
 std::shared_ptr<log_writer> log_writer::create_from_file_path(
@@ -255,13 +300,33 @@ std::shared_ptr<log_writer> log_writer::create_from_file_path(
 	}
 }
 
+
 /**
  * Creates a new log_writer instance which will emit output to the specified output stream.
  * @param output_stream stream to write XML to.
  * @param write_header indicates if the XML preamble should be written on startup
  * @param write_footer indicates if the XML closure tags should be written on shutdown.
- * @param specific_pid specify the PID to create log for (else use self determined pid)
- * @param specific_application_name specify the application name to create log for (else use self determined name)
+ * @param specific_pid specify the PID to create log for
+ * @param specific_application_name specify the application name to create log for
+ */
+std::shared_ptr<log_writer> log_writer::create_from_stream(const std::shared_ptr<std::ostream>& output_stream,
+		const bool& write_header, const bool& write_footer)
+{
+	// at this point either the log exists, or we are good to create it
+	// so attempt to open the specified file path for appending data.
+	return log_writer::create_from_stream(output_stream,
+			write_header, write_footer,
+			inglenook::core::application::pid(),
+			inglenook::core::application::name());
+}
+
+/**
+ * Creates a new log_writer instance which will emit output to the specified output stream.
+ * @param output_stream stream to write XML to.
+ * @param write_header indicates if the XML preamble should be written on startup
+ * @param write_footer indicates if the XML closure tags should be written on shutdown.
+ * @param specific_pid specify the PID to create log for
+ * @param specific_application_name specify the application name to create log for
  */
 std::shared_ptr<log_writer> log_writer::create_from_stream(const std::shared_ptr<std::ostream>& output_stream,
 		const bool& write_header, const bool& write_footer, const pid_type& specific_pid, const std::string& specific_application_name)

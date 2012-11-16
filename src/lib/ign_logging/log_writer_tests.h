@@ -40,6 +40,134 @@ namespace inglenook
 namespace logging
 {
 
+
+/**
+ * Creates a new log entry with specified parameters
+ * @param submit_as. 			category of message to create.
+ * @param message.				message body for the log entry.
+ * @param log_namespace.		entry namespace.
+ * @returns shared pointer to log entry
+ */
+std::shared_ptr<log_entry> create_log_entry(const category& submit_as, const std::string& message, const std::string& log_namespace)
+{
+	// create and return shared pointer
+	auto le = std::shared_ptr<log_entry>(new log_entry());
+	le->message(message);
+	le->log_namespace(log_namespace);
+	le->entry_type(submit_as);
+	return le;
+}
+
+/**
+ * Test scenario for log_writer.
+ * Creates a log writer and entry with the specified parameters, and returns the xml, cout and cerr results of
+ * passing that entry in to the writer.
+ * @param _log_entry. 			[log_entry] log entry to write
+ * @param xml_filter.			[log_writer] XML serialiation threshold.
+ * @param console_filter.		[log_writer] Console serialiation threshold.
+ * @param default_namespace.	[log_writer] default fallback namespace
+ * @param xml_out.				[output] how the entry appears in XML.
+ * @param console_cout_out.		[output] how the entry appears in cout.
+ * @param console_cerr_out.		[output] how the entry appears in cerr.
+ */
+void run_writer(std::shared_ptr<log_entry> _log_entry,
+				const category& xml_filter, const category& console_filter, const std::string& default_namespace,
+				std::string& xml_out, std::string& console_cout_out, std::string& console_cerr_out)
+{
+
+	// initialize the stream writer and clear any pre-amble from the output stream
+	auto test_xml_stream = std::shared_ptr<std::stringstream>(new std::stringstream());
+	auto _log_writer = log_writer::create_from_stream(test_xml_stream, false, false);
+	_log_writer->default_namespace(default_namespace);
+	_log_writer->console_threshold(console_filter);
+	_log_writer->xml_threshold(xml_filter);
+
+	// capture standard output (so we can check what is coming out)
+	auto test_console_cout_stream = std::shared_ptr<std::stringstream>(new std::stringstream());
+	auto test_console_cerr_stream = std::shared_ptr<std::stringstream>(new std::stringstream());
+	auto cout_buffer = std::cout.rdbuf();
+	auto cerr_buffer = std::cerr.rdbuf();
+
+	// reassign the buffers
+	std::cout.rdbuf(test_console_cout_stream->rdbuf());
+	std::cerr.rdbuf(test_console_cerr_stream->rdbuf());
+
+	// setup scoped exit to ensure we reset std::cout
+	BOOST_SCOPE_EXIT( (&cout_buffer) (&cerr_buffer))
+	{	std::cout.rdbuf(cout_buffer);
+		std::cerr.rdbuf(cerr_buffer);
+	} 	BOOST_SCOPE_EXIT_END
+
+	// ensure we are running no output yet
+	BOOST_CHECK(test_xml_stream->str() == "");
+	BOOST_CHECK(test_console_cout_stream->str() == "");
+	BOOST_CHECK(test_console_cerr_stream->str() == "");
+
+	// create a log entry that we expect to see...
+	_log_writer->add_entry(_log_entry);
+
+	// reset the writer (this should flush ouput, and cause the logging method to rejoins the
+	// primary execution thread) which gaurentees all output has been finished and is ready for
+	// evaluation.
+	_log_writer.reset();
+
+	// capture the results of the two opreations
+	console_cout_out = test_console_cout_stream->str();
+	console_cerr_out = test_console_cerr_stream->str();
+	xml_out = test_xml_stream->str();
+
+}
+
+/**
+ * Test scenario for log_writer.
+ * Creates a log writer and entry with the specified parameters, and returns the xml, cout and cerr results of
+ * passing that entry in to the writer.
+ * @param submit_as. 			[log_entry] category of message to create.
+ * @param message.				[log_entry] message body for the log entry.
+ * @param log_namespace.		[log_entry] entry namespace.
+ * @param xml_filter.			[log_writer] XML serialiation threshold.
+ * @param console_filter.		[log_writer] Console serialiation threshold.
+ * @param default_namespace.	[log_writer] default fallback namespace
+ * @param xml_out.				[output] how the entry appears in XML.
+ * @param console_cout_out.		[output] how the entry appears in cout.
+ * @param console_cerr_out.		[output] how the entry appears in cerr.
+ */
+void run_writer(const category& submit_as, const std::string& message, const std::string& log_namespace,
+				const category& xml_filter, const category& console_filter, const std::string& default_namespace,
+				std::string& xml_out, std::string& console_cout_out, std::string& console_cerr_out)
+{
+	// run writer with specified parameters.
+	auto le = create_log_entry(submit_as, message, log_namespace);
+	run_writer(le, xml_filter, console_filter, default_namespace, xml_out, console_cout_out, console_cerr_out);
+}
+
+/**
+ * Filter test scenario for log_writer.
+ * Use to test filter scenario's with run_writer_with_filter, allows us to drop 3 parameters.
+ * @param submit_as. 			[log_entry] category of message to create.
+ * @param xml_filter.			[log_writer] XML serialiation threshold.
+ * @param console_filter.		[log_writer] Console serialiation threshold.
+ * @param xml_out.				[output] how the entry appears in XML.
+ * @param console_cout_out.		[output] how the entry appears in cout.
+ * @param console_cerr_out.		[output] how the entry appears in cerr.
+ */
+void filter_scenario(const category& entry_category, const category& xml_filter, const category& console_filter,
+					 std::string& xml_out, std::string& console_cout_out, std::string& console_cerr_out)
+{
+
+	// resources
+	const std::string message	= "log_writer_tests__filteration";
+	const std::string ns	 	= "inglenook.logging.tests";
+	const std::string default_ns = "inglenook.logging.tests.fallback";
+
+	// run the writer
+	run_writer(
+			entry_category, message, ns,
+			xml_filter, console_filter, default_ns,
+			xml_out, console_cout_out, console_cerr_out);
+
+}
+
 //
 // log_writer_tests__ctor_dtor
 // checks all the default values for correctness. This should ensure that
@@ -119,6 +247,57 @@ BOOST_AUTO_TEST_CASE ( log_writer_tests__ctor_dtor_specific )
 
 }
 
+
+//
+// log_writer_tests__ctor_dtor_otr
+// When in off-the-record mode the log_writer does not write disk. This is flagged by providing
+// a nullptr to a create_from_stream(), these tests are designed to make sure this being set to
+// a null reference does not cause any issues.
+BOOST_AUTO_TEST_CASE ( log_writer_tests__ctor_dtor_otr )
+{
+	// resources
+	const std::string message_body_cout = "message body";
+	const std::string message_ns_cout = "inglenook.logging.tests";
+	const std::string message_body_cerr = "message body.fail";
+	const std::string message_ns_cerr = "inglenook.logging.tests.fail";
+
+	// first we'll create the stream. we'll even tell it to emit XML header / footers.
+	auto _log_writer = log_writer::create_from_stream(nullptr, true, true);
+
+	// create a test entries
+	auto test_entry_cerr = create_log_entry(category::fatal, message_body_cerr, message_ns_cerr);
+	auto test_entry_cout = create_log_entry(category::information, message_body_cout, message_ns_cout);
+
+	// capture standard output (so we can check what is coming out)
+	auto test_console_cout_stream = std::shared_ptr<std::stringstream>(new std::stringstream());
+	auto test_console_cerr_stream = std::shared_ptr<std::stringstream>(new std::stringstream());
+	auto cout_buffer = std::cout.rdbuf();
+	auto cerr_buffer = std::cerr.rdbuf();
+
+	// reassign the buffers
+	std::cout.rdbuf(test_console_cout_stream->rdbuf());
+	std::cerr.rdbuf(test_console_cerr_stream->rdbuf());
+
+	// setup scoped exit to ensure we reset std::cout
+	BOOST_SCOPE_EXIT( (&cout_buffer) (&cerr_buffer))
+	{	std::cout.rdbuf(cout_buffer);
+		std::cerr.rdbuf(cerr_buffer);
+	} 	BOOST_SCOPE_EXIT_END
+
+	// add two entries to stream
+	_log_writer->add_entry(test_entry_cout);
+	_log_writer->add_entry(test_entry_cerr);
+
+	// if we didn't crash things are looking good - just cleanup to be sure
+	// reset will also flush output.
+	_log_writer.reset();
+
+	// check output was what was expected.
+	BOOST_CHECK(test_console_cout_stream->str()	== message_body_cout + "\n");
+	BOOST_CHECK(test_console_cerr_stream->str()	== message_body_cerr + "\n");
+
+}
+
 //
 // log_writer_tests__assignments
 // These tests ensure that the properties associated with this class function as 
@@ -171,133 +350,6 @@ BOOST_AUTO_TEST_CASE ( log_writer_tests__assignments )
 	// nothing should have been written to the stream during this test
 	boost::this_thread::yield(); boost::this_thread::sleep(boost::posix_time::milliseconds(10));
 	BOOST_CHECK(test_stream->str() == "");
-	
-}
-
-/**
- * Creates a new log entry with specified parameters
- * @param submit_as. 			category of message to create.
- * @param message.				message body for the log entry.
- * @param log_namespace.		entry namespace.
- * @returns shared pointer to log entry
- */
-std::shared_ptr<log_entry> create_log_entry(const category& submit_as, const std::string& message, const std::string& log_namespace)
-{
-	// create and return shared pointer
-	auto le = std::shared_ptr<log_entry>(new log_entry());
-	le->message(message);
-	le->log_namespace(log_namespace);
-	le->entry_type(submit_as);
-	return le;
-}
-
-/**
- * Test scenario for log_writer.
- * Creates a log writer and entry with the specified parameters, and returns the xml, cout and cerr results of
- * passing that entry in to the writer.
- * @param _log_entry. 			[log_entry] log entry to write
- * @param xml_filter.			[log_writer] XML serialiation threshold.
- * @param console_filter.		[log_writer] Console serialiation threshold.
- * @param default_namespace.	[log_writer] default fallback namespace
- * @param xml_out.				[output] how the entry appears in XML.
- * @param console_cout_out.		[output] how the entry appears in cout.
- * @param console_cerr_out.		[output] how the entry appears in cerr.
- */
-void run_writer(std::shared_ptr<log_entry> _log_entry,
-				const category& xml_filter, const category& console_filter, const std::string& default_namespace,
-				std::string& xml_out, std::string& console_cout_out, std::string& console_cerr_out)
-{
-
-	// initialize the stream writer and clear any pre-amble from the output stream
-	auto test_xml_stream = std::shared_ptr<std::stringstream>(new std::stringstream());
-	auto _log_writer = log_writer::create_from_stream(test_xml_stream, false, false);
-	_log_writer->default_namespace(default_namespace);
-	_log_writer->console_threshold(console_filter);
-	_log_writer->xml_threshold(xml_filter);
-	
-	// capture standard output (so we can check what is coming out)
-	auto test_console_cout_stream = std::shared_ptr<std::stringstream>(new std::stringstream());
-	auto test_console_cerr_stream = std::shared_ptr<std::stringstream>(new std::stringstream());
-	auto cout_buffer = std::cout.rdbuf();
-	auto cerr_buffer = std::cerr.rdbuf();
-	
-	// reassign the buffers
-	std::cout.rdbuf(test_console_cout_stream->rdbuf());
-	std::cerr.rdbuf(test_console_cerr_stream->rdbuf());
-		
-	// setup scoped exit to ensure we reset std::cout
-	BOOST_SCOPE_EXIT( (&cout_buffer) (&cerr_buffer))
-	{	std::cout.rdbuf(cout_buffer);
-		std::cerr.rdbuf(cerr_buffer);
-	} 	BOOST_SCOPE_EXIT_END
-	
-	// ensure we are running no output yet
-	BOOST_CHECK(test_xml_stream->str() == "");
-	BOOST_CHECK(test_console_cout_stream->str() == "");
-	BOOST_CHECK(test_console_cerr_stream->str() == "");
-	
-	// create a log entry that we expect to see...
-	_log_writer->add_entry(_log_entry);
-		
-	// reset the writer (this should flush ouput, and cause the logging method to rejoins the 
-	// primary execution thread) which gaurentees all output has been finished and is ready for
-	// evaluation.
-	_log_writer.reset();
-	
-	// capture the results of the two opreations
-	console_cout_out = test_console_cout_stream->str();
-	console_cerr_out = test_console_cerr_stream->str();
-	xml_out = test_xml_stream->str();
-
-}
-	
-/**
- * Test scenario for log_writer.
- * Creates a log writer and entry with the specified parameters, and returns the xml, cout and cerr results of
- * passing that entry in to the writer.
- * @param submit_as. 			[log_entry] category of message to create.
- * @param message.				[log_entry] message body for the log entry.
- * @param log_namespace.		[log_entry] entry namespace.
- * @param xml_filter.			[log_writer] XML serialiation threshold.
- * @param console_filter.		[log_writer] Console serialiation threshold.
- * @param default_namespace.	[log_writer] default fallback namespace
- * @param xml_out.				[output] how the entry appears in XML.
- * @param console_cout_out.		[output] how the entry appears in cout.
- * @param console_cerr_out.		[output] how the entry appears in cerr.
- */
-void run_writer(const category& submit_as, const std::string& message, const std::string& log_namespace,
-				const category& xml_filter, const category& console_filter, const std::string& default_namespace,
-				std::string& xml_out, std::string& console_cout_out, std::string& console_cerr_out)
-{
-	// run writer with specified parameters.
-	auto le = create_log_entry(submit_as, message, log_namespace);
-	run_writer(le, xml_filter, console_filter, default_namespace, xml_out, console_cout_out, console_cerr_out);
-}
-
-/**
- * Filter test scenario for log_writer.
- * Use to test filter scenario's with run_writer_with_filter, allows us to drop 3 parameters.
- * @param submit_as. 			[log_entry] category of message to create.
- * @param xml_filter.			[log_writer] XML serialiation threshold.
- * @param console_filter.		[log_writer] Console serialiation threshold.
- * @param xml_out.				[output] how the entry appears in XML.
- * @param console_cout_out.		[output] how the entry appears in cout.	
- * @param console_cerr_out.		[output] how the entry appears in cerr.
- */
-void filter_scenario(const category& entry_category, const category& xml_filter, const category& console_filter,
-					 std::string& xml_out, std::string& console_cout_out, std::string& console_cerr_out)
-{
-	
-	// resources
-	const std::string message	= "log_writer_tests__filteration";
-	const std::string ns	 	= "inglenook.logging.tests";
-	const std::string default_ns = "inglenook.logging.tests.fallback";
-	
-	// run the writer
-	run_writer( 
-			entry_category, message, ns, 
-			xml_filter, console_filter, default_ns, 
-			xml_out, console_cout_out, console_cerr_out);	
 	
 }
 

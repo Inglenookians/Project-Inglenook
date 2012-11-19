@@ -73,7 +73,7 @@ class log_writer
 
 		// Creates a new log_writer instance.
 		static std::shared_ptr<log_writer> create(const bool& write_header, const bool& write_footer,
-				const pid_type& pid, const std::string& application_name);
+				const pid_type& pid, const std::string& application_name, std::shared_ptr<boost::filesystem::path> out_filename = nullptr);
 
 		// Creates a new log_writer instance which will emit logs to the specified file.
 		static std::shared_ptr<log_writer> create_from_file_path(const boost::filesystem::path& output_file, const bool& create = true,

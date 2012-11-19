@@ -54,6 +54,8 @@ log_write_action parse_action(const std::string& action_string)
 	
 }
 
+
+
 /**
  * Converts an unsigned integer in to a category
  * This method is designed to ensure that no values are used which are outside the range supported by the category enumeration
@@ -190,8 +192,29 @@ const boost::filesystem::path create_log_file(const std::string& name, const pid
 	// determine where to log to
 	auto log_file = log_writer::default_log_path(pid, name);
 
-	// write out the new file
-	return create_log_file(log_file);
+	using namespace inglenook::logging;
+	using namespace boost::locale;
+
+	// make things a little more readable
+	const bool emmit_xml_header = true;
+	const bool emmit_xml_footer = false;
+
+	auto path_to_log = std::shared_ptr<boost::filesystem::path>(new boost::filesystem::path());
+
+	// create the log file and a log client to work with
+	auto _log_writer = log_writer::create(emmit_xml_header, emmit_xml_footer, pid, name, path_to_log);
+	log_client _log_client(_log_writer);
+
+	// we want to only have the name of the log file printed out to console. but we want to put
+	// some content in the XML file (so we know when the script started running if the user script
+	// doesn't do this itself). As such, turn off console logging.
+	_log_writer->console_threshold(category::no_log);
+
+	// write out that we started logging (marks the start of the running script if they do not emmit there own note).
+	_log_client.info() << ns(log_write_default_namespace) << translate("Started new logging session.") << lf::end;
+
+	// return the new log file.
+	return boost::filesystem::path( boost::filesystem::system_complete(*path_to_log) );
 
 }
 

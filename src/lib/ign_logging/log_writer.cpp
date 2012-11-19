@@ -128,14 +128,26 @@ std::shared_ptr<log_writer> log_writer::create(const bool& write_header, const b
  * @param write_footer indicates if the XML closure tags should be written on shutdown.
  * @param specific_pid specify the PID to create log for.
  * @param specific_application_name specify the application name to create log for.
+ * @param out_filename name of the file that has been generated
  * @returns shared pointer to newly instanced log_writer.
  */
 std::shared_ptr<log_writer> log_writer::create(const bool& write_header, const bool& write_footer,
-		const pid_type& specific_pid, const std::string& specific_application_name)
+		const pid_type& specific_pid, const std::string& specific_application_name,
+		std::shared_ptr<boost::filesystem::path> out_filename)
 {
 
-	return log_writer::create_from_file_path(
-			default_log_path(specific_pid, specific_application_name), true,
+	// determine where to log to...
+	auto filename = default_log_path(specific_pid, specific_application_name);
+
+	// if the caller is interested in the output file...
+	if(out_filename != nullptr)
+	{
+		// ... let them know where we are writing too...
+		*out_filename = filename;
+	}
+
+	// create the log writer
+	return log_writer::create_from_file_path(filename, true,
 			write_header, write_footer, specific_pid, specific_application_name);
 
 }

@@ -5,19 +5,60 @@
 .SH NAME
 .BR "IGNMAN.NAME" " -- facilitates writing of log files from a CLI or script."
 .SH SYNOPSIS
-.B IGNMAN.NAME [OPTIONS] ...
+.B IGNMAN.NAME ACTION [OPTIONS] ...
 .SH DESCRIPTION
-.BR "IGNMAN.NAME" " is a tool to create and write log files from the CLI. It main use is logging to the standard Inglenook log format from a shell script."
-.SH OPTIONS
+.BR "IGNMAN.NAME" " is a tool to create and write log files from the CLI. It is designed to facilitate logging to the standard Inglenook log format from a shell script."
+.SH ACTIONS
+.BR "There are three supported actions. These are start, write or close. The action must be specified in lower-case and can be identified either by its full name or first letter. Each action requires options to operate. These options differ between each action."
+.SH START OPTIONS
+.BR "The following options relate to the \'start\' or \'s\' action." " This action creates a new log file. You can either specify the path of the log file you wish to create or the ID and name of the process you are logging on behalf of. On success the path to the created log file will be printed to standard out, on failure details will be printed to standard error."
 .TP
-.B "\-c, \-\-create "
-creates a new log transaction for a process with the specific pid and name. this call will return the file name that the log has been created under.
+.B "\-f, \-\-filename log-path"
+path to the log file to create.
 .TP                        
-.B \-w, \-\-write logpath  message
-message to write to the log file specified by logpath.
+.B \-p, \-\-pid process-id
+specifies the process id that you are logging on behalf of. 
 .TP
-.B \-f \-\-finish logpath
-closes the log specified by logpath.
+.B \-n \-\-name process-name
+specifies the name of the process you are logging on behalf of.
+.BR
+.SH WRITE OPTIONS
+.BR "The following options relate to the \'write\' or \'w\' action." " This action writes content to the log file. At a minimum you must specify a log file and message to be written. Other parameters are optional."
+.TP
+.B "\-f, \-\-filename log-path"
+path to the log file to append new message to.
+.TP                        
+.B \-m, \-\-message message
+the message to be written to the log file. 
+.TP
+.B \-N \-\-namespace namespace
+log namespace to write to (defaults to inglenook.logging).
+.TP
+.B \-C, \-\-category
+the category of the message being written in a numeric form (defaults to information). options are:
+.br
+1       debugging information.
+.br
+2       verbose or tracing output.
+.br
+3       standard status or information  update.
+.br
+4       warning message.
+.br
+5       error message.
+.br
+6       fatal error.
+.br
+NOTE: values outside this range will be defaulted to information.
+.BR
+.SH CLOSE OPTIONS
+.BR "The following options relate to the \'close\' or \'c\' action." " This action closes an existing log file. It expects the path to the log file to close."
+.TP
+.B "\-f, \-\-filename log-path"
+path to the log file to create.
+.BR
+.SH MISC OPTIONS
+.BR "The following options are not associate with any action, or the core functionality of IGNMAN.NAME"
 .TP
 .B \-\-help
 shows the program description and possible command line options.

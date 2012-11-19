@@ -18,6 +18,19 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE ign_log_write_tests
 
+/*
+ * The following tests help ensure that ign_log_write is operating correctly.
+ * Its covers behaviours specific to the application. The follow elements are
+ * not currently tested:
+ * 	log_write_exceptions.h  (all) 		- no functional code.
+ *  log_write_actions.h/cpp (listed) 	- methods touch disk, and are largely tested by ign_logging already.
+ * 		create_log_file() 					| all prototypes.
+ * 		write_log_entry() 					| all prototypes.
+ * 		close_log_file() 					| all prototypes.
+ *	main.cpp							- little functional code tests could be written for (by design).
+ */
+
+
 // boost (http://boost.org) includes
 #include <boost/test/unit_test.hpp>
 
@@ -101,16 +114,92 @@ template <class T> void add_argument(boost::program_options::variables_map& argu
 			
 }
 
-//
-// log_write_tests__parsing_action
-// ensures that the library is correctly parsing the action command
-BOOST_AUTO_TEST_CASE ( log_write_tests__invoking_actions )
+/**
+ * Submits a require instruction which is expected to fail.
+ * @params arguments arguments collection to query.
+ * @params argument argument to find (or not as case may be).
+ */
+template <class T> void require_and_expect_missing(boost::program_options::variables_map& arguments, std::string argument)
 {
-	
+	try
+	{
+		// attempt the test - for science.
+		auto result = require_parameter<T>(arguments, argument);
+		BOOST_FAIL("Expected require_paramater() on arguments to fail. Actually yielded \"" << result << "\"");
+	}
+	catch(inglenook::logging::action_required_arguments_missing_exception)
+	{
+		// nothing to do - this is the correct result //
+	}
+}
+
+//
+// log_write_tests__require_parameters
+// ensures that the library is correctly extracting required parameters
+BOOST_AUTO_TEST_CASE ( log_write_tests__require_parameters )
+{
+	// build a variable map to test with
 	boost::program_options::variables_map commandline_arguments;
-	add_argument<std::string>(commandline_arguments, "action", "bad");
-		
+	add_argument<std::string>	(commandline_arguments, "action1", "key1");
+	add_argument<std::string>	(commandline_arguments, "action2", "key2");
+	add_argument<unsigned int>	(commandline_arguments, "action3", 3);
 	
+	// check failure is working as intended.
+	require_and_expect_missing<std::string>(commandline_arguments, "actions4");
+	require_and_expect_missing<std::string>(commandline_arguments, "actions5");
+	require_and_expect_missing<unsigned int>(commandline_arguments, "actions6");
+
+	// check success if working as intended.
+	BOOST_CHECK(require_parameter<std::string>(commandline_arguments, "action1") == "key1" );
+	BOOST_CHECK(require_parameter<std::string>(commandline_arguments, "action2") == "key2" );
+	BOOST_CHECK(require_parameter<unsigned int>(commandline_arguments, "action3") == 3 );
+}
+
+//
+// log_write_tests__optional_parameters
+// ensures that the library is correctly extracting optional parameters
+BOOST_AUTO_TEST_CASE ( log_write_tests__optional_parameters )
+{
+	// build a variable map to test with
+	boost::program_options::variables_map commandline_arguments;
+	add_argument<std::string>	(commandline_arguments, "action1", "key1");
+	add_argument<std::string>	(commandline_arguments, "action2", "key2");
+	add_argument<unsigned int>	(commandline_arguments, "action3", 3);
+
+	// check failure is working as intended.
+	BOOST_CHECK(optional_parameter<std::string>(commandline_arguments, "action4", "fallback") == "fallback" );
+	BOOST_CHECK(optional_parameter<std::string>(commandline_arguments, "action5", "fallback") == "fallback" );
+	BOOST_CHECK(optional_parameter<unsigned int>(commandline_arguments, "action6", 999) == 999 );
+
+	// check success if working as intended.
+	BOOST_CHECK(optional_parameter<std::string>(commandline_arguments, "action1", "fallback") == "key1" );
+	BOOST_CHECK(optional_parameter<std::string>(commandline_arguments, "action2", "fallback") == "key2" );
+	BOOST_CHECK(optional_parameter<unsigned int>(commandline_arguments, "action3", 999) == 3 );
+}
+
+//
+// log_write_tests__convert_category_tests
+// ensures that the convert to category tests are working
+BOOST_AUTO_TEST_CASE ( log_write_tests__convert_category_tests )
+{
+	// first check all known good values
+	BOOST_CHECK( convert_to_category(1) == category::debugging);
+	BOOST_CHECK( convert_to_category(2) == category::verbose);
+	BOOST_CHECK( convert_to_category(3) == category::information);
+	BOOST_CHECK( convert_to_category(4) == category::warning);
+	BOOST_CHECK( convert_to_category(5) == category::error);
+	BOOST_CHECK( convert_to_category(6) == category::fatal);
+
+	// next check known values that should not convert
+	BOOST_CHECK( convert_to_category(0)		== category::information); // unspecified
+	BOOST_CHECK( convert_to_category(0x99) 	== category::information); // no_log
+
+	// finally just throw a whole range at it
+	for(int i = 7; i < 0xff; i++)
+	{
+		// check that the invalid values don't cast
+		BOOST_CHECK( convert_to_category(i)		== category::information);
+	}
 }
 
 } // namespace inglenook::logging

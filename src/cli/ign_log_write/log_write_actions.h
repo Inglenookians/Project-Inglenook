@@ -26,6 +26,7 @@
 
 // inglenook includes
 #include <ign_logging/logging.h>
+#include "log_write_exceptions.h"
 
 namespace inglenook
 {
@@ -63,11 +64,56 @@ const std::string log_write_default_namespace = "inglenook.logging";
 // parses an action string and returns the corresponding action
 log_write_action parse_action(const std::string& action_string);
 
-// extracts a parameter from the specified map, throwing an exception on failure
-template <class T> T require_parameter(const boost::program_options::variables_map& from, const std::string& parameter);
 
-// extracts a parameter from the specified map, returning a fallback on failure
-template <class T> T optional_parameter(const boost::program_options::variables_map& from, const std::string& parameter, const T& fallback);
+/**
+ * extracts a required parameter from the arguments vector.
+ * @params from arguments vector to extract value from.
+ * @params parameter parameter to extract.
+ * @throws action_required_arguments_missing if the required argument is missing.
+ * @returns value of the required argument
+ */
+template <class T> T require_parameter(const boost::program_options::variables_map& from, const std::string& parameter)
+{
+
+	// ensure the value is present...
+	if(from.count(parameter) == 0)
+	{
+		using namespace inglenook::logging;
+
+		// throw exception - item is missing...
+		BOOST_THROW_EXCEPTION( action_required_arguments_missing_exception()
+				<< expected_argument(parameter));
+	}
+
+	// return the item required.
+	return from[parameter].as<T>();
+}
+
+/**
+ * extracts an optional parameter from the arguments vector.
+ * @params from arguments vector to extract value from.
+ * @params parameter parameter to extract.
+ * @params fallback what to use if the parameter isn't present
+ * @returns value of the optional argument
+ */
+template <class T> T optional_parameter(const boost::program_options::variables_map& from, const std::string& parameter, const T& fallback)
+{
+
+	// create and default buffer
+	T result = fallback;
+
+	// check if the value is present...
+	if(from.count(parameter) != 0)
+	{
+		// ... and populate result if so
+		result = from[parameter].as<T>();
+	}
+
+	// return the item.
+	return result;
+}
+
+
 
 // converts an unsigned int in to a category
 category convert_to_category(unsigned int value);

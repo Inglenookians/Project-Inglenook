@@ -65,7 +65,9 @@ boost::program_options::options_description create_program_options()
     boost::program_options::options_description writing_options( translate("Log writing specific options (w, write)") );
     writing_options.add_options()
 
-		("message,m", 	boost::program_options::value<std::string>(), 				translate("REQUIRED: Process id of script or process.").str().c_str());
+		("message,m", 	boost::program_options::value<std::string>(), 				translate("REQUIRED: Process id of script or process.").str().c_str())
+    	("namespace,N", boost::program_options::value<std::string>(), 				translate("Namespace to write message in.").str().c_str())
+    	("category,C", 	boost::program_options::value<unsigned int>(), 				translate("Type of message to write.").str().c_str());
 
 
     // add all the options
@@ -140,11 +142,9 @@ int main(int arg_c, char* arg_v[])
 	    		case log_write_action::write_message_to_log:
 				{
 
-					// extract required paramaters
-					//std::string log_path 	= require_parameter<std::string>(vm, "filename");
-					//std::string message 	= require_parameter<std::string>(vm, "message");
+					// write a log entry with the given arguments
+					write_log_entry(vm);
 
-					//std::cout << "writing " << message << " to '" << log_path << "'"<< std::endl;
 					break;
 				}
 				// caller wants to close an open log file.

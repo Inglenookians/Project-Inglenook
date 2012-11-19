@@ -57,11 +57,20 @@ enum log_write_action : unsigned int
 	close_log 				= 0x03  /**< close an open log file. */
 };
 
+/// default namespace to write entries in when using this binary.
+const std::string log_write_default_namespace = "inglenook.logging";
+
 // parses an action string and returns the corresponding action
 log_write_action parse_action(const std::string& action_string);
 
 // extracts a parameter from the specified map, throwing an exception on failure
-template <class T> T require_parameter(const boost::program_options::variables_map& from, const std::string parameter);
+template <class T> T require_parameter(const boost::program_options::variables_map& from, const std::string& parameter);
+
+// extracts a parameter from the specified map, returning a fallback on failure
+template <class T> T optional_parameter(const boost::program_options::variables_map& from, const std::string& parameter, const T& fallback);
+
+// converts an unsigned int in to a category
+category convert_to_category(unsigned int value);
 
 
 
@@ -74,6 +83,13 @@ const boost::filesystem::path create_log_file(const boost::filesystem::path& pat
 // creates a new log file using the specified PID and name
 const boost::filesystem::path create_log_file(const std::string& name, const pid_type& pid);
 
+
+
+// writes a log entry using the arguments provided.
+void write_log_entry(const boost::program_options::variables_map& arguments);
+
+// writes a log entry to the specified file with the specified message, namespace and category.
+void write_log_entry(const boost::filesystem::path& path_to_log, std::string message, std::string log_namespace = log_write_default_namespace, category event_type = category::information);
 
 } // namespace logging
 

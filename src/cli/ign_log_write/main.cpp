@@ -180,7 +180,7 @@ int main(int arg_c, char* arg_v[])
 			 std::cerr << translate("ERROR: The specified action was unrecognised: ") << *action << std::endl;
 		else std::cerr << translate("ERROR: The action was unrecognised, further details are unavailable.") << std::endl;
 
-		// be helpful - suggest where the user can get additional support using this tool
+		// be helpful - tell the user valid options, and suggest where the user can get additional support using this tool
 		std::cerr << translate("Valid actions are start (s), write (w) and close (c).") << std::endl;
 		std::cerr << translate("For support with this binary check the manual documentation by typing \"man ") << inglenook::core::application::name() << "\"" << std::endl;
 

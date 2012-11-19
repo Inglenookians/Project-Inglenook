@@ -91,6 +91,15 @@ void write_log_entry(const boost::program_options::variables_map& arguments);
 // writes a log entry to the specified file with the specified message, namespace and category.
 void write_log_entry(const boost::filesystem::path& path_to_log, std::string message, std::string log_namespace = log_write_default_namespace, category event_type = category::information);
 
+
+
+// closes the log file identified in the program arguments.
+void close_log_file(const boost::program_options::variables_map& arguments);
+
+// closes the specified log file.
+void close_log_file(const boost::filesystem::path& path_to_log);
+
+
 } // namespace logging
 
 } // namespace inglenook

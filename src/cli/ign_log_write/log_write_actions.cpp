@@ -106,6 +106,7 @@ template <class T> T optional_parameter(const boost::program_options::variables_
 
 /**
  * Converts an unsigned integer in to a category
+ * This method is designed to ensure that no values are used which are outside the range supported by the category enumeration
  * @params value value to convert.
  * @returns value as category, or information on failure.
  */
@@ -290,6 +291,46 @@ void write_log_entry(const boost::filesystem::path& path_to_log, std::string mes
 
 }
 
+
+/**
+ * Closes the log file idenfied by the arguments.
+ * @params arguments arguments to extract file name from.
+ */
+void close_log_file(const boost::program_options::variables_map& arguments)
+{
+	// extract the log name and call close method...
+	auto log_file = require_parameter<std::string>(arguments, "filename");
+	close_log_file(log_file);
+}
+
+/**
+ * Closes the specified log file.
+ * @params path_to_log log file to close.
+ */
+void close_log_file(const boost::filesystem::path& path_to_log)
+{
+	using namespace inglenook::logging;
+	using namespace boost::locale;
+
+	// make things a little more readable
+	const bool create_file_if_not_exists = false;
+	const bool emmit_xml_header = false;
+	const bool emmit_xml_footer = true;
+
+	// create the log file and a log client to work with
+	auto _log_writer = log_writer::create_from_file_path(path_to_log,
+			create_file_if_not_exists, emmit_xml_header, emmit_xml_footer);
+	log_client _log_client(_log_writer);
+
+	// No console output is expected from this method. but we want to put some content in
+	// the XML file (so we know when the script has finished running if the user script
+	// doesn't do this itself). As such, turn off console logging.
+	_log_writer->console_threshold(category::no_log);
+
+	// write out that we started logging (marks the start of the running script if they do not emmit there own note).
+	_log_client.info() << ns(log_write_default_namespace) << translate("Terminated logging session.") << lf::end;
+
+}
 
 } // namespace logging
 

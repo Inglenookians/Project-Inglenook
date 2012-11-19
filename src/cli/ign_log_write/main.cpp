@@ -150,16 +150,19 @@ int main(int arg_c, char* arg_v[])
 				// caller wants to close an open log file.
 	    		case log_write_action::close_log:
 				{
-					// extract required paramaters
-					//std::string log_path 	= require_parameter<std::string>(vm, "filename");
 
-					//std::cout << "closing log file '" << log_path << "'"<< std::endl;
+					// close a log file.
+					close_log_file(vm);
+
 					break;
 				}
 				// we have no idea what the caller wants to do.
 	    		default:
 	    		{
-	    			//std::cout << "default" << std::endl;
+	    			// throw exception - we don't know what this is
+	    			BOOST_THROW_EXCEPTION( unrecognised_action_exception()
+	    					<< unrecognised_action(action));
+
 	    			break;
 	    		}
 	    	}
@@ -168,6 +171,19 @@ int main(int arg_c, char* arg_v[])
 	    
 		// the binary has (for all we know) done its job.
 		success = EXIT_SUCCESS;
+	}
+	catch(inglenook::logging::unrecognised_action_exception& ex)
+	{
+
+		// tell the user what went wrong...
+		if( const std::string* action = boost::get_error_info<unrecognised_action>(ex) )
+			 std::cerr << translate("ERROR: The specified action was unrecognised: ") << *action << std::endl;
+		else std::cerr << translate("ERROR: The action was unrecognised, further details are unavailable.") << std::endl;
+
+		// be helpful - suggest where the user can get additional support using this tool
+		std::cerr << translate("Valid actions are start (s), write (w) and close (c).") << std::endl;
+		std::cerr << translate("For support with this binary check the manual documentation by typing \"man ") << inglenook::core::application::name() << "\"" << std::endl;
+
 	}
 	catch(inglenook::logging::action_required_arguments_missing_exception& ex)
 	{

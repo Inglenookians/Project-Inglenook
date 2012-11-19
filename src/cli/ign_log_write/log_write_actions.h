@@ -22,6 +22,10 @@
 
 // boost (http://boost.org) includes
 #include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
+
+// inglenook includes
+#include <ign_logging/logging.h>
 
 namespace inglenook
 {
@@ -56,7 +60,20 @@ enum log_write_action : unsigned int
 // parses an action string and returns the corresponding action
 log_write_action parse_action(const std::string& action_string);
 
-//void create_log_file(boost::program_options arguments);
+// extracts a parameter from the specified map, throwing an exception on failure
+template <class T> T require_parameter(const boost::program_options::variables_map& from, const std::string parameter);
+
+
+
+// creates a new log file with using the arguments provided.
+const boost::filesystem::path create_log_file(const boost::program_options::variables_map& arguments);
+
+// creates a new log file using the specified file name.
+const boost::filesystem::path create_log_file(const boost::filesystem::path& path_to_log);
+
+// creates a new log file using the specified PID and name
+const boost::filesystem::path create_log_file(const std::string& name, const pid_type& pid);
+
 
 } // namespace logging
 

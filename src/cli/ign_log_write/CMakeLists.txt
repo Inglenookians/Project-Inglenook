@@ -27,6 +27,7 @@ add_executable(
 target_link_libraries(
 	ign_log_write
 	ign_logging
+	ign_core
 )
 
 # Configure the automatic version header generation.
@@ -60,6 +61,7 @@ add_executable(
 target_link_libraries(
 	ign_log_write_tests
 	ign_logging
+	ign_core
 	boost_unit_test_framework
 	boost_regex
 ) 

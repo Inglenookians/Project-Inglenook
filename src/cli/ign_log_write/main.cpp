@@ -69,10 +69,9 @@ boost::program_options::options_description create_program_options()
 
 
     // add all the options
-    boost::program_options::options_description all_options( translate("All available options") );
-    all_options.add(action_options).add(creation_options).add(writing_options);
+    action_options.add(creation_options).add(writing_options);
 
-    return all_options;
+    return action_options;
 }
 
 
@@ -88,30 +87,6 @@ boost::program_options::positional_options_description create_program_positional
     positions.add("filename", 1);
     positions.add("message", 1);
     return positions;
-}
-
-/**
- * extracts a required parameter from the arguments vector.
- * @params from arguments vector to extract value from.
- * @params parameter parameter to extract.
- * @throws action_required_arguments_missing if the required argument is missing.
- * @returns value of the required argument
- */
-template <class T> T require_parameter(const boost::program_options::variables_map& from, const std::string parameter)
-{
-
-	// ensure the value is present...
-	if(from.count(parameter) == 0)
-	{
-		using namespace inglenook::logging;
-
-		// throw exception - item is missing...
-		BOOST_THROW_EXCEPTION( action_required_arguments_missing()
-				<< expected_argument(parameter));
-	}
-
-	// return the item required.
-	return from[parameter].as<T>();
 }
 
 /**
@@ -153,7 +128,12 @@ int main(int arg_c, char* arg_v[])
 	    		// caller wants to create a new log
 	    		case log_write_action::create_new_log:
 	    		{
-	    			std::cout << "log_write_action::create_new_log" << std::endl;
+	    			// create the new log file
+					auto new_log = create_log_file(vm);
+
+					// notify callers where the log file was created.
+					std::cout << boost::filesystem::system_complete(new_log) << std::endl;
+
 	    			break;
 	    		}
 	    		// caller wants to write to an existing log
@@ -161,25 +141,25 @@ int main(int arg_c, char* arg_v[])
 				{
 
 					// extract required paramaters
-					std::string log_path 	= require_parameter<std::string>(vm, "filename");
-					std::string message 	= require_parameter<std::string>(vm, "message");
+					//std::string log_path 	= require_parameter<std::string>(vm, "filename");
+					//std::string message 	= require_parameter<std::string>(vm, "message");
 
-					std::cout << "writing " << message << " to '" << log_path << "'"<< std::endl;
+					//std::cout << "writing " << message << " to '" << log_path << "'"<< std::endl;
 					break;
 				}
 				// caller wants to close an open log file.
 	    		case log_write_action::close_log:
 				{
 					// extract required paramaters
-					std::string log_path 	= require_parameter<std::string>(vm, "filename");
+					//std::string log_path 	= require_parameter<std::string>(vm, "filename");
 
-					std::cout << "closing log file '" << log_path << "'"<< std::endl;
+					//std::cout << "closing log file '" << log_path << "'"<< std::endl;
 					break;
 				}
 				// we have no idea what the caller wants to do.
 	    		default:
 	    		{
-	    			std::cout << "default" << std::endl;
+	    			//std::cout << "default" << std::endl;
 	    			break;
 	    		}
 	    	}
@@ -189,7 +169,7 @@ int main(int arg_c, char* arg_v[])
 		// the binary has (for all we know) done its job.
 		success = EXIT_SUCCESS;
 	}
-	catch(inglenook::logging::action_required_arguments_missing& ex)
+	catch(inglenook::logging::action_required_arguments_missing_exception& ex)
 	{
 
 		// tell the user what went wrong...
@@ -198,7 +178,7 @@ int main(int arg_c, char* arg_v[])
 		else std::cerr << translate("ERROR: The specified action requires an unspecified additional argument") << std::endl;
 
 		// be helpful - suggest where the user can get additional support using this tool
-		std::cerr << translate("For support with this library check the manual documentation by typing \"man ") << inglenook::core::application::name() << "\"" << std::endl;
+		std::cerr << translate("For support with this binary check the manual documentation by typing \"man ") << inglenook::core::application::name() << "\"" << std::endl;
 
 	}
 	catch(inglenook::core::exceptions::application_arguments_parser_exception&)
@@ -206,7 +186,7 @@ int main(int arg_c, char* arg_v[])
 		/* nothing to do - arguments passed to the program were incorrect */
 
 		// be helpful - suggest where the user can get additional support using this tool
-		std::cerr << translate("For support with this library check the manual documentation by typing \"man ") << inglenook::core::application::name() << "\"" << std::endl;
+		std::cerr << translate("For support with this binary check the manual documentation by typing \"man ") << inglenook::core::application::name() << "\"" << std::endl;
 
 	}
 	catch(...) // this is the "its gone seriously wrong" error handler.

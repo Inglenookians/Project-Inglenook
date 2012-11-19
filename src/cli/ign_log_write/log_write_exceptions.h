@@ -25,6 +25,9 @@
 #include <boost/exception/all.hpp>
 #include <boost/locale.hpp>
 
+// inglenook includes
+#include <ign_core/exceptions.h>
+
 namespace inglenook
 {
 
@@ -40,10 +43,13 @@ const unsigned long log_write_exception_missing_argument = module_error_base + 0
 /// argument that was expected, but not provided.
 typedef boost::error_info<struct __expected_argument, std::string> expected_argument;
 
+/// couldn't work out how to use provided arguments - this is what was expected.
+typedef boost::error_info<struct __acceptable_arguments, std::string> acceptable_arguments;
+
 //
 // log_write_exception
 // Standard base exception for all exceptions thrown by ign_log_write.
-struct log_write_exception: virtual boost::exception, virtual std::exception
+struct log_write_exception: virtual inglenook::core::exceptions::inglenook_exception
 {/// provides a boiler plate explanation of the exception.
    const char* what() const throw() {
 	   return boost::locale::translate("Unhandled exception in CLI log writer (ign_log_write)").str().c_str();
@@ -53,10 +59,20 @@ struct log_write_exception: virtual boost::exception, virtual std::exception
 //
 // log_write_exception
 // Standard base exception for all exceptions thrown by ign_log_write.
-struct action_required_arguments_missing: virtual log_write_exception
+struct action_required_arguments_missing_exception: virtual log_write_exception
 {/// provides a boiler plate explanation of the exception.
    const char* what() const throw() {
 	   return boost::locale::translate("An argument required by this action was not specified.").str().c_str();
+   }
+};
+
+//
+// log_write_exception
+// Standard base exception for all exceptions thrown by ign_log_write.
+struct wrong_number_of_arguments_exception: virtual log_write_exception
+{/// provides a boiler plate explanation of the exception.
+   const char* what() const throw() {
+	   return boost::locale::translate("The action invoked couldn't work out how to use to arguments provided.").str().c_str();
    }
 };
 

@@ -56,6 +56,12 @@ add_executable(
 	tests.cpp
 )
 
+# Set the properties
+set_target_properties(
+	ign_directories_tests PROPERTIES
+	RUNTIME_OUTPUT_DIRECTORY ${TESTS_OUTPUT_DIRECTORY}
+)
+
 # Link to required libraries
 target_link_libraries(
 	ign_directories_tests

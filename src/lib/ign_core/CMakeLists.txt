@@ -35,6 +35,7 @@ target_link_libraries(
 	boost_locale
 	boost_program_options
 	boost_system
+	c++
 )
 
 # Set the properties
@@ -58,6 +59,12 @@ install(
 add_executable(
 	ign_core_tests 
 	tests.cpp
+)
+
+# Set the properties
+set_target_properties(
+	ign_core_tests PROPERTIES
+	RUNTIME_OUTPUT_DIRECTORY ${TESTS_OUTPUT_DIRECTORY}
 )
 
 # Link to required libraries

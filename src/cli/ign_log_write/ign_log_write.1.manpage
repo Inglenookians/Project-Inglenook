@@ -1,0 +1,85 @@
+\." manpage for IGNMAN.NAME
+\." This manpage is part of Project Inglenook (http://www.project-inglenook.co.uk).
+\." Please report errors, typos and any other mistakes on the projects issue tracker.
+.TH IGNMAN.NAME IGNMAN.SECTION "IGNMAN.DATE" "GNU" "Project Inglenook Manual"
+.SH NAME
+.BR "IGNMAN.NAME" " -- facilitates writing of log files from a CLI or script."
+.SH SYNOPSIS
+.B IGNMAN.NAME ACTION [OPTIONS] ...
+.SH DESCRIPTION
+.BR "IGNMAN.NAME" " is a tool to create and write log files from the CLI. It is designed to facilitate logging to the standard Inglenook log format from a shell script."
+.SH ACTIONS
+.BR "There are three supported actions. These are start, write or close. The action must be specified in lower-case and can be identified either by its full name or first letter. Each action requires options to operate. These options differ between each action."
+.SH START OPTIONS
+.BR "The following options relate to the \'start\' or \'s\' action." " This action creates a new log file. You can either specify the path of the log file you wish to create or the ID and name of the process you are logging on behalf of. On success the path to the created log file will be printed to standard out, on failure details will be printed to standard error."
+.TP
+.B "\-f, \-\-filename log-path"
+path to the log file to create.
+.TP                        
+.B \-p, \-\-pid process-id
+specifies the process id that you are logging on behalf of. 
+.TP
+.B \-n \-\-name process-name
+specifies the name of the process you are logging on behalf of.
+.BR
+.SH WRITE OPTIONS
+.BR "The following options relate to the \'write\' or \'w\' action." " This action writes content to the log file. At a minimum you must specify a log file and message to be written. Other parameters are optional."
+.TP
+.B "\-f, \-\-filename log-path"
+path to the log file to append new message to.
+.TP                        
+.B \-m, \-\-message message
+the message to be written to the log file. 
+.TP
+.B \-N \-\-namespace namespace
+log namespace to write to (defaults to inglenook.logging).
+.TP
+.B \-C, \-\-category
+the category of the message being written in a numeric form (defaults to information). options are:
+.br
+1       debugging information.
+.br
+2       verbose or tracing output.
+.br
+3       standard status or information  update.
+.br
+4       warning message.
+.br
+5       error message.
+.br
+6       fatal error.
+.br
+NOTE: values outside this range will be defaulted to information.
+.BR
+.SH CLOSE OPTIONS
+.BR "The following options relate to the \'close\' or \'c\' action." " This action closes an existing log file. It expects the path to the log file to close."
+.TP
+.B "\-f, \-\-filename log-path"
+path to the log file to create.
+.BR
+.SH MISC OPTIONS
+.BR "The following options are not associate with any action, or the core functionality of IGNMAN.NAME"
+.TP
+.B \-\-help
+shows the program description and possible command line options.
+.TP
+.B \-\-version
+shows the version number and compiled timestamp.
+.SH EXIT STATUS
+.RB "The " "IGNMAN.NAME" " utility exits 0 on success, and >0 if an error occurs."
+.SH NOTES
+None.
+.SH BUGS
+No known bugs. Report new bugs at: <https://github.com/inglenookians/project-inglenook/issues>
+.SH AUTHOR
+Project Inglenook (http://www.project\-inglenook.co.uk).
+.SH COPYRIGHT
+Copyright \(co 2012, Project Inglenook (http://www.project\-inglenook.co.uk).
+.PP
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+.PP
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+.PP
+You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
+.SH SEE ALSO
+None.

@@ -18,3 +18,4 @@
 
 # Include subdirectories to process.
 add_subdirectory(ign_locate)
+add_subdirectory(ign_log_write)

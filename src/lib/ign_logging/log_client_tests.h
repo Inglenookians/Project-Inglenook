@@ -1,3 +1,4 @@
+#pragma once
 /*
 * logging_client_tests.h: Test routines for the log_client class (log_client.cpp/h)
 * Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
@@ -15,8 +16,6 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-
-#pragma once
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE LOG_TEST_NAME

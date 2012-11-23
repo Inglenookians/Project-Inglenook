@@ -1,3 +1,4 @@
+#pragma once
 /*
 * log_writer.h: log_writer provides log writing functionality for the logging service daemon.
 * Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
@@ -15,8 +16,6 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-
-#pragma once
 
 // standard library includes
 #include <ostream>
@@ -55,7 +54,11 @@ class log_writer
 		log_writer() = delete;
 
 		// Creates a new LogWriter instance which will emit logs to the specified output stream.
-		log_writer(const std::shared_ptr<std::ostream>& output_stream, bool write_header = true, bool write_footer = true);
+		log_writer(const std::shared_ptr<std::ostream>& output_stream, const bool& write_header = true, const bool& write_footer = true);
+
+		// Creates a new LogWriter instance which will emit logs to the specified output stream.
+		log_writer(const std::shared_ptr<std::ostream>& output_stream, const bool& write_header, const bool& write_footer,
+				const pid_type& pid, const std::string& application_name);
 
 
 
@@ -65,16 +68,33 @@ class log_writer
 		log_writer(const log_writer&) = delete;
 
 		// Creates a new log_writer instance.
-		static std::shared_ptr<log_writer> create(bool write_header = true, bool write_footer = true);
+		static std::shared_ptr<log_writer> create(const bool& write_header = true, const bool& write_footer = true);
+
+		// Creates a new log_writer instance.
+		static std::shared_ptr<log_writer> create(const bool& write_header, const bool& write_footer,
+				const pid_type& pid, const std::string& application_name, std::shared_ptr<boost::filesystem::path> out_filename = nullptr);
 
 		// Creates a new log_writer instance which will emit logs to the specified file.
-		static std::shared_ptr<log_writer> create_from_file_path(const boost::filesystem::path& output_file, const bool& create = true, bool write_header = true, bool write_footer = true);
+		static std::shared_ptr<log_writer> create_from_file_path(const boost::filesystem::path& output_file, const bool& create = true,
+				const bool& write_header = true, const bool& write_footer = true);
+
+		// Creates a new log_writer instance which will emit logs to the specified file.
+		static std::shared_ptr<log_writer> create_from_file_path(const boost::filesystem::path& output_file, const bool& create,
+				const bool& write_header, const bool& write_footer,	const pid_type& pid, const std::string& application_name);
 
 		// Creates a new log_writer instance which will emit logs to a specified stream
-		static std::shared_ptr<log_writer> create_from_stream(const std::shared_ptr<std::ostream>& output_stream, bool write_header = true, bool write_footer = true);
+		static std::shared_ptr<log_writer> create_from_stream(const std::shared_ptr<std::ostream>& output_stream,
+				const bool& write_header = true, const bool& write_footer = true);
+
+		// Creates a new log_writer instance which will emit logs to a specified stream
+		static std::shared_ptr<log_writer> create_from_stream(const std::shared_ptr<std::ostream>& output_stream,
+				const bool& write_header, const bool& write_footer, const pid_type& pid, const std::string& application_name);
 
 		// gets the default log path for this run of the software.
 		static boost::filesystem::path default_log_path();
+
+		// gets the default log path for this run of the software.
+		static boost::filesystem::path default_log_path(const pid_type& pid, const std::string& application_name);
 
 		// Destroys the LogWriter, releasing any associated resources.
 		virtual ~log_writer();
@@ -115,6 +135,12 @@ class log_writer
 
 		/// sets the console threshold
 		void console_threshold(const category& value);
+
+
+
+		/// defines the value that expresses no PID
+		static const pid_type NO_PID;
+
 
 
 	private:

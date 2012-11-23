@@ -1,3 +1,4 @@
+#pragma once
 /*
 * logging.h: External interface for client applications. Full implementation in common logging.
 * Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
@@ -15,7 +16,6 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-#pragma once
 
 // boost (http://boost.org) includes
 #include <boost/filesystem.hpp>
@@ -94,3 +94,7 @@ namespace logging
 } // namespace logging
 
 } // namespace inglenook
+
+
+
+

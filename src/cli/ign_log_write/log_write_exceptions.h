@@ -1,5 +1,5 @@
 /*
-* log_write_exceptions.cpp: ign_log_write exception constants and structures..
+* log_write_exceptions.h: ign_log_write exception constants and structures..
 * Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
 *
 * This program is free software: you can redistribute it and/or modify

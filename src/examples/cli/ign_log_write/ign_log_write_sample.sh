@@ -26,7 +26,7 @@
 LOG_NAMESPACE="inglenook.examples.ign_log_write"
 
 # writing our information the easy way
-log "hello world from out script..."
+log "hello world from our script..."
 
 # and as before - all the other varieties - in full
 log_debug 	"I'm a debug message"		# NOTE: filtering will prevent these being shown. 

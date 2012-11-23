@@ -135,7 +135,9 @@ const boost::filesystem::path create_log_file(const std::string& name, const pid
 void write_log_entry(const boost::program_options::variables_map& arguments);
 
 // writes a log entry to the specified file with the specified message, namespace and category.
-void write_log_entry(const boost::filesystem::path& path_to_log, std::string message, std::string log_namespace = log_write_default_namespace, category event_type = category::information);
+void write_log_entry(const boost::filesystem::path& path_to_log, const std::string& message,
+        const std::string& log_namespace = log_write_default_namespace,
+        const category& event_type = category::information);
 
 
 

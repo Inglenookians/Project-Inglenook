@@ -41,13 +41,35 @@ log_write_action parse_action(const std::string& action_string)
 	// initialize result buffer
 	auto result = log_write_action::no_action;
 	
+	//
 	// determine what is being requested
-	if		(action_string == start_full_action_string) 	result = create_new_log;
-	else if	(action_string == start_short_action_string) 	result = create_new_log;
-	else if	(action_string == write_full_action_string) 	result = write_message_to_log;
-	else if	(action_string == write_short_action_string) 	result = write_message_to_log;
-	else if	(action_string == close_full_action_string) 	result = close_log;
-	else if	(action_string == close_short_action_string) 	result = close_log;
+	// and assign an appropriate value
+	//
+
+	if(action_string == start_full_action_string)
+	{
+		result = create_new_log;
+	}
+	else if	(action_string == start_short_action_string)
+	{
+		result = create_new_log;
+	}
+	else if	(action_string == write_full_action_string)
+	{
+	    result = write_message_to_log;
+	}
+	else if	(action_string == write_short_action_string)
+	{
+	    result = write_message_to_log;
+	}
+	else if	(action_string == close_full_action_string)
+    {
+	    result = close_log;
+	}
+	else if	(action_string == close_short_action_string)
+    {
+        result = close_log;
+    }
 	
 	// return the result
 	return result;
@@ -121,7 +143,7 @@ const boost::filesystem::path create_log_file(const boost::program_options::vari
 		}
 		case 3: // expect create action, a process id and name.
 		{
-			// extract the pid and name, then cann the appropriate method...
+			// extract the pid and name, then call the appropriate method...
 			auto pid = require_parameter<pid_type>(arguments, "pid");
 			auto name = require_parameter<std::string>(arguments, "name");
 			result = create_log_file(name, pid);
@@ -242,7 +264,7 @@ void write_log_entry(const boost::program_options::variables_map& arguments)
  * @params log_namespace namespace to write the log out to
  * @params category the type of event to write
  */
-void write_log_entry(const boost::filesystem::path& path_to_log, std::string message, std::string log_namespace, category event_type)
+void write_log_entry(const boost::filesystem::path& path_to_log, const std::string& message, const std::string& log_namespace, const category& event_type)
 {
 	using namespace inglenook::logging;
 	using namespace boost::locale;

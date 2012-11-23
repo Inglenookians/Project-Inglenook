@@ -1,3 +1,4 @@
+#pragma once
 /*
 * log_writer.h: log_writer provides log writing functionality for the logging service daemon.
 * Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
@@ -15,8 +16,6 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-
-#pragma once
 
 // standard library includes
 #include <ostream>

@@ -161,7 +161,7 @@ std::string application::name()
                 std::string buffer;
                 
                 // Read a line in to the buffer, and then convert to path.
-                std::getline(parser, buffer, ' ');
+                std::getline(parser, buffer, '\0');
                 binary_path = buffer;
                 
             }
@@ -261,9 +261,9 @@ bool application::arguments_parser(boost::program_options::variables_map& variab
     // Generic options (help, version and config file).
     boost::program_options::options_description generic("Other options");
     generic.add_options()
-        ("help", "produce help message")
-        ("version", "produce version information")
-        ("config-file", boost::program_options::value<std::string>(), "override the global/application configuration file")
+        ("help", boost::locale::translate("produce help message").str().c_str())
+        ("version", boost::locale::translate("produce version information").str().c_str())
+        ("config-file", boost::program_options::value<std::string>(), boost::locale::translate("override the global/application configuration file").str().c_str())
     ;
     
     // Setup the program options, this joins the options together and sets the program description.

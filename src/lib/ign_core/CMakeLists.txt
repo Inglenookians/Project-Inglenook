@@ -35,7 +35,6 @@ target_link_libraries(
 	boost_locale
 	boost_program_options
 	boost_system
-	c++
 )
 
 # Set the properties

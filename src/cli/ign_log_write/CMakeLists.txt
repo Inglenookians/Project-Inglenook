@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-# Make the library.
+# Make the application.
 add_executable(
 	ign_log_write
 	main.cpp
@@ -46,6 +46,24 @@ install(
 	DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
 )
 
+###########
+# Scripts #
+###########
+
+# Copy script into build directory.
+add_custom_target(ign_logging.sh
+	COMMAND cmake -E copy
+	${CMAKE_CURRENT_SOURCE_DIR}/ign_logging.sh
+	${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ign_logging.sh
+)
+add_dependencies(ign_log_write ign_logging.sh)
+
+# Specify the install location.
+install(
+	FILES ign_logging.sh 
+	DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
+)
+
 #########
 # Tests #
 #########
@@ -55,6 +73,12 @@ add_executable(
 	ign_log_write_tests 
 	tests.cpp
 	log_write_actions.cpp
+)
+
+# Set the properties
+set_target_properties(
+	ign_log_write_tests PROPERTIES
+	RUNTIME_OUTPUT_DIRECTORY ${EXAMPLES_OUTPUT_DIRECTORY}
 )
 
 # Link to required libraries

@@ -16,30 +16,5 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-# Make the application.
-add_executable(
-	ign_locate
-	main.cpp
-)
-
-# Link to required libraries
-target_link_libraries(
-	ign_locate
-	ign_directories
-)
-
-# Configure the automatic version header generation.
-set(TARGET_VERSION 0.1)
-add_custom_target(ign_locate_version ALL 
-	COMMAND ${CMAKE_COMMAND} 
-	-D TARGET_VERSION=${TARGET_VERSION}
-	-P ${PROJECT_SOURCE_DIR}/cmake/version_git.cmake
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
-add_dependencies(ign_locate ign_locate_version)
-
-# Specify the install location.
-install(
-	TARGETS ign_locate 
-	DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
-)
+# Include subdirectories to process.
+add_subdirectory(ign_log_write)

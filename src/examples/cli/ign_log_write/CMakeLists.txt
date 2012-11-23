@@ -16,30 +16,14 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-# Make the application.
-add_executable(
-	ign_locate
-	main.cpp
-)
+###########
+# Scripts #
+###########
 
-# Link to required libraries
-target_link_libraries(
-	ign_locate
-	ign_directories
+# Copy script into build directory.
+add_custom_target(ign_log_write_sample.sh
+	COMMAND cmake -E copy
+	${CMAKE_CURRENT_SOURCE_DIR}/ign_log_write_sample.sh
+	${EXAMPLES_OUTPUT_DIRECTORY}/ign_log_write_sample.sh
 )
-
-# Configure the automatic version header generation.
-set(TARGET_VERSION 0.1)
-add_custom_target(ign_locate_version ALL 
-	COMMAND ${CMAKE_COMMAND} 
-	-D TARGET_VERSION=${TARGET_VERSION}
-	-P ${PROJECT_SOURCE_DIR}/cmake/version_git.cmake
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
-add_dependencies(ign_locate ign_locate_version)
-
-# Specify the install location.
-install(
-	TARGETS ign_locate 
-	DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
-)
+add_custom_target(ign_log_write_sample ALL DEPENDS ign_log_write_sample.sh)

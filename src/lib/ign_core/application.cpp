@@ -253,7 +253,7 @@ std::string application::name()
 //--------------------------------------------------------//
 
 //--------------------------------------------------------//
-bool application::arguments_parser(boost::program_options::variables_map& variables_map, int argc, char* argv[], const boost::program_options::options_description& options, const boost::program_options::positional_options_description& positions)
+bool application::arguments_parser(boost::program_options::variables_map& variables_map, const int& argc, const char* argv[], const boost::program_options::options_description& options, const boost::program_options::positional_options_description& positions)
 {
     // Keep track of whether we should suggest exit the application.
     bool should_exit(false);

@@ -31,7 +31,7 @@
 #include <boost/locale.hpp>
 #include <boost/program_options.hpp>
 
-int main(int argc, char* argv[])
+int main(int argc, const char* argv[])
 {
     // Keep track of our success.
     int success(EXIT_FAILURE);

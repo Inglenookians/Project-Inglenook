@@ -96,7 +96,7 @@ boost::program_options::positional_options_description create_program_positional
  * @params arg_v list of command line arguments
  * @returns EXIT_SUCCESS on success, EXIT_FAILURE on generic failure.
  */
-int main(int arg_c, char* arg_v[])
+int main(int arg_c, const char* arg_v[])
 {
     int success = EXIT_FAILURE;
 

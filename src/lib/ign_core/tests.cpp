@@ -64,11 +64,11 @@ BOOST_AUTO_TEST_CASE(application)
     // Test the arguments parser.
     // Setup some required variables.
     boost::program_options::variables_map variables_map_one;
-    char* argv_one[] { const_cast<char*>("--help"), const_cast<char*>("--help"), const_cast<char*>("--custom") };
+    const char* argv_one[] { "--help", "--help", "--custom" };
     boost::program_options::variables_map variables_map_two;
-    char* argv_two[] { const_cast<char*>("appname"), const_cast<char*>("--version"), const_cast<char*>("custom") };
+    const char* argv_two[] { "appname", "--version", "custom" };
     boost::program_options::variables_map variables_map_three;
-    char* argv_three[] { const_cast<char*>("appname"), const_cast<char*>("--config-file"), const_cast<char*>("conf_file.xml") };
+    const char* argv_three[] { "appname", "--config-file", "conf_file.xml" };
     boost::program_options::options_description options;
     options.add_options() ("custom", "Custom Option");
     boost::program_options::positional_options_description positions;

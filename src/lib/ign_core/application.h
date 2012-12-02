@@ -132,7 +132,7 @@ namespace inglenook
              * @return Whether the user has specified the help/version option, as usually we want to stop the application from executing any further.
              * @note This will throw if invalid arguments are specified on the command line.
              */
-            static bool arguments_parser(boost::program_options::variables_map& variables_map, int argc, char* argv[], const boost::program_options::options_description& options = boost::program_options::options_description(), const boost::program_options::positional_options_description& positions = boost::program_options::positional_options_description());
+            static bool arguments_parser(boost::program_options::variables_map& variables_map, const int& argc, const char* argv[], const boost::program_options::options_description& options = boost::program_options::options_description(), const boost::program_options::positional_options_description& positions = boost::program_options::positional_options_description());
             
         };
         

@@ -57,7 +57,7 @@ namespace inglenook
              * Set a config value to the application config file.
              * @param key The key of the config value to store.
              * @param value The value to set for the key.
-             * @return Whether the operation was successfully.
+             * @return Whether the operation was successful.
              * @note Ensure that the parent directory of file_path exists and we have permission to write to it.
              */
             bool set(const std::string& key, const std::string& value);
@@ -65,7 +65,7 @@ namespace inglenook
             /**
              * Remove a config value from the application config file.
              * @param key The key of the config value to remove.
-             * @return Whether the operation was successfully.
+             * @return Whether the operation was successful.
              */
             bool remove(const std::string& key);
             
@@ -87,15 +87,15 @@ namespace inglenook
              * Set a config value to the global config file.
              * @param key The key of the config value to store.
              * @param value The value to set for the key.
-             * @return Whether the operation was successfully.
+             * @return Whether the operation was successful.
              * @note Ensure that the parent directory of file_path exists and we have permission to write to it.
              */
             bool set(const std::string& key, const std::string& value);
             
             /**
-             * Remove a config value from the gloabl config file.
+             * Remove a config value from the global config file.
              * @param key The key of the config value to remove.
-             * @return Whether the operation was successfully.
+             * @return Whether the operation was successful.
              */
             bool remove(const std::string& key);
             
@@ -119,7 +119,7 @@ namespace inglenook
              * @param file_path The location of the configuration file.
              * @param key The key of the config value to store.
              * @param value The value to set for the key.
-             * @return Whether the operation was successfully.
+             * @return Whether the operation was successful.
              * @note Ensure that the parent directory of file_path exists and we have permission to write to it.
              */
             bool set(const boost::filesystem::path& file_path, const std::string& key, const std::string& value);
@@ -128,7 +128,7 @@ namespace inglenook
              * Remove a config value from a config file.
              * @param file_path The location of the configuration file.
              * @param key The key of the config value to remove.
-             * @return Whether the operation was successfully.
+             * @return Whether the operation was successful.
              */
             bool remove(const boost::filesystem::path& file_path, const std::string& key);
 

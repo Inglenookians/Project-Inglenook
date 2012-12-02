@@ -265,7 +265,7 @@ bool config::file::set(const boost::filesystem::path& file_path, const std::stri
         /// @todo should we stop here or overwrite it anwyay?
         if(!read_error)
         {
-            // Try and write the modified configuration structure to file.
+            // Try to write the modified configuration structure to file.
             try
             {
                 // Set the new value.

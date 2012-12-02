@@ -139,6 +139,11 @@ int main(int argc, char* argv[])
         {
             directory_value = inglenook::directories::user(option_verbose);
         }
+        else
+        {
+            // Invalid option!
+            std::cerr << boost::format(boost::locale::translate("ERROR: unrecognised directory option: '%1%'")) % option_directory << std::endl;
+        }
         
         // Did we find a valid option?
         if(!directory_value.empty())
@@ -151,8 +156,8 @@ int main(int argc, char* argv[])
         }
         else
         {
-            // Invalid option!
-            std::cerr << boost::format(boost::locale::translate("ERROR: unrecognised directory option: '%1%'")) % option_directory << std::endl;
+            // Invalid: cannot have empty directory option!
+            std::cerr << boost::format(boost::locale::translate("ERROR: failed to find directory: '%1%'")) % option_directory << std::endl;
         }
     }
     

@@ -37,27 +37,27 @@ namespace logging
 class log_entry_buffered: public log_entry
 {
 
-	public:
+    public:
 
-		/// creates a new buffered log entry.
-		log_entry_buffered();
+        /// creates a new buffered log entry.
+        log_entry_buffered();
 
-		/// deconstructs an buffered log entry.
-		virtual ~log_entry_buffered();
+        /// deconstructs an buffered log entry.
+        virtual ~log_entry_buffered();
 
-		/// gets the log message stream buffer
-		std::stringstream& message_buffer();
+        /// gets the log message stream buffer
+        std::stringstream& message_buffer();
 
-		/// overrides message() from log entry to ensure it remains in sync with stream buffer.
-		virtual const std::string& message() override;
+        /// overrides message() from log entry to ensure it remains in sync with stream buffer.
+        virtual const std::string& message() override;
 
-		/// sets the log message
-		virtual void message(const std::string& value) override;
+        /// sets the log message
+        virtual void message(const std::string& value) override;
 
-	private:
+    private:
 
-		/// log message content buffer
-		std::stringstream m_message_buffer;
+        /// log message content buffer
+        std::stringstream m_message_buffer;
 
 };
 

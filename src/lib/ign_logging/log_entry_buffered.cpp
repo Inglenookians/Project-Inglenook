@@ -30,10 +30,10 @@ namespace logging
 * @see ~log_entry_buffered()
 */
 log_entry_buffered::log_entry_buffered()
-	: log_entry(),
-	m_message_buffer()
+    : log_entry(),
+    m_message_buffer()
 {
-	// Nothing to do here at the moment.
+    // Nothing to do here at the moment.
 }
 
 /**
@@ -42,7 +42,7 @@ log_entry_buffered::log_entry_buffered()
 */
 log_entry_buffered::~log_entry_buffered()
 {
-	// Nothing to do here at the moment.
+    // Nothing to do here at the moment.
 }
 
 
@@ -53,7 +53,7 @@ log_entry_buffered::~log_entry_buffered()
  */
 std::stringstream& log_entry_buffered::message_buffer()
 {
-	return m_message_buffer;
+    return m_message_buffer;
 }
 
 /**
@@ -65,9 +65,9 @@ std::stringstream& log_entry_buffered::message_buffer()
  */
 const std::string& log_entry_buffered::message()
 {
-	// update the underlying buffer, and return as if a normal log_entry
-	log_entry::message(std::string(m_message_buffer.str()));
-	return log_entry::message();
+    // update the underlying buffer, and return as if a normal log_entry
+    log_entry::message(std::string(m_message_buffer.str()));
+    return log_entry::message();
 }
 
 /**
@@ -79,13 +79,13 @@ const std::string& log_entry_buffered::message()
  */
 void log_entry_buffered::message(const std::string& value)
 {
-	// reset string stream
-	m_message_buffer.clear();
-	m_message_buffer.str(std::string());
+    // reset string stream
+    m_message_buffer.clear();
+    m_message_buffer.str(std::string());
 
-	// update with new value
-	m_message_buffer << value;
-	log_entry::message(value);
+    // update with new value
+    m_message_buffer << value;
+    log_entry::message(value);
 }
 
 

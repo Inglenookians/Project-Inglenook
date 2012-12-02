@@ -22,28 +22,28 @@
 
 # Make the library.
 add_library(
-	ign_config 
-	SHARED
-	config.cpp
+    ign_config 
+    SHARED
+    config.cpp
 )
 
 # Link to required libraries
 target_link_libraries(
-	ign_config
-	ign_directories
+    ign_config
+    ign_directories
 )
 
 # Set the properties
 set_target_properties(
-	ign_config PROPERTIES
-	VERSION 0.0.1
-	SOVERSION 1
+    ign_config PROPERTIES
+    VERSION 0.0.1
+    SOVERSION 1
 )
 
 # Specify the install location.
 install(
-	TARGETS ign_config 
-	DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
+    TARGETS ign_config
+    DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
 )
 
 #########
@@ -52,25 +52,25 @@ install(
 
 # Make the test.
 add_executable(
-	ign_config_tests 
-	tests.cpp
+    ign_config_tests
+    tests.cpp
 )
 
 # Set the properties
 set_target_properties(
-	ign_config_tests PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY ${TESTS_OUTPUT_DIRECTORY}
+    ign_config_tests PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${TESTS_OUTPUT_DIRECTORY}
 )
 
 # Link to required libraries
 target_link_libraries(
-	ign_config_tests
-	ign_config
-	boost_unit_test_framework
+    ign_config_tests
+    ign_config
+    boost_unit_test_framework
 ) 
 
 # Add the test.
 add_test(
-	NAME ign_config_tests
-	COMMAND ign_config_tests
+    NAME ign_config_tests
+    COMMAND ign_config_tests
 )

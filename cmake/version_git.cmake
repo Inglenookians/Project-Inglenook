@@ -19,27 +19,27 @@
 # Make sure we can find git.
 find_program(GIT_EXECUTABLE git)
 if(NOT GIT_EXECUTABLE)
-	message(FATAL_ERROR "Unable to find 'git'")
+    message(FATAL_ERROR "Unable to find 'git'")
 endif(NOT GIT_EXECUTABLE)
 
 # Fetch the current git branch name.
 execute_process(
-	COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
-	OUTPUT_VARIABLE GIT_BRANCH_NAME
-	OUTPUT_STRIP_TRAILING_WHITESPACE
+    COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+    OUTPUT_VARIABLE GIT_BRANCH_NAME
+    OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
 # Fetch the last git commit hash.
 execute_process(
-	COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
-	OUTPUT_VARIABLE GIT_BRANCH_HASH
-	OUTPUT_STRIP_TRAILING_WHITESPACE
+    COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+    OUTPUT_VARIABLE GIT_BRANCH_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
 # Create an intermediate file with the new contents.
 file(
-	WRITE ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in
-	"/*
+    WRITE ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in
+    "/*
  * version.h: An automatically-generated git-based version definition file.
  * Copyright (C) 2012, Project Inglenook (http://www.project-inglenook.co.uk)
  *
@@ -62,13 +62,13 @@ file(
 
 # Copy over the current file, but only if its different!
 execute_process(
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-	${CMAKE_CURRENT_SOURCE_DIR}/version.h.in 
-	${CMAKE_CURRENT_SOURCE_DIR}/version.h
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in 
+    ${CMAKE_CURRENT_SOURCE_DIR}/version.h
 )
 
 # Remove the intermediate file.
 execute_process(
-	COMMAND ${CMAKE_COMMAND} -E remove 
-	${CMAKE_CURRENT_SOURCE_DIR}/version.h.in
+    COMMAND ${CMAKE_COMMAND} -E remove 
+    ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in
 )

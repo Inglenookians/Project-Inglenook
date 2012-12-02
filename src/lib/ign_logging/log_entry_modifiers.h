@@ -32,31 +32,31 @@ namespace logging
 class ns
 {
 
-	public:
+    public:
 
-		/**
-		 * Creates a new name space stream modifier
-		 * @param value new name space
-		 */
-		ns(const std::string& value)
-		{
-			m_ns = value;
-		}
+        /**
+         * Creates a new name space stream modifier
+         * @param value new name space
+         */
+        ns(const std::string& value)
+        {
+            m_ns = value;
+        }
 
-		/**
-		 * log namespace to apply
-		 * @return log namespace
-		 */
+        /**
+         * log namespace to apply
+         * @return log namespace
+         */
+        const std::string& log_namespace() const
+        {
+            return m_ns;
+        }
 
-		const std::string& log_namespace() const
-		{
-			return m_ns;
-		}
-
-	private:
-		/// the name space to apply
-		std::string m_ns;
-
+    private:
+    
+        /// the name space to apply
+        std::string m_ns;
+    
 };
 
 /**
@@ -65,47 +65,45 @@ class ns
 class log_data
 {
 
-	public:
+    public:
 
-		/**
-		 * Adds a data item to the log.
-		 * @param key key for the data type.
-		 * @param value new name space
-		 */
-		log_data(const std::string& key, const std::string& value)
-		{
-			m_value = value;
-			m_key = key;
-		}
+        /**
+         * Adds a data item to the log.
+         * @param key key for the data type.
+         * @param value new name space
+         */
+        log_data(const std::string& key, const std::string& value)
+        {
+            m_value = value;
+            m_key = key;
+        }
 
+        /**
+         * Key of data pair
+         * @return Data pairs key
+         */
+        const std::string& key() const
+        {
+            return m_key;
+        }
 
-		/**
-		 * Key of data pair
-		 * @return Data pairs key
-		 */
-		const std::string& key() const
-		{
-			return m_key;
-		}
-
-
-		/**
-		 * Value of data pair
-		 * @return Data pairs value
-		 */
-		const std::string& value() const
-		{
-			return m_value;
-		}
+        /**
+         * Value of data pair
+         * @return Data pairs value
+         */
+        const std::string& value() const
+        {
+            return m_value;
+        }
 
 
-	private:
+    private:
 
-		/// the key of the data
-		std::string m_key;
+        /// the key of the data
+        std::string m_key;
 
-		/// the value of the data
-		std::string m_value;
+        /// the value of the data
+        std::string m_value;
 
 };
 

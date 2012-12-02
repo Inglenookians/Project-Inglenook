@@ -35,8 +35,8 @@ namespace logging
  */
 void initialize_logging()
 {
-	// initialize logging functionality
-	initialize_logging(log_writer::default_log_path());
+    // initialize logging functionality
+    initialize_logging(log_writer::default_log_path());
 }
 
 /**
@@ -46,9 +46,9 @@ void initialize_logging()
  */
 void initialize_logging(const boost::filesystem::path& log_file)
 {
-	// create global variables and output appropriately.
-	log_output = log_writer::create_from_file_path( log_file );
-	ilog = std::shared_ptr<log_client>(new log_client(log_output));
+    // create global variables and output appropriately.
+    log_output = log_writer::create_from_file_path( log_file );
+    ilog = std::shared_ptr<log_client>(new log_client(log_output));
 }
 
 /**
@@ -57,9 +57,9 @@ void initialize_logging(const boost::filesystem::path& log_file)
  */
 void initialize_logging_off_record()
 {
-	// create global variables and output appropriately.
-	log_output = log_writer::create_from_stream( nullptr );
-	ilog = std::shared_ptr<log_client>(new log_client(log_output));
+    // create global variables and output appropriately.
+    log_output = log_writer::create_from_stream( nullptr );
+    ilog = std::shared_ptr<log_client>(new log_client(log_output));
 }
 
 /**
@@ -68,23 +68,20 @@ void initialize_logging_off_record()
  */
 void logging_initialization_check(const bool& warning)
 {
+    // check if logging is properly instanciated.
+    if(log_output == nullptr || ilog == nullptr)
+    {
+        // create fallback logger - do not assume we have disk access.
+        initialize_logging_off_record();
 
-	// check if logging is properly instanciated.
-	if(log_output == nullptr || ilog == nullptr)
-	{
-		// create fallback logger - do not assume we have disk access.
-		initialize_logging_off_record();
-
-		// check if this fail-safe is silent.
-		if(warning)
-		{
-			// warn implementors that an automatic check just saved them. if you want basic logging no file - call  initialize_logging_off_record() yourself.
-			log_warning() << boost::locale::translate("WARNING: use of inglenook logging prior to initialization. an off-the-record logging mechanism has been") << std::endl;
-			log_warning() << boost::locale::translate("         initialized on your behalf, its strongly recommended you do this yourself.") << lf::end;
-		}
-
-	}
-
+        // check if this fail-safe is silent.
+        if(warning)
+        {
+            // warn implementors that an automatic check just saved them. if you want basic logging no file - call  initialize_logging_off_record() yourself.
+            log_warning() << boost::locale::translate("WARNING: use of inglenook logging prior to initialization. an off-the-record logging mechanism has been") << std::endl;
+            log_warning() << boost::locale::translate("         initialized on your behalf, its strongly recommended you do this yourself.") << lf::end;
+        }
+    }
 }
 
 /**
@@ -94,9 +91,9 @@ void logging_initialization_check(const bool& warning)
  */
 log_client& set_category_and_return(const category& new_value)
 {
-	logging_initialization_check();
-	ilog->buffer()->entry_type(new_value);
-	return *ilog;
+    logging_initialization_check();
+    ilog->buffer()->entry_type(new_value);
+    return *ilog;
 }
 
 /**
@@ -104,8 +101,8 @@ log_client& set_category_and_return(const category& new_value)
  */
 log_client& log()
 {
-	logging_initialization_check();
-	return *ilog;
+    logging_initialization_check();
+    return *ilog;
 }
 
 /**
@@ -113,7 +110,7 @@ log_client& log()
  */
 log_client& log_debug()
 {
-	return set_category_and_return(category::debugging);
+    return set_category_and_return(category::debugging);
 }
 
 /**
@@ -121,7 +118,7 @@ log_client& log_debug()
  */
 log_client& log_trace()
 {
-	return set_category_and_return(category::verbose);
+    return set_category_and_return(category::verbose);
 }
 
 /**
@@ -129,7 +126,7 @@ log_client& log_trace()
  */
 log_client& log_info()
 {
-	return set_category_and_return(category::information);
+    return set_category_and_return(category::information);
 }
 
 /**
@@ -137,7 +134,7 @@ log_client& log_info()
  */
 log_client& log_warning()
 {
-	return set_category_and_return(category::warning);
+    return set_category_and_return(category::warning);
 }
 
 /**
@@ -145,7 +142,7 @@ log_client& log_warning()
  */
 log_client& log_error()
 {
-	return set_category_and_return(category::error);
+    return set_category_and_return(category::error);
 }
 
 /**
@@ -153,7 +150,7 @@ log_client& log_error()
  */
 log_client& log_fatal()
 {
-	return set_category_and_return(category::fatal);
+    return set_category_and_return(category::fatal);
 }
 
 } // namespace logging

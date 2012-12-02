@@ -22,8 +22,8 @@
 
 # Copy script into build directory.
 add_custom_target(ign_log_write_sample.sh
-	COMMAND cmake -E copy
-	${CMAKE_CURRENT_SOURCE_DIR}/ign_log_write_sample.sh
-	${EXAMPLES_OUTPUT_DIRECTORY}/ign_log_write_sample.sh
+    COMMAND cmake -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/ign_log_write_sample.sh
+    ${EXAMPLES_OUTPUT_DIRECTORY}/ign_log_write_sample.sh
 )
 add_custom_target(ign_log_write_sample ALL DEPENDS ign_log_write_sample.sh)

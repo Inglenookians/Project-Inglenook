@@ -52,10 +52,10 @@ const std::string close_short_action_string = "c";
  */
 enum log_write_action : unsigned int
 {
-	no_action 				= 0x00, /**< no action to be performed. */
-	create_new_log 			= 0x01, /**< create a new log file. */
-	write_message_to_log 	= 0x02,	/**< write a message to an existing log file. */
-	close_log 				= 0x03  /**< close an open log file. */
+    no_action            = 0x00, /**< no action to be performed. */
+    create_new_log       = 0x01, /**< create a new log file. */
+    write_message_to_log = 0x02, /**< write a message to an existing log file. */
+    close_log            = 0x03  /**< close an open log file. */
 };
 
 /// default namespace to write entries in when using this binary.
@@ -74,19 +74,18 @@ log_write_action parse_action(const std::string& action_string);
  */
 template <class T> T require_parameter(const boost::program_options::variables_map& from, const std::string& parameter)
 {
+    // ensure the value is present...
+    if(from.count(parameter) == 0)
+    {
+        using namespace inglenook::logging;
 
-	// ensure the value is present...
-	if(from.count(parameter) == 0)
-	{
-		using namespace inglenook::logging;
+        // throw exception - item is missing...
+        BOOST_THROW_EXCEPTION( action_required_arguments_missing_exception()
+                << expected_argument(parameter));
+    }
 
-		// throw exception - item is missing...
-		BOOST_THROW_EXCEPTION( action_required_arguments_missing_exception()
-				<< expected_argument(parameter));
-	}
-
-	// return the item required.
-	return from[parameter].as<T>();
+    // return the item required.
+    return from[parameter].as<T>();
 }
 
 /**
@@ -98,19 +97,18 @@ template <class T> T require_parameter(const boost::program_options::variables_m
  */
 template <class T> T optional_parameter(const boost::program_options::variables_map& from, const std::string& parameter, const T& fallback)
 {
+    // create and default buffer
+    T result = fallback;
 
-	// create and default buffer
-	T result = fallback;
+    // check if the value is present...
+    if(from.count(parameter) != 0)
+    {
+        // ... and populate result if so
+        result = from[parameter].as<T>();
+    }
 
-	// check if the value is present...
-	if(from.count(parameter) != 0)
-	{
-		// ... and populate result if so
-		result = from[parameter].as<T>();
-	}
-
-	// return the item.
-	return result;
+    // return the item.
+    return result;
 }
 
 

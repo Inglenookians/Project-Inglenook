@@ -29,11 +29,11 @@ LOG_NAMESPACE="inglenook.examples.ign_log_write"
 log "hello world from our script..."
 
 # and as before - all the other varieties - in full
-log_debug 	"I'm a debug message"		# NOTE: filtering will prevent these being shown. 
-log_verbose 	"I'm a verbose message"		# NOTE: filtering will prevent these being shown.
-log_info	"I'm a status message"
-log_warning	"I'm a warning message"
-log_error	"I'm an error message"
-log_fatal	"Doh! I'm a fatal message"
+log_debug    "I'm a debug message"      # NOTE: filtering will prevent these being shown. 
+log_verbose  "I'm a verbose message"    # NOTE: filtering will prevent these being shown.
+log_info     "I'm a status message"
+log_warning  "I'm a warning message"
+log_error    "I'm an error message"
+log_fatal    "Doh! I'm a fatal message"
 
 # and thats all there is too it - log creation and cleanup are handled using auto-magic.

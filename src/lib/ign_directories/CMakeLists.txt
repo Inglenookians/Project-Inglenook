@@ -22,28 +22,28 @@
 
 # Make the library.
 add_library(
-	ign_directories 
-	SHARED
-	directories.cpp
+    ign_directories
+    SHARED
+    directories.cpp
 )
 
 # Link to required libraries
 target_link_libraries(
-	ign_directories
-	ign_core
+    ign_directories
+    ign_core
 )
 
 # Set the properties
 set_target_properties(
-	ign_directories PROPERTIES
-	VERSION 0.0.1
-	SOVERSION 1
+    ign_directories PROPERTIES
+    VERSION 0.0.1
+    SOVERSION 1
 )
 
 # Specify the install location.
 install(
-	TARGETS ign_directories 
-	DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
+    TARGETS ign_directories
+    DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
 )
 
 #########
@@ -52,25 +52,25 @@ install(
 
 # Make the test.
 add_executable(
-	ign_directories_tests 
-	tests.cpp
+    ign_directories_tests
+    tests.cpp
 )
 
 # Set the properties
 set_target_properties(
-	ign_directories_tests PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY ${TESTS_OUTPUT_DIRECTORY}
+    ign_directories_tests PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${TESTS_OUTPUT_DIRECTORY}
 )
 
 # Link to required libraries
 target_link_libraries(
-	ign_directories_tests
-	ign_directories
-	boost_unit_test_framework
+    ign_directories_tests
+    ign_directories
+    boost_unit_test_framework
 ) 
 
 # Add the test.
 add_test(
-	NAME ign_directories_tests
-	COMMAND ign_directories_tests
+    NAME ign_directories_tests
+    COMMAND ign_directories_tests
 )

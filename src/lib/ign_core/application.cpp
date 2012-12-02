@@ -259,7 +259,7 @@ bool application::arguments_parser(boost::program_options::variables_map& variab
     bool should_exit(false);
     
     // Generic options (help, version and config file).
-    boost::program_options::options_description generic("Other options");
+    boost::program_options::options_description generic(boost::locale::translate("Other options").str().c_str());
     generic.add_options()
         ("help", boost::locale::translate("produce help message").str().c_str())
         ("version", boost::locale::translate("produce version information").str().c_str())

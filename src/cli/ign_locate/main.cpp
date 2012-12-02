@@ -46,17 +46,17 @@ int main(int argc, char* argv[])
     boost::program_options::options_description options("Program options");
     options.add_options()
         ("dir,d", boost::program_options::value<std::string>()->required(),
-            "REQUIRED: The directory to locate. Available options are:\n\n"
-            "cli     \tThe location of inglenook's command line tools\n"
-            "config  \tThe location of inglenook's configuration files\n"
-            "data    \tThe location of inglenook's data files\n"
-            "lib     \tThe location of inglenook's internal libraries\n"
-            "log     \tThe location of inglenook's log files\n"
-            "sbin    \tThe location of inglenook's system administrator tools\n"
-            "man     \tThe location of inglenook's manual pages\n"
-            "tmp     \tThe location of inglenook's temporary files\n"
-            "user    \tThe location of user's home directory\n")
-        ("verbose,v", "Detailed output indicate how it came to its conclusion (detailing where it looked to find the directory)")
+            boost::locale::translate("REQUIRED: The directory to locate. Available options are:\n\n"
+                                     "cli     \tThe location of inglenook's command line tools\n"
+                                     "config  \tThe location of inglenook's configuration files\n"
+                                     "data    \tThe location of inglenook's data files\n"
+                                     "lib     \tThe location of inglenook's internal libraries\n"
+                                     "log     \tThe location of inglenook's log files\n"
+                                     "sbin    \tThe location of inglenook's system administrator tools\n"
+                                     "man     \tThe location of inglenook's manual pages\n"
+                                     "tmp     \tThe location of inglenook's temporary files\n"
+                                     "user    \tThe location of user's home directory\n").str().c_str())
+        ("verbose,v", boost::locale::translate("Detailed output indicate how it came to its conclusion (detailing where it looked to find the directory)").str().c_str())
     ;
     
     // Set the positional options.

@@ -81,26 +81,26 @@ namespace inglenook
             
             /**
              * Fetch the application description.
-             * @retutn the description.
+             * @return the description.
              */
             static std::string description();
             
             /**
              * Fetch the application version number.
-             * @retutn the version number.
+             * @return the version number.
              */
             static std::string version();
             
             /**
              * Fetch the application build information.
-             * @retutn the build information.
+             * @return the build information.
              */
             static std::string build();
             
             /**
              * Fetch the application overriding config file, which can be set 
              * using the default argument parser as well as manually.
-             * @retutn the config file.
+             * @return the config file.
              */
             static boost::filesystem::path config_file();
             

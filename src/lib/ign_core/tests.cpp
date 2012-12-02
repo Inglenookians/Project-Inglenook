@@ -18,7 +18,10 @@
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE ign_core_tests
+
+// standard library includes
 #include <iostream>
+
 // boost includes
 #include <boost/test/unit_test.hpp>
 

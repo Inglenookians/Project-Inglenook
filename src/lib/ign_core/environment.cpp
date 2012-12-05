@@ -18,6 +18,9 @@
 
 #include "environment.h"
 
+// inglenook includes
+#include "environment_exceptions.h"
+
 // standard library includes
 #include <cerrno>
 #include <iostream>
@@ -50,26 +53,21 @@ std::string environment::get(const std::string& variable, const std::string& def
 //--------------------------------------------------------//
 
 //--------------------------------------------------------//
-bool environment::set(const std::string& variable, const std::string& value, bool overwrite)
+void environment::set(const std::string& variable, const std::string& value, bool overwrite)
 {
-    // Keep track of the success.
-    bool success(false);
-    
     // Try to set the environment variable.
-    if(setenv(variable.c_str(), value.c_str(), overwrite) == 0)
-    {
-        // Success!
-        success = true;
-    }
-    else
+    if(setenv(variable.c_str(), value.c_str(), overwrite) != 0)
     {
         // Error trying to set environment variable.
         /// @todo Investigate whether this should raise a log entry.
-        /// @todo Should this raise an exception instead of returning a boolean.
         std::cerr << boost::format(boost::locale::translate("Error trying to set environment variable '%1%' to '%2%': %3%")) % variable % value % std::strerror(errno) << std::endl;
+
+        BOOST_THROW_EXCEPTION(exceptions::set_environment_exception()
+                              << exceptions::environment_variable_name(variable)
+                              << exceptions::environment_variable_value(value)
+                              << exceptions::c_error_number(errno)
+                              << exceptions::c_error_message(strerror(errno))
+                              );
     }
-    
-    // Return our sucess.
-    return success;
 }
 //--------------------------------------------------------//

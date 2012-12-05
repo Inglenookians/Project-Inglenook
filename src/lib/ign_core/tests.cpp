@@ -117,22 +117,22 @@ BOOST_AUTO_TEST_CASE(environment)
     BOOST_CHECK(inglenook::core::environment::get(variable_one, "DEFAULT") == "DEFAULT");
     
     // Test setting with overwrite enabled.
-    BOOST_CHECK(inglenook::core::environment::set(variable_one, "ONE", true) == true);
+    BOOST_CHECK_NO_THROW(inglenook::core::environment::set(variable_one, "ONE", true));
     BOOST_CHECK(inglenook::core::environment::get(variable_one) == "ONE");
-    BOOST_CHECK(inglenook::core::environment::set(variable_one, "TWO", true) == true);
+    BOOST_CHECK_NO_THROW(inglenook::core::environment::set(variable_one, "TWO", true));
     BOOST_CHECK(inglenook::core::environment::get(variable_one) != "ONE");
     BOOST_CHECK(inglenook::core::environment::get(variable_one) == "TWO");
     
     // Test setting with overwrite disabled for pre-existing variable.
-    BOOST_CHECK(inglenook::core::environment::set(variable_one, "THREE", false) == true);
+    BOOST_CHECK_NO_THROW(inglenook::core::environment::set(variable_one, "THREE", false));
     BOOST_CHECK(inglenook::core::environment::get(variable_one) != "ONE");
     BOOST_CHECK(inglenook::core::environment::get(variable_one) == "TWO");
     BOOST_CHECK(inglenook::core::environment::get(variable_one) != "THREE");
     
     // Test setting with overwrite disabled for new variable.
-    BOOST_CHECK(inglenook::core::environment::set(variable_two, "APPLE", false) == true);
+    BOOST_CHECK_NO_THROW(inglenook::core::environment::set(variable_two, "APPLE", false));
     BOOST_CHECK(inglenook::core::environment::get(variable_two) == "APPLE");
-    BOOST_CHECK(inglenook::core::environment::set(variable_two, "ORANGE", false) == true);
+    BOOST_CHECK_NO_THROW(inglenook::core::environment::set(variable_two, "ORANGE", false));
     BOOST_CHECK(inglenook::core::environment::get(variable_two) == "APPLE");
     BOOST_CHECK(inglenook::core::environment::get(variable_two) != "ORANGE");
 }

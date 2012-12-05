@@ -18,6 +18,7 @@
 
 // inglenook includes
 #include "version.h"
+#include "program_options.h"
 #include <ign_core/application.h>
 #include <ign_core/application_exceptions.h>
 #include <ign_directories/directories.h>
@@ -45,7 +46,8 @@ int main(int argc, const char* argv[])
     // Program specific options.
     boost::program_options::options_description options("Program options");
     options.add_options()
-        ("dir,d", boost::program_options::value<std::string>()->required(),
+        (boost::str(boost::format("%1%,%2%") % PO_DIR_FULL % PO_DIR_SHORT).c_str(),
+            boost::program_options::value<std::string>()->required(),
             boost::locale::translate("REQUIRED: The directory to locate. Available options are:\n\n"
                                      "cli     \tThe location of inglenook's command line tools\n"
                                      "config  \tThe location of inglenook's configuration files\n"
@@ -56,12 +58,13 @@ int main(int argc, const char* argv[])
                                      "man     \tThe location of inglenook's manual pages\n"
                                      "tmp     \tThe location of inglenook's temporary files\n"
                                      "user    \tThe location of user's home directory\n").str().c_str())
-        ("verbose,v", boost::locale::translate("Detailed output indicate how it came to its conclusion (detailing where it looked to find the directory)").str().c_str())
+        (boost::str(boost::format("%1%,%2%") % PO_VERBOSE_FULL % PO_VERBOSE_SHORT).c_str(),
+            boost::locale::translate("Detailed output indicate how it came to its conclusion (detailing where it looked to find the directory)").str().c_str())
     ;
     
     // Set the positional options.
     boost::program_options::positional_options_description positions;
-    positions.add("dir", 1);
+    positions.add(PO_DIR_FULL.c_str(), 1);
     
     // Try and parse the command line arguments.
     bool parser_exit(false);
@@ -92,14 +95,14 @@ int main(int argc, const char* argv[])
     {
         // Did the user request verbose output?
         bool option_verbose(false);
-        if(vm.count("verbose"))
+        if(vm.count(PO_VERBOSE_FULL))
         {
             // They did!
             option_verbose = true;
         }
         
         // Get the actual directory selected.
-        std::string option_directory(vm["dir"].as<std::string>());
+        std::string option_directory(vm[PO_DIR_FULL].as<std::string>());
         boost::filesystem::path directory_value;
     
         // Fetch the correct directory_value based on the specified option.

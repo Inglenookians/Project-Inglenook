@@ -20,6 +20,7 @@
 
 // inglenook includes
 #include "application_exceptions.h"
+#include "application_program_options.h"
 
 // standard library includes
 #include <fstream>
@@ -261,9 +262,9 @@ bool application::arguments_parser(boost::program_options::variables_map& variab
     // Generic options (help, version and config file).
     boost::program_options::options_description generic(boost::locale::translate("Other options").str().c_str());
     generic.add_options()
-        ("help", boost::locale::translate("produce help message").str().c_str())
-        ("version", boost::locale::translate("produce version information").str().c_str())
-        ("config-file", boost::program_options::value<std::string>(), boost::locale::translate("override the global/application configuration file").str().c_str())
+        (PO_HELP_FULL.c_str(), boost::locale::translate("produce help message").str().c_str())
+        (PO_VERSION_FULL.c_str(), boost::locale::translate("produce version information").str().c_str())
+        (PO_CONFIG_FILE_FULL.c_str(), boost::program_options::value<std::string>(), boost::locale::translate("override the global/application configuration file").str().c_str())
     ;
     
     // Setup the program options, this joins the options together and sets the program description.
@@ -285,7 +286,7 @@ bool application::arguments_parser(boost::program_options::variables_map& variab
         boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(cmdline_options).positional(positions).run(), variables_map);
         
         // Did the user request help?
-        if(variables_map.count("help"))
+        if(variables_map.count(PO_HELP_FULL))
         {
             // Print out the available options.
             std::cout << cmdline_options;
@@ -294,7 +295,7 @@ bool application::arguments_parser(boost::program_options::variables_map& variab
             should_exit = true;
         }
         // Did the user request version information?
-        else if(variables_map.count("version"))
+        else if(variables_map.count(PO_VERSION_FULL))
         {
             // Print out the version information.
             std::cout << name() << " " << version() << " (compiled " << build() << ")" << std::endl << std::endl;
@@ -324,10 +325,10 @@ bool application::arguments_parser(boost::program_options::variables_map& variab
         }
         
         // Did the user specify a config file.
-        if(variables_map.count("config-file"))
+        if(variables_map.count(PO_CONFIG_FILE_FULL))
         {
             // Set the specified config file.
-            config_file(variables_map["config-file"].as<std::string>());
+            config_file(variables_map[PO_CONFIG_FILE_FULL].as<std::string>());
         }
     }
     catch(std::exception &ex)

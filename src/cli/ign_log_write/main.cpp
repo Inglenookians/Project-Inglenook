@@ -21,6 +21,7 @@
 #include <sstream>
 
 // boost (http://boost.org) includes
+#include <boost/format.hpp>
 #include <boost/locale.hpp>
 
 // inglenook includes
@@ -29,6 +30,7 @@
 #include <ign_logging/logging.h>
 #include "log_write_exceptions.h"
 #include "log_write_actions.h"
+#include "program_options.h"
 #include "version.h"
 
 /**
@@ -51,23 +53,21 @@ boost::program_options::options_description create_program_options()
     // create the actions group
     boost::program_options::options_description action_options( translate("Actions") );
     action_options.add_options()
-        ("action,a",    boost::program_options::value<std::string>()->required(),   actions_description.str().c_str())
-        ("filename,f",  boost::program_options::value<std::string>(),               translate("Path to log file.").str().c_str());
+        (boost::str(boost::format("%1%,%2%") % PO_ACTION_FULL % PO_ACTION_SHORT).c_str(),       boost::program_options::value<std::string>()->required(),   actions_description.str().c_str())
+        (boost::str(boost::format("%1%,%2%") % PO_FILENAME_FULL % PO_FILENAME_SHORT).c_str(),   boost::program_options::value<std::string>(),               translate("Path to log file.").str().c_str());
 
     // Create program options for log creation...
     boost::program_options::options_description creation_options(translate("Log creation specific options (s, start)"));
     creation_options.add_options()
-        ("name,n",      boost::program_options::value<std::string>(),               translate("REQUIRED: Name of script or process.").str().c_str())
-        ("pid,p",       boost::program_options::value<int>(),                       translate("REQUIRED: Process id of script or process.").str().c_str());
+        (boost::str(boost::format("%1%,%2%") % PO_NAME_FULL % PO_NAME_SHORT).c_str(),           boost::program_options::value<std::string>(),               translate("REQUIRED: Name of script or process.").str().c_str())
+        (boost::str(boost::format("%1%,%2%") % PO_PID_FULL % PO_PID_SHORT).c_str(),             boost::program_options::value<int>(),                       translate("REQUIRED: Process id of script or process.").str().c_str());
 
     // Create program options for log writing...
     boost::program_options::options_description writing_options( translate("Log writing specific options (w, write)") );
     writing_options.add_options()
-
-        ("message,m",   boost::program_options::value<std::string>(),               translate("REQUIRED: Process id of script or process.").str().c_str())
-        ("namespace,N", boost::program_options::value<std::string>(),               translate("Namespace to write message in.").str().c_str())
-        ("category,C",  boost::program_options::value<unsigned int>(),              translate("Type of message to write.").str().c_str());
-
+        (boost::str(boost::format("%1%,%2%") % PO_MESSAGE_FULL % PO_MESSAGE_SHORT).c_str(),     boost::program_options::value<std::string>(),               translate("REQUIRED: Process id of script or process.").str().c_str())
+        (boost::str(boost::format("%1%,%2%") % PO_NAMESPACE_FULL % PO_NAMESPACE_SHORT).c_str(), boost::program_options::value<std::string>(),               translate("Namespace to write message in.").str().c_str())
+        (boost::str(boost::format("%1%,%2%") % PO_CATEGORY_FULL % PO_CATEGORY_SHORT).c_str(),   boost::program_options::value<unsigned int>(),              translate("Type of message to write.").str().c_str());
 
     // add all the options
     action_options.add(creation_options).add(writing_options);
@@ -84,9 +84,9 @@ boost::program_options::positional_options_description create_program_positional
 {
     // Set the positional options.
     boost::program_options::positional_options_description positions;
-    positions.add("action", 1);
-    positions.add("filename", 1);
-    positions.add("message", 1);
+    positions.add(PO_ACTION_FULL.c_str(), 1);
+    positions.add(PO_FILENAME_FULL.c_str(), 1);
+    positions.add(PO_MESSAGE_FULL.c_str(), 1);
     return positions;
 }
 
@@ -118,7 +118,7 @@ int main(int arg_c, const char* arg_v[])
         if(!inglenook::core::application::arguments_parser(vm, arg_c, arg_v,
                 create_program_options(), create_program_positionals()))
         {
-            std::string action ( vm["action"].as<std::string>() );
+            std::string action ( vm[PO_ACTION_FULL].as<std::string>() );
 
             // determine what was asked for...
             switch( parse_action(action) )

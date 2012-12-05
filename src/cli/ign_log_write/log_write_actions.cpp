@@ -23,6 +23,7 @@
 #include <ign_core/application.h>
 #include "log_write_actions.h"
 #include "log_write_exceptions.h"
+#include "program_options.h"
 
 namespace inglenook
 {
@@ -132,15 +133,15 @@ const boost::filesystem::path create_log_file(const boost::program_options::vari
         case 2: // expect create action and a file name.
         {
             // extract the log name and call the appropriate method...
-            auto log_file = require_parameter<std::string>(arguments, "filename");
+            auto log_file = require_parameter<std::string>(arguments, PO_FILENAME_FULL);
             result = create_log_file(log_file);
             break;
         }
         case 3: // expect create action, a process id and name.
         {
             // extract the pid and name, then call the appropriate method...
-            auto pid = require_parameter<pid_type>(arguments, "pid");
-            auto name = require_parameter<std::string>(arguments, "name");
+            auto pid = require_parameter<pid_type>(arguments, PO_PID_FULL);
+            auto name = require_parameter<std::string>(arguments, PO_NAME_FULL);
             result = create_log_file(name, pid);
             break;
         }
@@ -242,10 +243,10 @@ const boost::filesystem::path create_log_file(const std::string& name, const pid
 void write_log_entry(const boost::program_options::variables_map& arguments)
 {
     // create defaults - we only actually require the log path and the message
-    std::string file_path       = require_parameter <std::string>(arguments, "filename");
-    std::string message         = require_parameter <std::string>(arguments, "message");;
-    std::string log_namespace   = optional_parameter<std::string>(arguments, "namespace", log_write_default_namespace);
-    unsigned int event_type     = optional_parameter<unsigned int>(arguments, "category", category::information);
+    std::string file_path       = require_parameter <std::string>(arguments, PO_FILENAME_FULL);
+    std::string message         = require_parameter <std::string>(arguments, PO_MESSAGE_FULL);
+    std::string log_namespace   = optional_parameter<std::string>(arguments, PO_NAMESPACE_FULL, log_write_default_namespace);
+    unsigned int event_type     = optional_parameter<unsigned int>(arguments, PO_CATEGORY_FULL, category::information);
 
     // write out the log entry
     write_log_entry(file_path, message, log_namespace, convert_to_category(event_type) );
@@ -287,7 +288,7 @@ void write_log_entry(const boost::filesystem::path& path_to_log, const std::stri
 void close_log_file(const boost::program_options::variables_map& arguments)
 {
     // extract the log name and call close method...
-    auto log_file = require_parameter<std::string>(arguments, "filename");
+    auto log_file = require_parameter<std::string>(arguments, PO_FILENAME_FULL);
     close_log_file(log_file);
 }
 

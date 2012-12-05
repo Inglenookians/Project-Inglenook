@@ -21,11 +21,6 @@
 // inglenook includes
 #include "exceptions.h"
 
-// boost (http://boost.org) includes
-#include <boost/exception/all.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/locale.hpp>
-
 namespace inglenook
 {
     namespace core
@@ -55,6 +50,10 @@ namespace inglenook
              */
             struct application_arguments_parser_exception : virtual inglenook::core::exceptions::inglenook_exception
             {
+                /// provides a boiler plate explanation of the exception.
+                const char* what() const throw() {
+                    return boost::locale::translate("There was a problem processing the command line arguments").str().c_str();
+                }
             };
             
         }

@@ -37,15 +37,23 @@ using namespace inglenook;
 //--------------------------------------------------------//
 boost::optional<std::string> config::get(const std::string& key, bool skip_blank, const boost::optional<std::string>& default_value)
 {
-    // First check the application config file.
+    // First check the command line config file.
     // We do not pass the default value, as we want to know specifically if it has been set.
-    auto return_value(config::app::get(key, boost::optional<std::string>()));
+    auto return_value(config::command_line::get(key));
     
     // Did we not get a value or have we specified to skip blank values.
     if(!return_value || (skip_blank && (*return_value).empty()))
     {   
-        // Get it from the global config instead.
-        return_value = config::global::get(key, default_value);
+        // Get it from the application config instead.
+        // We do not pass the default value, as we want to know specifically if it has been set.
+        return_value = config::app::get(key);
+        
+        // Did we not get a value or have we specified to skip blank values.
+        if(!return_value || (skip_blank && (*return_value).empty()))
+        {
+            // Get it from the global config instead.
+            return_value = config::global::get(key, default_value);
+        }
     }
     
     // Return the value.
@@ -54,104 +62,52 @@ boost::optional<std::string> config::get(const std::string& key, bool skip_blank
 //--------------------------------------------------------//
 
 //--------------------------------------------------------//
-boost::optional<std::string> config::app::get(const std::string& key, const boost::optional<std::string>& default_value)
+boost::optional<std::string> config::command_line::get(const std::string& key, const boost::optional<std::string>& default_value)
 {
-    // Get the application config file.
-    boost::filesystem::path file_path(directories::config() / (core::application::name() +  "_config.xml"));
+    // Default the return value, as the command line config file might not be set.
+    auto return_value(default_value);
     
-    // Do we need to override file_path with the command line config file.
+    // See if the command line config file has been specified.
     if(!core::application::config_file().empty())
     {
-        file_path = core::application::config_file();
+        // It has been specified, try to fetch the key value from the comand line config file. 
+        return_value = config::file::get(core::application::config_file(), key, default_value);
     }
     
     // Fetch and return the key value from the application config file.
-    return config::file::get(file_path, key, default_value);
+    return return_value;
 }
 //--------------------------------------------------------//
 
 //--------------------------------------------------------//
-bool config::app::set(const std::string& key, const std::string& value)
+boost::filesystem::path config::app::filepath()
 {
-    // Get the application config file.
-    boost::filesystem::path file_path(directories::config() / (core::application::name() +  "_config.xml"));
-    
-    // Do we need to override file_path with the command line config file.
-    if(!core::application::config_file().empty())
-    {
-        file_path = core::application::config_file();
-    }
-    
-    // Set the value for the key in the application config file and return success.
-    return config::file::set(file_path, key, value);
+    // Return the application config file.
+    return boost::filesystem::path(directories::config() / (core::application::name() +  "_config.xml"));
 }
 //--------------------------------------------------------//
 
 //--------------------------------------------------------//
-bool config::app::remove(const std::string& key)
+boost::optional<std::string> config::app::get(const std::string& key, const boost::optional<std::string>& default_value)
 {
-    // Get the application config file.
-    boost::filesystem::path file_path(directories::config() / (core::application::name() +  "_config.xml"));
-    
-    // Do we need to override file_path with the command line config file.
-    if(!core::application::config_file().empty())
-    {
-        file_path = core::application::config_file();
-    }
-    
-    // Remove the value for the key in the application config file and return success.
-    return config::file::remove(file_path, key);
+    // Fetch and return the key value from the application config file.
+    return config::file::get(app::filepath(), key, default_value);
+}
+//--------------------------------------------------------//
+
+//--------------------------------------------------------//
+boost::filesystem::path config::global::filepath()
+{
+    // Return the global config file.
+    return boost::filesystem::path(directories::config() / "config.xml");
 }
 //--------------------------------------------------------//
 
 //--------------------------------------------------------//
 boost::optional<std::string> config::global::get(const std::string& key, const boost::optional<std::string>& default_value)
 {
-    // Get the global config file.
-    boost::filesystem::path file_path(directories::config() / "config.xml");
-    
-    // Do we need to override file_path with the command line config file.
-    if(!core::application::config_file().empty())
-    {
-        file_path = core::application::config_file();
-    }
-    
     // Fetch and return the key value from the global config file.
-    return config::file::get(file_path, key, default_value);
-}
-//--------------------------------------------------------//
-
-//--------------------------------------------------------//
-bool config::global::set(const std::string& key, const std::string& value)
-{
-    // Get the global config file.
-    boost::filesystem::path file_path(directories::config() / "config.xml");
-    
-    // Do we need to override file_path with the command line config file.
-    if(!core::application::config_file().empty())
-    {
-        file_path = core::application::config_file();
-    }
-    
-    // Set the value for the key in the global config file and return success.
-    return config::file::set(file_path, key, value);
-}
-//--------------------------------------------------------//
-
-//--------------------------------------------------------//
-bool config::global::remove(const std::string& key)
-{
-    // Get the global config file.
-    boost::filesystem::path file_path(directories::config() / "config.xml");
-    
-    // Do we need to override file_path with the command line config file.
-    if(!core::application::config_file().empty())
-    {
-        file_path = core::application::config_file();
-    }
-    
-    // Remove the value for the key in the global config file and return success.
-    return config::file::remove(file_path, key);
+    return config::file::get(global::filepath(), key, default_value);
 }
 //--------------------------------------------------------//
 
@@ -192,7 +148,7 @@ boost::optional<std::string> config::file::get(const boost::filesystem::path& fi
     {
         // Warning! Configuration files does not exist.
         /// @todo Investigate whether this should raise a log entry.
-        std::cerr << boost::format(boost::locale::translate("WARNING: configuration file does not exist: '%1%'")) % file_path.string() << std::endl;
+        //std::cerr << boost::format(boost::locale::translate("WARNING: configuration file does not exist: '%1%'")) % file_path.string() << std::endl;
     }
     
     // If we didn't get a value and a default value has been set.

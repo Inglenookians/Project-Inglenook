@@ -41,9 +41,29 @@ namespace inglenook
          */
         boost::optional<std::string> get(const std::string& key, bool skip_blank = true, const boost::optional<std::string>& default_value = boost::optional<std::string>());
         
+        // Command line config file helpers.
+        namespace command_line
+        {
+            
+            /**
+             * Get a config value from the command line config file.
+             * @param key The key of the config value to retrieve.
+             * @param default_value The default value to return if no value set.
+             * @return The value for the key.
+             */
+            boost::optional<std::string> get(const std::string& key, const boost::optional<std::string>& default_value = boost::optional<std::string>());
+            
+        }
+        
         // Application config file helpers.
         namespace app
         {
+            
+            /**
+             * The application config filepath.
+             * @return filepath of the application config file.
+             */
+            boost::filesystem::path filepath();
             
             /**
              * Get a config value from the application config file.
@@ -53,28 +73,18 @@ namespace inglenook
              */
             boost::optional<std::string> get(const std::string& key, const boost::optional<std::string>& default_value = boost::optional<std::string>());
             
-            /**
-             * Set a config value to the application config file.
-             * @param key The key of the config value to store.
-             * @param value The value to set for the key.
-             * @return Whether the operation was successful.
-             * @note Ensure that the parent directory of file_path exists and we have permission to write to it.
-             */
-            bool set(const std::string& key, const std::string& value);
-    
-            /**
-             * Remove a config value from the application config file.
-             * @param key The key of the config value to remove.
-             * @return Whether the operation was successful.
-             */
-            bool remove(const std::string& key);
-            
         }
         
         // Global config file helpers.
         namespace global
         {
-            
+
+            /**
+             * The application config filepath.
+             * @return filepath of the application config file.
+             */
+            boost::filesystem::path filepath();
+
             /**
              * Get a config value from the global config file.
              * @param key The key of the config value to retrieve.
@@ -82,22 +92,6 @@ namespace inglenook
              * @return The value for the key.
              */
             boost::optional<std::string> get(const std::string& key, const boost::optional<std::string>& default_value = boost::optional<std::string>());
-            
-            /**
-             * Set a config value to the global config file.
-             * @param key The key of the config value to store.
-             * @param value The value to set for the key.
-             * @return Whether the operation was successful.
-             * @note Ensure that the parent directory of file_path exists and we have permission to write to it.
-             */
-            bool set(const std::string& key, const std::string& value);
-            
-            /**
-             * Remove a config value from the global config file.
-             * @param key The key of the config value to remove.
-             * @return Whether the operation was successful.
-             */
-            bool remove(const std::string& key);
             
         }
         

@@ -24,9 +24,13 @@
 
 // inglenook includes
 #include "config.h"
+#include "config_exceptions.h"
 #include <ign_core/application.h>
 #include <ign_core/environment.h>
 #include <ign_core/environment_variables.h>
+
+// standard library includes
+#include <fstream>
 
 // config test case.
 BOOST_AUTO_TEST_CASE(config)
@@ -40,31 +44,38 @@ BOOST_AUTO_TEST_CASE(config)
     
     // Test the direct file interface.
     auto temp_file_path(temp_directory / "direct_file.xml");
+    
+    // Try the direct interface while the file does not exist, will throw exception.
+    BOOST_CHECK_THROW(inglenook::config::file::get(temp_file_path, "key"), inglenook::config::exceptions::config_file_not_found_exception);
+    
+    // Now touch the filepath so we can continue testing the direct interface.
+    std::ofstream(temp_file_path.string().c_str());
+    
     // Test getting with defaults, should return an empty boost::optional.
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key") == boost::optional<std::string>());
     // Test getting with specified default value, return specified default value.
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key", std::string("")) == boost::optional<std::string>(""));
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key", std::string("default")) == boost::optional<std::string>("default"));
     // Test setting a value.
-    BOOST_CHECK(inglenook::config::file::set(temp_file_path, "key", "value"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::set(temp_file_path, "key", "value"));
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key") == boost::optional<std::string>("value"));
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key", std::string("")) == boost::optional<std::string>("value"));
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key", std::string("default")) == boost::optional<std::string>("value"));
     // Test removing a key.
-    BOOST_CHECK(inglenook::config::file::remove(temp_file_path, "key"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::remove(temp_file_path, "key"));
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key") == boost::optional<std::string>());
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key", std::string("")) == boost::optional<std::string>(""));
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key", std::string("default")) == boost::optional<std::string>("default"));
     // Test multi-level key set, remove then get.
-    BOOST_CHECK(inglenook::config::file::set(temp_file_path, "key", "value"));
-    BOOST_CHECK(inglenook::config::file::set(temp_file_path, "key.a", "value"));
-    BOOST_CHECK(inglenook::config::file::set(temp_file_path, "key.a.1", "value"));
-    BOOST_CHECK(inglenook::config::file::set(temp_file_path, "key.a.2", "value"));
-    BOOST_CHECK(inglenook::config::file::set(temp_file_path, "key.b", "value"));
-    BOOST_CHECK(inglenook::config::file::set(temp_file_path, "key.b.1", "value"));
-    BOOST_CHECK(inglenook::config::file::set(temp_file_path, "key.b.2", "value"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::set(temp_file_path, "key", "value"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::set(temp_file_path, "key.a", "value"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::set(temp_file_path, "key.a.1", "value"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::set(temp_file_path, "key.a.2", "value"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::set(temp_file_path, "key.b", "value"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::set(temp_file_path, "key.b.1", "value"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::set(temp_file_path, "key.b.2", "value"));
     // Test removing multi-level child.
-    BOOST_CHECK(inglenook::config::file::remove(temp_file_path, "key.a"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::remove(temp_file_path, "key.a"));
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key") == boost::optional<std::string>("value"));
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key.a") == boost::optional<std::string>());
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key.a.1") == boost::optional<std::string>());
@@ -73,7 +84,7 @@ BOOST_AUTO_TEST_CASE(config)
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key.b.1") == boost::optional<std::string>("value"));
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key.b.2") == boost::optional<std::string>("value"));
     // Test removing leaf of multi-level child.
-    BOOST_CHECK(inglenook::config::file::remove(temp_file_path, "key.b.1"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::remove(temp_file_path, "key.b.1"));
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key") == boost::optional<std::string>("value"));
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key.a") == boost::optional<std::string>());
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key.a.1") == boost::optional<std::string>());
@@ -82,7 +93,7 @@ BOOST_AUTO_TEST_CASE(config)
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key.b.1") == boost::optional<std::string>());
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key.b.2") == boost::optional<std::string>("value"));
     // Test removing root of multi-level child.
-    BOOST_CHECK(inglenook::config::file::remove(temp_file_path, "key"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::remove(temp_file_path, "key"));
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key") == boost::optional<std::string>());
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key.a") == boost::optional<std::string>());
     BOOST_CHECK(inglenook::config::file::get(temp_file_path, "key.a.1") == boost::optional<std::string>());
@@ -95,6 +106,10 @@ BOOST_AUTO_TEST_CASE(config)
     
     // Override the config location with the temp directory (affects global and app functions).
     inglenook::core::environment::set(inglenook::core::environment::variables::DIR_CONFIG, temp_directory.string());
+    
+    // Test the config file locations.
+    BOOST_CHECK(inglenook::config::app::filepath() == application_file_path);
+    BOOST_CHECK(inglenook::config::global::filepath() == global_file_path);
     
     // No global, app or command line config file.
     // Test getting with defaults, should return an empty boost::optional.
@@ -109,12 +124,14 @@ BOOST_AUTO_TEST_CASE(config)
     
     // Test global only config file.
     // Test setting a global variable.
-    BOOST_CHECK(inglenook::config::file::set(global_file_path, "key", "value"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::set(global_file_path, "key", "value"));
+    inglenook::config::cache::clear();
     BOOST_CHECK(inglenook::config::get("key") == boost::optional<std::string>("value"));
     BOOST_CHECK(inglenook::config::get("key", true, std::string("")) == boost::optional<std::string>("value"));
     BOOST_CHECK(inglenook::config::get("key", true, std::string("default")) == boost::optional<std::string>("value"));
     // Test removing a key.
-    BOOST_CHECK(inglenook::config::file::remove(global_file_path, "key"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::remove(global_file_path, "key"));
+    inglenook::config::cache::clear();
     BOOST_CHECK(inglenook::config::get("key") == boost::optional<std::string>());
     BOOST_CHECK(inglenook::config::get("key", true, std::string("")) == boost::optional<std::string>(""));
     BOOST_CHECK(inglenook::config::get("key", true, std::string("default")) == boost::optional<std::string>("default"));
@@ -122,13 +139,15 @@ BOOST_AUTO_TEST_CASE(config)
     boost::filesystem::remove(global_file_path);
     
     // Test application only config file.
-    // Test setting an application variable.
-    BOOST_CHECK(inglenook::config::file::set(application_file_path, "key", "value"));
+    // Test setting an application variable. (We have to clear cache to force this change to appear)
+    BOOST_CHECK_NO_THROW(inglenook::config::file::set(application_file_path, "key", "value"));
+    inglenook::config::cache::clear();
     BOOST_CHECK(inglenook::config::get("key") == boost::optional<std::string>("value"));
     BOOST_CHECK(inglenook::config::get("key", true, std::string("")) == boost::optional<std::string>("value"));
     BOOST_CHECK(inglenook::config::get("key", true, std::string("default")) == boost::optional<std::string>("value"));
-    // Test removing a key.
-    BOOST_CHECK(inglenook::config::file::remove(application_file_path, "key"));
+    // Test removing a key. (We have to clear cache to force this change to appear)
+    BOOST_CHECK_NO_THROW(inglenook::config::file::remove(application_file_path, "key"));
+    inglenook::config::cache::clear();
     BOOST_CHECK(inglenook::config::get("key") == boost::optional<std::string>());
     BOOST_CHECK(inglenook::config::get("key", true, std::string("")) == boost::optional<std::string>(""));
     BOOST_CHECK(inglenook::config::get("key", true, std::string("default")) == boost::optional<std::string>("default"));
@@ -136,20 +155,23 @@ BOOST_AUTO_TEST_CASE(config)
     boost::filesystem::remove(application_file_path);
     
     // Test global and appplication config file.
-    // Test setting both global and appplication variables, application should hide global values.
-    BOOST_CHECK(inglenook::config::file::set(global_file_path, "key", "global"));
-    BOOST_CHECK(inglenook::config::file::set(application_file_path, "key", "application"));
-    BOOST_CHECK(inglenook::config::file::set(global_file_path, "key.global", "global"));
-    BOOST_CHECK(inglenook::config::file::set(application_file_path, "key.application", "application"));
+    // Test setting both global and appplication variables, application should hide global values. (We have to clear cache to force this change to appear)
+    BOOST_CHECK_NO_THROW(inglenook::config::file::set(global_file_path, "key", "global"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::set(application_file_path, "key", "application"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::set(global_file_path, "key.global", "global"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::set(application_file_path, "key.application", "application"));
+    inglenook::config::cache::clear();
     BOOST_CHECK(inglenook::config::get("key") == boost::optional<std::string>("application"));
     BOOST_CHECK(inglenook::config::get("key.global") == boost::optional<std::string>("global"));
     BOOST_CHECK(inglenook::config::get("key.application") == boost::optional<std::string>("application"));
     // Remove the application keys, should expose appropriate global keys.
-    BOOST_CHECK(inglenook::config::file::remove(application_file_path, "key.application"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::remove(application_file_path, "key.application"));
+    inglenook::config::cache::clear();
     BOOST_CHECK(inglenook::config::get("key") == boost::optional<std::string>("application"));
     BOOST_CHECK(inglenook::config::get("key.global") == boost::optional<std::string>("global"));
     BOOST_CHECK(inglenook::config::get("key.application") == boost::optional<std::string>());
-    BOOST_CHECK(inglenook::config::file::remove(application_file_path, "key"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::remove(application_file_path, "key"));
+    inglenook::config::cache::clear();
     BOOST_CHECK(inglenook::config::get("key") == boost::optional<std::string>("global"));
     BOOST_CHECK(inglenook::config::get("key.global") == boost::optional<std::string>("global"));
     // Cleanup global and app config file interface.
@@ -158,19 +180,23 @@ BOOST_AUTO_TEST_CASE(config)
     
     // Test command line config file.
     // Set global and application settings.
-    BOOST_CHECK(inglenook::config::file::set(global_file_path, "key", "global"));
-    BOOST_CHECK(inglenook::config::file::set(application_file_path, "key", "application"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::set(global_file_path, "key", "global"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::set(application_file_path, "key", "application"));
+    inglenook::config::cache::clear();
     // Set the command line config.
     inglenook::core::application::config_file(command_line_file_path);
     // Test getting, command line config file should not override value.
     BOOST_CHECK(inglenook::config::get("key") == boost::optional<std::string>("application"));
     // Test setting, command line config file should override value.
-    BOOST_CHECK(inglenook::config::file::set(command_line_file_path, "key", "command_line"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::set(command_line_file_path, "key", "command_line"));
+    inglenook::config::cache::clear();
     BOOST_CHECK(inglenook::config::get("key") == boost::optional<std::string>("command_line"));
     // Disable the command line config file, all our previous global and application values should reappear.
     inglenook::core::application::config_file("");
+    inglenook::config::cache::clear();
     BOOST_CHECK(inglenook::config::get("key") == boost::optional<std::string>("application"));
-    BOOST_CHECK(inglenook::config::file::remove(application_file_path, "key"));
+    BOOST_CHECK_NO_THROW(inglenook::config::file::remove(application_file_path, "key"));
+    inglenook::config::cache::clear();
     BOOST_CHECK(inglenook::config::get("key") == boost::optional<std::string>("global"));
     // Cleanup global and app config file interface.
     boost::filesystem::remove(global_file_path);

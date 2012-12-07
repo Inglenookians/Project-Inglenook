@@ -19,6 +19,7 @@
 #include "config.h"
 
 // inglenook includes
+#include "config_exceptions.h"
 #include <ign_core/application.h>
 #include <ign_directories/directories.h>
 
@@ -29,30 +30,40 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/locale.hpp>
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/optional.hpp>
 
 using namespace inglenook;
+
+//--------------------------------------------------------//
+namespace
+{
+    /// Cache of configuration settings.
+    boost::optional<boost::property_tree::ptree> m_command_line_config;
+    boost::optional<boost::property_tree::ptree> m_application_config;
+    boost::optional<boost::property_tree::ptree> m_global_config;
+}
+//--------------------------------------------------------//
 
 //--------------------------------------------------------//
 boost::optional<std::string> config::get(const std::string& key, bool skip_blank, const boost::optional<std::string>& default_value)
 {
     // First check the command line config file.
     // We do not pass the default value, as we want to know specifically if it has been set.
-    auto return_value(config::command_line::get(key));
+    auto return_value(command_line::get(key));
     
     // Did we not get a value or have we specified to skip blank values.
     if(!return_value || (skip_blank && (*return_value).empty()))
     {   
         // Get it from the application config instead.
         // We do not pass the default value, as we want to know specifically if it has been set.
-        return_value = config::app::get(key);
+        return_value = app::get(key);
         
         // Did we not get a value or have we specified to skip blank values.
         if(!return_value || (skip_blank && (*return_value).empty()))
         {
             // Get it from the global config instead.
-            return_value = config::global::get(key, default_value);
+            return_value = global::get(key, default_value);
         }
     }
     
@@ -64,18 +75,24 @@ boost::optional<std::string> config::get(const std::string& key, bool skip_blank
 //--------------------------------------------------------//
 boost::optional<std::string> config::command_line::get(const std::string& key, const boost::optional<std::string>& default_value)
 {
-    // Default the return value, as the command line config file might not be set.
-    auto return_value(default_value);
-    
-    // See if the command line config file has been specified.
-    if(!core::application::config_file().empty())
+    // Has the file been loaded?
+    if(!m_command_line_config)
     {
-        // It has been specified, try to fetch the key value from the comand line config file. 
-        return_value = config::file::get(core::application::config_file(), key, default_value);
+        // See if the command line config file has been specified.
+        if(!core::application::config_file().empty())
+        {
+            // Load the file into cache.
+            m_command_line_config = cache::load(core::application::config_file());
+        }
+        else
+        {
+            // Set to an empty tree to stop continual file checking.
+            m_command_line_config = boost::property_tree::ptree();
+        }
     }
     
-    // Fetch and return the key value from the application config file.
-    return return_value;
+    // Fetch and return the key value from the application config.
+    return cache::get((*m_command_line_config), key, default_value);
 }
 //--------------------------------------------------------//
 
@@ -90,8 +107,15 @@ boost::filesystem::path config::app::filepath()
 //--------------------------------------------------------//
 boost::optional<std::string> config::app::get(const std::string& key, const boost::optional<std::string>& default_value)
 {
-    // Fetch and return the key value from the application config file.
-    return config::file::get(app::filepath(), key, default_value);
+    // Has the file been loaded?
+    if(!m_application_config)
+    {
+        // Load the file into cache.
+        m_application_config = cache::load(app::filepath());
+    }
+    
+    // Fetch and return the key value from the application config.
+    return cache::get((*m_application_config), key, default_value);
 }
 //--------------------------------------------------------//
 
@@ -106,8 +130,87 @@ boost::filesystem::path config::global::filepath()
 //--------------------------------------------------------//
 boost::optional<std::string> config::global::get(const std::string& key, const boost::optional<std::string>& default_value)
 {
-    // Fetch and return the key value from the global config file.
-    return config::file::get(global::filepath(), key, default_value);
+    // Has the file been loaded?
+    if(!m_global_config)
+    {
+        // Load the file into cache.
+        m_global_config = cache::load(global::filepath());
+    }
+    
+    // Fetch and return the key value from the global config.
+    return cache::get((*m_global_config), key, default_value);
+}
+//--------------------------------------------------------//
+
+//--------------------------------------------------------//
+boost::property_tree::ptree config::cache::load(const boost::filesystem::path& file_path)
+{
+    // Set the default return configuration settings.
+    boost::property_tree::ptree return_ptree;
+    
+    // Check whether the file exists.
+    if(boost::filesystem::exists(file_path))
+    {
+        // Get a lock on the file.
+        boost::interprocess::file_lock flock(file_path.string().c_str());
+        boost::interprocess::scoped_lock<boost::interprocess::file_lock> exclusive_lock(flock);
+        
+        // Try and read the configuration file and then fetch the value.
+        try
+        {
+            // Read the configuration file.
+            boost::property_tree::xml_parser::read_xml(file_path.string(), return_ptree);
+        }
+        catch(boost::property_tree::xml_parser::xml_parser_error &ex)
+        {
+            // Error! Failed to read configuration file.
+            /// @todo Investigate whether this should raise a log entry.
+            std::cerr << boost::format(boost::locale::translate("ERROR: failed to read configuration file: '%1%'")) % ex.what() << std::endl;
+
+            BOOST_THROW_EXCEPTION(exceptions::config_file_read_exception()
+                                  << exceptions::config_file(file_path)
+                                  );
+        }
+    }
+    else
+    {
+        // Warning! Configuration files does not exist.
+        /// @todo Investigate whether this should raise a log entry.
+        std::cerr << boost::format(boost::locale::translate("WARNING: configuration file does not exist: '%1%'")) % file_path.string() << std::endl;
+
+        /// @note We choose not to throw an exception as the cache loading does not require the config file to exist.
+    }
+    
+    // Return the configuration settings.
+    return return_ptree;
+}
+//--------------------------------------------------------//
+
+//--------------------------------------------------------//
+boost::optional<std::string> config::cache::get(const boost::property_tree::ptree& ptree, const std::string& key, const boost::optional<std::string>& default_value)
+{
+    // Fetch the value for the key from the cache.
+    boost::optional<std::string> return_value(ptree.get_optional<std::string>(key));
+    
+    // If we didn't get a value and a default value has been set.
+    if(!return_value && default_value)
+    {
+        // Set the return value to the default value.
+        return_value = default_value;
+    }
+    
+    // Return the value.
+    return return_value;
+}
+//--------------------------------------------------------//
+
+//--------------------------------------------------------//
+void config::cache::clear()
+{
+    // Reset all the caches.
+    m_command_line_config.reset();
+    m_application_config.reset();
+    m_global_config.reset();
 }
 //--------------------------------------------------------//
 
@@ -140,15 +243,22 @@ boost::optional<std::string> config::file::get(const boost::filesystem::path& fi
         {
             // Error! Failed to read configuration file.
             /// @todo Investigate whether this should raise a log entry.
-            /// @todo Should this throw the exception.
             std::cerr << boost::format(boost::locale::translate("ERROR: failed to read configuration file: '%1%'")) % ex.what() << std::endl;
+
+            BOOST_THROW_EXCEPTION(exceptions::config_file_read_exception()
+                                  << exceptions::config_file(file_path)
+                                  );
         }
     }
     else
     {
-        // Warning! Configuration files does not exist.
+        // Error! Configuration files does not exist.
         /// @todo Investigate whether this should raise a log entry.
-        //std::cerr << boost::format(boost::locale::translate("WARNING: configuration file does not exist: '%1%'")) % file_path.string() << std::endl;
+        std::cerr << boost::format(boost::locale::translate("ERROR: configuration file does not exist: '%1%'")) % file_path.string() << std::endl;
+        
+        BOOST_THROW_EXCEPTION(exceptions::config_file_not_found_exception()
+                              << exceptions::config_file(file_path)
+                              );
     }
     
     // If we didn't get a value and a default value has been set.
@@ -164,11 +274,8 @@ boost::optional<std::string> config::file::get(const boost::filesystem::path& fi
 //--------------------------------------------------------//
 
 //--------------------------------------------------------//
-bool config::file::set(const boost::filesystem::path& file_path, const std::string& key, const std::string& value)
+void config::file::set(const boost::filesystem::path& file_path, const std::string& key, const std::string& value)
 {
-    // Set the default return value.
-    bool success(false);
-    
     // Generate a new ptree to store the configuration structure.
     boost::property_tree::ptree ptree;
     
@@ -178,20 +285,26 @@ bool config::file::set(const boost::filesystem::path& file_path, const std::stri
         // Error! Failed to specify a configuration file.
         /// @todo Investigate whether this should raise a log entry.
         std::cerr << boost::locale::translate("ERROR: failed to specify a configuration file") << std::endl;
+        
+        BOOST_THROW_EXCEPTION(exceptions::config_file_not_found_exception()
+                              << exceptions::config_file(file_path)
+                              );
     }
     // Check that the parent folder of the file exists.
     else if(!boost::filesystem::exists(file_path.parent_path()))
     {
         // Error! Specified parent path of configuration file does not exist.
         /// @todo Investigate whether this should raise a log entry.
-        std::cerr << boost::format(boost::locale::translate("ERROR:  specified parent path of configuration file does not exist: '%1%'")) % file_path.parent_path().string() << std::endl;
+        std::cerr << boost::format(boost::locale::translate("ERROR: specified parent path of configuration file does not exist: '%1%'")) % file_path.parent_path().string() << std::endl;
+        
+        BOOST_THROW_EXCEPTION(exceptions::config_file_parent_exception()
+                              << exceptions::config_file(file_path)
+                              << exceptions::config_file_parent(file_path.parent_path())
+                              );
     }
     else
     {
-        // Track whether there is a read error.
-        auto read_error(false);
-        
-        // Check whether the file exists, we need to touch it if it does for the file lock.
+        // Check whether the file exists, we need to touch it if it doesn't for the file lock.
         if(!boost::filesystem::exists(file_path))
         {
             std::ofstream file(file_path.string().c_str());
@@ -213,52 +326,49 @@ bool config::file::set(const boost::filesystem::path& file_path, const std::stri
             /// @todo Investigate whether this should raise a log entry.
             std::cerr << boost::format(boost::locale::translate("ERROR: failed to read configuration file: '%1%'")) % ex.what() << std::endl;
             
-            // Set there was a read error.
-            read_error = true;
+            BOOST_THROW_EXCEPTION(exceptions::config_file_read_exception()
+                                  << exceptions::config_file(file_path)
+                                  );
         }
         
-        // Check whether there was a read error.
-        /// @todo should we stop here or overwrite it anwyay?
-        if(!read_error)
+        // Try to write the modified configuration structure to file.
+        try
         {
-            // Try to write the modified configuration structure to file.
-            try
-            {
-                // Set the new value.
-                ptree.put(key, value);
-                
-                // Save the configuration file.
-                boost::property_tree::xml_parser::write_xml(file_path.string(), ptree);
-                
-                // Success!
-                success = true;
-            }
-            catch(boost::property_tree::ptree_bad_data &ex)
-            {
-                // Error! Failed to convert value into ptree data type.
-                /// @todo Investigate whether this should raise a log entry.
-                std::cerr << boost::format(boost::locale::translate("ERROR: failed to modify key '%1%' with value '%2%' in the configuration file: '%3%'")) % key % value % ex.what() << std::endl;
-            }
-            catch(boost::property_tree::xml_parser::xml_parser_error &ex)
-            {
-                // Error! Failed to write the configuration file.
-                /// @todo Investigate whether this should raise a log entry.
-                std::cerr << boost::format(boost::locale::translate("ERROR: failed to write configuration file: '%1%'")) % ex.what() << std::endl;
-            }
+            // Set the new value.
+            ptree.put(key, value);
+            
+            // Save the configuration file.
+            boost::property_tree::xml_parser::write_xml(file_path.string(), ptree);
+        }
+        catch(boost::property_tree::ptree_bad_data &ex)
+        {
+            // Error! Failed to convert value into ptree data type.
+            /// @todo Investigate whether this should raise a log entry.
+            std::cerr << boost::format(boost::locale::translate("ERROR: failed to modify key '%1%' with value '%2%' in the configuration file: '%3%'")) % key % value % ex.what() << std::endl;
+            
+            BOOST_THROW_EXCEPTION(exceptions::config_file_value_exception()
+                                  << exceptions::config_file(file_path)
+                                  << exceptions::config_file_key(key)
+                                  << exceptions::config_file_value(value)
+                                  );
+        }
+        catch(boost::property_tree::xml_parser::xml_parser_error &ex)
+        {
+            // Error! Failed to write the configuration file.
+            /// @todo Investigate whether this should raise a log entry.
+            std::cerr << boost::format(boost::locale::translate("ERROR: failed to write configuration file: '%1%'")) % ex.what() << std::endl;
+            
+            BOOST_THROW_EXCEPTION(exceptions::config_file_write_exception()
+                                  << exceptions::config_file(file_path)
+                                  );
         }
     }
-    
-    // Return our sucess.
-    return success;
 }
 //--------------------------------------------------------//
 
 //--------------------------------------------------------//
-bool config::file::remove(const boost::filesystem::path& file_path, const std::string& key)
+void config::file::remove(const boost::filesystem::path& file_path, const std::string& key)
 {
-    // Set the default return value.
-    bool success(false);
-    
     // Generate a new ptree to store the modified configuration structure.
     boost::property_tree::ptree ptree;
     
@@ -277,73 +387,83 @@ bool config::file::remove(const boost::filesystem::path& file_path, const std::s
         {
             // Read the configuration file.
             boost::property_tree::xml_parser::read_xml(file_path.string(), ptree);
-            
-            // We have to find the parent node of the leaf we want to remove first.
-            try
-            {
-                // Get a pointer to the root.
-                boost::property_tree::ptree* find_ptree = &ptree;
-                
-                // Split the key into its parts.
-                std::vector<std::string> key_parts;
-                boost::split(key_parts, key, boost::is_any_of("."));
-                // Loop through each part, except the last (ie: the leaf we want to delete).
-                for(unsigned i = 0; i < key_parts.size() - 1; ++i)
-                {
-                    // Move the pointer to next part of the key.
-                    find_ptree = &(find_ptree->get_child(key_parts[i]));
-                }
-                
-                // We should now be at the leaf's parent, remove the leaf from the parent node.
-                find_ptree->erase(key_parts.back());
-                
-                // Try and write the modified configuration structure to file.
-                try
-                {
-                    // Save the configuration file.
-                    boost::property_tree::xml_parser::write_xml(file_path.string(), ptree);
-                    
-                    // Success!
-                    success = true;
-                }
-                catch(boost::property_tree::ptree_bad_data &ex)
-                {
-                    // Error! Failed to convert value into ptree data type.
-                    /// @todo Investigate whether this should raise a log entry.
-                    std::cerr << boost::format(boost::locale::translate("ERROR: failed to remove key '%1%' in the configuration file: '%2%'")) % key % ex.what() << std::endl;
-                }
-                catch(boost::property_tree::xml_parser::xml_parser_error &ex)
-                {
-                    // Error! Failed to write the configuration file.
-                    /// @todo Investigate whether this should raise a log entry.
-                    std::cerr << boost::format(boost::locale::translate("ERROR: failed to write configuration file: '%1%'")) % ex.what() << std::endl;
-                }
-            }
-            catch(boost::property_tree::ptree_bad_path &ex)
-            {
-                // Warning! Trying to remove a key that does not exist.
-                /// @todo Investigate whether this should raise a log entry.
-                std::cerr << boost::format(boost::locale::translate("WARNING: trying to remove key that does not exist: '%1%'")) % file_path.string() << std::endl;
-                
-                // Technically, this is still a success!
-                success = true;
-            }
         }
         catch(boost::property_tree::xml_parser::xml_parser_error &ex)
         {
             // Error! Failed to read the configuration file.
             /// @todo Investigate whether this should raise a log entry.
             std::cerr << boost::format(boost::locale::translate("ERROR: failed to read configuration file: '%1%'")) % ex.what() << std::endl;
+            
+            BOOST_THROW_EXCEPTION(exceptions::config_file_read_exception()
+                                  << exceptions::config_file(file_path)
+                                  );
+        }
+        
+        // We have to find the parent node of the leaf we want to remove first.
+        try
+        {
+            // Get a pointer to the root.
+            boost::property_tree::ptree* find_ptree = &ptree;
+            
+            // Split the key into its parts.
+            std::vector<std::string> key_parts;
+            boost::split(key_parts, key, boost::is_any_of("."));
+            // Loop through each part, except the last (ie: the leaf we want to delete).
+            for(unsigned i = 0; i < key_parts.size() - 1; ++i)
+            {
+                // Move the pointer to next part of the key.
+                find_ptree = &(find_ptree->get_child(key_parts[i]));
+            }
+            
+            // We should now be at the leaf's parent, remove the leaf from the parent node.
+            find_ptree->erase(key_parts.back());
+            
+            // Try and write the modified configuration structure to file.
+            try
+            {
+                // Save the configuration file.
+                boost::property_tree::xml_parser::write_xml(file_path.string(), ptree);
+            }
+            catch(boost::property_tree::ptree_bad_data &ex)
+            {
+                // Error! Failed to convert value into ptree data type.
+                /// @todo Investigate whether this should raise a log entry.
+                std::cerr << boost::format(boost::locale::translate("ERROR: failed to remove key '%1%' in the configuration file: '%2%'")) % key % ex.what() << std::endl;
+                
+                BOOST_THROW_EXCEPTION(exceptions::config_file_value_exception()
+                                      << exceptions::config_file(file_path)
+                                      << exceptions::config_file_key(key)
+                                      );
+            }
+            catch(boost::property_tree::xml_parser::xml_parser_error &ex)
+            {
+                // Error! Failed to write the configuration file.
+                /// @todo Investigate whether this should raise a log entry.
+                std::cerr << boost::format(boost::locale::translate("ERROR: failed to write configuration file: '%1%'")) % ex.what() << std::endl;
+                
+                BOOST_THROW_EXCEPTION(exceptions::config_file_write_exception()
+                                      << exceptions::config_file(file_path)
+                                      );
+            }
+        }
+        catch(boost::property_tree::ptree_bad_path &ex)
+        {
+            // Warning! Trying to remove a key that does not exist.
+            /// @todo Investigate whether this should raise a log entry.
+            std::cerr << boost::format(boost::locale::translate("WARNING: trying to remove key that does not exist: '%1%'")) % file_path.string() << std::endl;
+            
+            // Technically, this is still a success so no need to throw an exception!
         }
     }
     else
     {
-        // Warning! Configuration files does not exist.
+        // Error! Configuration files does not exist.
         /// @todo Investigate whether this should raise a log entry.
-        std::cerr << boost::format(boost::locale::translate("WARNING: configuration file does not exist: '%1%'")) % file_path.string() << std::endl;
+        std::cerr << boost::format(boost::locale::translate("ERROR: configuration file does not exist: '%1%'")) % file_path.string() << std::endl;
+        
+        BOOST_THROW_EXCEPTION(exceptions::config_file_not_found_exception()
+                              << exceptions::config_file(file_path)
+                              );
     }
-    
-    // Return our sucess.
-    return success;
 }
 //--------------------------------------------------------//

@@ -48,42 +48,45 @@ typedef boost::error_info<struct __acceptable_arguments, std::string> acceptable
 /// couldn't work out how to use provided arguments - this is what was expected.
 typedef boost::error_info<struct __unrecongised_action, std::string> unrecognised_action;
 
-
-//
-// log_write_exception
-// Standard base exception for all exceptions thrown by ign_log_write.
+/**
+ * Standard base exception for all exceptions thrown by ign_log_write.
+ */
 struct log_write_exception: virtual inglenook::core::exceptions::inglenook_exception
-{/// provides a boiler plate explanation of the exception.
+{	
+	/// provides a boiler plate explaination of the exception.
    const char* what() const throw() {
 	   return boost::locale::translate("Unhandled exception in CLI log writer (ign_log_write)").str().c_str();
    }
 };
 
-//
-// action_required_arguments_missing_exception
-// thrown when an action requires a parameter that has not been provided.
+/**
+ * Thrown when an action requires a parameter that has not been provided.
+ */
 struct action_required_arguments_missing_exception: virtual log_write_exception
-{/// provides a boiler plate explanation of the exception.
+{
+	/// provides a boiler plate explaination of the exception.
    const char* what() const throw() {
 	   return boost::locale::translate("An argument required by this action was not specified.").str().c_str();
    }
 };
 
-//
-// wrong_number_of_arguments_exception
-// Throw when the wrong number of arguments is received by an action processor
+/**
+ * Throw when the wrong number of arguments is received by an action processor
+ */
 struct wrong_number_of_arguments_exception: virtual log_write_exception
-{/// provides a boiler plate explanation of the exception.
+{
+	/// provides a boiler plate explaination of the exception.
    const char* what() const throw() {
 	   return boost::locale::translate("The action invoked couldn't work out how to use to arguments provided.").str().c_str();
    }
 };
 
-//
-// unrecognised_action_exception
-// Thrown when an action is provided that is not understood by the software.
+/**
+ * Thrown when an action is provided that is not understood by the software.
+ */
 struct unrecognised_action_exception: virtual log_write_exception
-{/// provides a boiler plate explanation of the exception.
+{
+	/// provides a boiler plate explaination of the exception.
    const char* what() const throw() {
 	   return boost::locale::translate("The action was not understood.").str().c_str();
    }

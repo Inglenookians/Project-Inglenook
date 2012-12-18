@@ -37,12 +37,26 @@ using namespace inglenook::core;
 //--------------------------------------------------------//
 namespace
 {
-    /// Cache of application information.
+	//
+    // Cache of application information.
+	//
+
+	/// a brief description of the applications purpose.
     std::string m_description("");
+    
+    /// the human-readable version of the application.
     std::string m_version("");
+    
+    /// a string containing detailed build information. 
     std::string m_build("");
+    
+    /// user specified options and configuration file.
     boost::filesystem::path m_config_file("");
+    
+    /// this processes unique identifier.
     pid_t m_pid(0);
+    
+    /// the processes binary name.
     std::string m_name("");
 }
 //--------------------------------------------------------//

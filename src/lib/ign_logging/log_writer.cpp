@@ -318,8 +318,7 @@ std::shared_ptr<log_writer> log_writer::create_from_file_path(
  * @param output_stream stream to write XML to.
  * @param write_header indicates if the XML preamble should be written on startup
  * @param write_footer indicates if the XML closure tags should be written on shutdown.
- * @param specific_pid specify the PID to create log for
- * @param specific_application_name specify the application name to create log for
+ * @returns shared pointer to newly instanced log_writer.
  */
 std::shared_ptr<log_writer> log_writer::create_from_stream(const std::shared_ptr<std::ostream>& output_stream,
 		const bool& write_header, const bool& write_footer)
@@ -339,6 +338,7 @@ std::shared_ptr<log_writer> log_writer::create_from_stream(const std::shared_ptr
  * @param write_footer indicates if the XML closure tags should be written on shutdown.
  * @param specific_pid specify the PID to create log for
  * @param specific_application_name specify the application name to create log for
+ * @returns Shared pointer to newly instanced log_writer.
  */
 std::shared_ptr<log_writer> log_writer::create_from_stream(const std::shared_ptr<std::ostream>& output_stream,
 		const bool& write_header, const bool& write_footer, const pid_type& specific_pid, const std::string& specific_application_name)

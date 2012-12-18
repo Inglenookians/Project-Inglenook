@@ -59,10 +59,10 @@ class log_client
 
 public:
 
-	// there is no default constructor for this class.
+	/// there is no default constructor for this class.
 	log_client() = delete;
 
-	// there is no copy constructor for this class.
+	/// there is no copy constructor for this class.
 	log_client(log_client&) = delete;
 
 	/// creates a new log_client, which will emit log entries to
@@ -146,38 +146,68 @@ private:
 public:
 
 	// the following overrides exhibit specific behaviour for the inglenook log writer
-	log_client& operator<<(const log_data& _log_data);	// appends data to the log file
-	log_client& operator<<(const ns& _ns);				// sets the current message namespace
-	log_client& operator<<(lf _lf);						// ends the current message and submits it for serialization
+	
+	/// Stream operator to append a specified key:value pair to the current entries data collection.
+	log_client& operator<<(const log_data& _log_data);	
+	
+	/// Stream operator to sets the current entries namespace
+	log_client& operator<<(const ns& _ns);
+	
+	/// Stream operator to signal a log client action (log flag).
+	/// Most commonly used in the sense of lf::endl to commit the current message to 
+	/// the log and start the next message
+	log_client& operator<<(lf _lf);					
 
 	//
 	// THERE IS NOTHING SPECIAL BELOW THIS POINT
 	// just a lot of stream operator overloads that redirect (as various types) to the
 	// log_client::send_to_stream() method above. nothing to see here. move along.
+	
+	/// Stream opeartor to serialize and append a integer to the current entries message.
     log_client& operator<<(int _int);
+    /// Stream opeartor to serialize and append a long integer to the current entries message.
     log_client& operator<<(long _long);
+    /// Stream opeartor to serialize and append a unsigned long integer to the current entries message.
     log_client& operator<<(unsigned long _unsigned_long);
+    /// Stream opeartor to serialize and append a short integer to the current entries message.
     log_client& operator<<(short _short);
+    /// Stream opeartor to serialize and append an unsigned short to the current entries message.
     log_client& operator<<(unsigned short _unsigned_short);
+    /// Stream opeartor to serialize and append an unsigned integer to the current entries message.
     log_client& operator<<(unsigned int _unsigned_int);
 #ifdef _GLIBCXX_USE_LONG_LONG
+    /// Stream opeartor to serialize and append a long, long integer to the current entries message.
     log_client& operator<<(long long _long_long);
+    /// Stream opeartor to serialize and append an unsigned long, long integer to the current entries message.
     log_client& operator<<(unsigned long long _unsigned_long_long);
 #endif
+    /// Stream opeartor to serialize and append a double floating point number to the current entries message.
     log_client& operator<<(double _double);
+    /// Stream opeartor to serialize and append a long double floating point number to the current entries message.
     log_client& operator<<(long double _long_double);
+    /// Stream opeartor to serialize and append a floating point number to the current entries message.    
     log_client& operator<<(float _float);
+    /// Stream opeartor to append a character to the current entries message.
     log_client& operator<<(char _char);
+    /// Stream opeartor to serialize and append an unsigned character to the current entries message.
     log_client& operator<<(unsigned char _unsigned_char);
+    /// Stream opeartor to serialize and append a signed character to the current entries message.
     log_client& operator<<(signed char _signed_char);
+    /// Stream opeartor to serialize and append a pointer to a constant signed character to the current entries message.
     log_client& operator<<(const signed char* _const_signed_char_ptr);
+    /// Stream opeartor to serialize and append a pointer to a constant unsigned character to the current entries message.
     log_client& operator<<(const unsigned char* _const_unsigned_char_ptr);
+    /// Stream opeartor to append the contents of a stream buffer to the current entries message.
     log_client& operator<< (std::streambuf* _streambuf_ptr);
+    /// Stream opeartor to append a string to the current entries message.
     log_client& operator<<(std::string _string);
+    /// Stream opeartor to serialize and append a pointer to a string to the current entries message.
 	log_client& operator<<(std::string* _string);
-    // function pointer(s)
+	/// Stream opeartor to serialize and append the result of a method matching the following delegate to the current entries message.
     log_client& operator<< (std::ostream& ( *pf )(std::ostream&));
+    /// Stream opeartor to serialize and append the result of a method matching the following delegate to the current entries message.
     log_client& operator<< (std::ios& ( *pf )(std::ios&));
+    /// Stream opeartor to serialize and append the result of a method matching the following delegate to the current entries message.
     log_client& operator<< (std::ios_base& ( *pf )(std::ios_base&));
     /////////////////////////////////////////////////////////////////
     //

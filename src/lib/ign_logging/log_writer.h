@@ -64,7 +64,7 @@ class log_writer
 
 	public:
 
-		// (there is no default constructor for the LogWriter)
+		/// (there is no default constructor for the LogWriter)
 		log_writer(const log_writer&) = delete;
 
 		// Creates a new log_writer instance.

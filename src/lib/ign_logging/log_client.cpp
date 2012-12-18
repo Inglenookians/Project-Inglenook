@@ -32,7 +32,7 @@ namespace logging
 /**
  * Creates a new log_client object.
  * Initializes a new log client to be use in conjunction with the specified log_writer output interface.
- * @params output_interface log_writer that completed entries should be written to.
+ * @param output_interface log_writer that completed entries should be written to.
  */
 log_client::log_client(std::shared_ptr<log_writer> output_interface)
 	: m_output_interface(output_interface)
@@ -107,7 +107,7 @@ void log_client::clear_default_namespace()
 
 /**
  * Sets the value of the default name space for this thread.
- * @params value new value for this property
+ * @param value new value for this property
  */
 void log_client::default_namespace(const std::string& value)
 {
@@ -149,7 +149,7 @@ void log_client::clear_default_entry_type()
 
 /**
  * Sets the value of the default entry type for this thread.
- * @params value new value for this property
+ * @param value new value for this property
  */
 void log_client::default_entry_type(const category& value)
 {
@@ -164,7 +164,7 @@ void log_client::default_entry_type(const category& value)
 
 /**
  * Sends a data element to the message stream.
- * @param type type of object that is being sent to stream.
+ * @tparam type type of object that is being sent to stream.
  * @param x actual variable to send to stream.
  * @returns always returns *this.
  */
@@ -207,24 +207,42 @@ log_buffer& log_client::buffer()
 	return *m_buffer.get();
 }
 
-
-/// Create a debug log entry
+/**
+ * Create a debug log entry
+ * @returns a reference to the current log_client.
+ */
 log_client& log_client::debug() { return create_log_stream(category::debugging); }
 
-/// Creates a verbose (trace) log entry
+/**
+ * Creates a verbose (trace) log entry
+ * @returns a reference to the current log_client.
+ */
 log_client& log_client::trace() { return create_log_stream(category::verbose); }
 
-/// Creates an information log entry
+/**
+ * Creates an information log entry
+ * @returns a reference to the current log_client.
+ */
 log_client& log_client::info() { return create_log_stream(category::information); }
 
-/// Creates a warning log entry
+/**
+ * Creates a warning log entry
+ * @returns a reference to the current log_client.
+ */
 log_client& log_client::warning() { return create_log_stream(category::warning); }
 
-/// Creates an error log entry
+/**
+ * Creates an error log entry
+ * @returns a reference to the current log_client.
+ */
 log_client& log_client::error() { return create_log_stream(category::error); }
 
-/// Creates a fatal error log entry
+/**
+ * Creates a fatal error log entry
+ * @returns a reference to the current log_client.
+ */
 log_client& log_client::fatal() { return create_log_stream(category::fatal); }
+
 
 /**
  * processes a log data stream manipulator.
@@ -245,7 +263,7 @@ log_client& log_client::operator<<(const log_data& _log_data)
 
 /**
  * processes a name space (ns) stream manipulator.
- * @param ns new name space to apply
+ * @param _ns new name space to apply
  * @returns always returns *this
  **/
 log_client& log_client::operator<<(const ns& _ns)

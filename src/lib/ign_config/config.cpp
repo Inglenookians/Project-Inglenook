@@ -111,7 +111,7 @@ boost::optional<std::string> config::app::get(const std::string& key, const boos
     if(!m_application_config)
     {
         // Load the file into cache.
-        m_application_config = cache::load(app::filepath());
+        m_application_config = cache::load(app::filepath(), false);
     }
     
     // Fetch and return the key value from the application config.
@@ -143,7 +143,7 @@ boost::optional<std::string> config::global::get(const std::string& key, const b
 //--------------------------------------------------------//
 
 //--------------------------------------------------------//
-boost::property_tree::ptree config::cache::load(const boost::filesystem::path& file_path)
+boost::property_tree::ptree config::cache::load(const boost::filesystem::path& file_path, const bool verbose_file_warning)
 {
     // Set the default return configuration settings.
     boost::property_tree::ptree return_ptree;
@@ -174,11 +174,14 @@ boost::property_tree::ptree config::cache::load(const boost::filesystem::path& f
     }
     else
     {
-        // Warning! Configuration files does not exist.
-        /// @todo Investigate whether this should raise a log entry.
-        std::cerr << boost::format(boost::locale::translate("WARNING: configuration file does not exist: '%1%'")) % file_path.string() << std::endl;
+        // Warning! Configuration file does not exist, be vebose if required.
+        if(verbose_file_warning)
+        {
+            /// @todo Investigate whether this should raise a log entry.
+            std::cerr << boost::format(boost::locale::translate("WARNING: configuration file does not exist: '%1%'")) % file_path.string() << std::endl;
 
-        /// @note We choose not to throw an exception as the cache loading does not require the config file to exist.
+            /// @note We choose not to throw an exception as the cache loading does not require the config file to exist.
+        }
     }
     
     // Return the configuration settings.
@@ -190,7 +193,7 @@ boost::property_tree::ptree config::cache::load(const boost::filesystem::path& f
 boost::optional<std::string> config::cache::get(const boost::property_tree::ptree& ptree, const std::string& key, const boost::optional<std::string>& default_value)
 {
     // Fetch the value for the key from the cache.
-    boost::optional<std::string> return_value(ptree.get_optional<std::string>(key));
+    auto return_value(ptree.get_optional<std::string>(key));
     
     // If we didn't get a value and a default value has been set.
     if(!return_value && default_value)

@@ -103,9 +103,10 @@ namespace inglenook
             /**
              * Load the full configuration settings from a file.
              * @param file_path The location of the configuration file.
+             * @param verbose_file_warning Whether to log a warning message when the file does not exist.
              * @return The configuration settings.
              */
-            boost::property_tree::ptree load(const boost::filesystem::path& file_path);
+            boost::property_tree::ptree load(const boost::filesystem::path& file_path, const bool verbose_file_warning = true);
             
             /**
              * Get a config value from a cache.

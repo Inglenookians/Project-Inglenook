@@ -128,7 +128,7 @@ namespace inglenook
              * Fetch the application's process id (pid).
              * @return The application's pid.
              */
-            static pid_t pid();
+            static pid_type pid();
             
             /**
              * Fetch the application's process name.

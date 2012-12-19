@@ -54,7 +54,7 @@ namespace
     std::map<std::string, std::string> m_config_arguments;
 
     /// Cache of the application's 'process id'.
-    pid_t m_pid(0);
+    pid_type m_pid(0);
 
     /// Cache of the application's 'process name'.
     std::string m_name("");
@@ -173,7 +173,7 @@ void application::config_arguments(const std::map<std::string, std::string>& con
 //--------------------------------------------------------//
 
 //--------------------------------------------------------//
-pid_t application::pid()
+pid_type application::pid()
 {
     // Have we already fetched the value?
     if(m_pid == 0)

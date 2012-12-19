@@ -99,8 +99,8 @@ namespace inglenook
             static std::string build();
             
             /**
-             * Fetch the application overriding config file, which can be set 
-             * using the default argument parser as well as manually.
+             * Fetch the overriding config file from the command line,
+             * which can be set using the default argument parser.
              * @return the config file.
              */
             static boost::filesystem::path config_file();
@@ -111,6 +111,19 @@ namespace inglenook
              */
             static void config_file(const boost::filesystem::path& config_file);
             
+            /**
+             * Fetch the overriding config arguments from the command line, 
+             * which can be set using the default argument parser.
+             * @return the config arguments.
+             */
+            static const std::map<std::string, std::string>& config_arguments();
+
+            /**
+             * Set the overriding config arguments for the application.
+             * @param config_arguments The config arguments to set.
+             */
+            static void config_arguments(const std::map<std::string, std::string>& config_arguments);
+
             /**
              * Fetch the application's process id (pid).
              * @return The application's pid.
@@ -134,7 +147,7 @@ namespace inglenook
              * @note This will throw if invalid arguments are specified on the command line.
              */
             static bool arguments_parser(boost::program_options::variables_map& variables_map, const int& argc, const char* argv[], const boost::program_options::options_description& options = boost::program_options::options_description(), const boost::program_options::positional_options_description& positions = boost::program_options::positional_options_description());
-            
+
         };
         
     }

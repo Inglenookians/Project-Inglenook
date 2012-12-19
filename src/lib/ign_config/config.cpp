@@ -75,24 +75,31 @@ boost::optional<std::string> config::get(const std::string& key, bool skip_blank
 //--------------------------------------------------------//
 boost::optional<std::string> config::command_line::get(const std::string& key, const boost::optional<std::string>& default_value)
 {
-    // Has the file been loaded?
-    if(!m_command_line_config)
+    // Set the default return config value.
+    auto return_value(default_value);
+    
+    // Check whether it exists in the application's config arguments first.
+    auto itrFind = core::application::config_arguments().find(key);
+    if(itrFind != core::application::config_arguments().end())
     {
-        // See if the command line config file has been specified.
-        if(!core::application::config_file().empty())
+        // Fetch the key value from the application's config arguments.
+        return_value = itrFind->second;
+    }
+    else
+    {
+        // Has the config file been loaded?
+        if(!m_command_line_config)
         {
             // Load the file into cache.
-            m_command_line_config = cache::load(core::application::config_file());
+            m_command_line_config = cache::load(core::application::config_file(), false);
         }
-        else
-        {
-            // Set to an empty tree to stop continual file checking.
-            m_command_line_config = boost::property_tree::ptree();
-        }
+        
+        // Fetch the key value from the application's config file.
+        return_value = cache::get((*m_command_line_config), key, default_value);
     }
     
-    // Fetch and return the key value from the application config.
-    return cache::get((*m_command_line_config), key, default_value);
+    // Return the key value.
+    return return_value;
 }
 //--------------------------------------------------------//
 

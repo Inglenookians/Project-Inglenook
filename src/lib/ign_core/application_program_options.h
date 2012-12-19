@@ -27,3 +27,9 @@ const std::string PO_VERSION_FULL = "version";
 
 // Program options: config file
 const std::string PO_CONFIG_FILE_FULL = "config-file";
+
+// Program options: config command line prefix
+const std::string PO_CONFIG_COMMAND_PREFIX = "-conf-";
+
+// Program options: ignore config command line
+const std::string PO_IGNORE_CONFIG_COMMAND = "ignore-config-command";

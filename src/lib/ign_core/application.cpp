@@ -38,13 +38,64 @@ using namespace inglenook::core;
 //--------------------------------------------------------//
 namespace
 {
-    /// Cache of application information.
+    /// Cache of the application's description.
     std::string m_description("");
+
+    /// Cache of the application's version.
     std::string m_version("");
+
+    /// Cache of the application's build number.
     std::string m_build("");
+
+    /// Cache of the application's config file.
     boost::filesystem::path m_config_file("");
+
+    /// Cache of the application's config arguments.
+    std::map<std::string, std::string> m_config_arguments;
+
+    /// Cache of the application's 'process id'.
     pid_t m_pid(0);
+
+    /// Cache of the application's 'process name'.
     std::string m_name("");
+
+    /**
+     * Custom parser to extract config arguments from the command line.
+     * @param raw_argument The raw argument to be parsed.
+     * @return the key/value pair if it matches the required prefix, otherwise just an empty pair.
+     */
+    std::pair<std::string, std::string> config_arguments_parser(const std::string& raw_argument)
+    {
+        // Set the default return value to a blank pair, this indicates that this argument is not for us.
+        std::pair<std::string, std::string> return_parsed;
+        
+        // Does the specified argument start with the config command line prefix?
+        if(raw_argument.find(PO_CONFIG_COMMAND_PREFIX) == 0)
+        {
+            // Fetch the key=value part of the argument string.
+            std::string keyValue = raw_argument.substr(PO_CONFIG_COMMAND_PREFIX.length());
+            
+            // We need to extract the key and value, which should be separated use the '=' character.
+            size_t equalsPosition = keyValue.find('=');
+            
+            // Did we find the '=' separator.
+            if(equalsPosition != std::string::npos)
+            {
+                // Add the split key and value to the map.
+                m_config_arguments[keyValue.substr(0, equalsPosition)] = keyValue.substr(equalsPosition + 1);
+                
+                // We have to return the ignore option to stop the arguments parser from failing, store the key/value in its vector.
+                return_parsed = std::make_pair(PO_IGNORE_CONFIG_COMMAND, keyValue);
+            }
+            else
+            {
+                // Does not match expected key=value format, ignore.
+            }
+        }
+        
+        // Return the result of our parsing.
+        return return_parsed;
+    }
 }
 //--------------------------------------------------------//
 
@@ -102,6 +153,22 @@ void application::config_file(const boost::filesystem::path& config_file)
 {
     // Set the config file.
     m_config_file = config_file;
+}
+//--------------------------------------------------------//
+
+//--------------------------------------------------------//
+const std::map<std::string, std::string>& application::config_arguments()
+{
+    // Return the config arguments map.
+    return m_config_arguments;
+}
+//--------------------------------------------------------//
+
+//--------------------------------------------------------//
+void application::config_arguments(const std::map<std::string, std::string>& config_arguments)
+{
+    // Set the config arguments map.
+    m_config_arguments = config_arguments;
 }
 //--------------------------------------------------------//
 
@@ -258,7 +325,7 @@ bool application::arguments_parser(boost::program_options::variables_map& variab
 {
     // Keep track of whether we should suggest exit the application.
     bool should_exit(false);
-    
+
     // Generic options (help, version and config file).
     boost::program_options::options_description generic(boost::locale::translate("Other options").str().c_str());
     generic.add_options()
@@ -266,24 +333,31 @@ bool application::arguments_parser(boost::program_options::variables_map& variab
         (PO_VERSION_FULL.c_str(), boost::locale::translate("produce version information").str().c_str())
         (PO_CONFIG_FILE_FULL.c_str(), boost::program_options::value<std::string>(), boost::locale::translate("override the global/application configuration file").str().c_str())
     ;
-    
+
     // Setup the program options, this joins the options together and sets the program description.
     boost::program_options::options_description cmdline_options(name() + ", " + description());
-    
+
     // Have any additional options been specified?
     if(options.options().size() > 0)
     {
         // Add the additional options first.
         cmdline_options.add(options);
     }
-    
+
     // Add the generic options.
     cmdline_options.add(generic);
-    
+
+    // Add hidden options (ignore-config-command).
+    boost::program_options::options_description all_options;
+    all_options.add_options()
+        (PO_IGNORE_CONFIG_COMMAND.c_str(), boost::program_options::value< std::vector<std::string> >(), "")
+    ;
+    all_options.add(cmdline_options);
+
     try
     {
         // Parse the arguments!
-        boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(cmdline_options).positional(positions).run(), variables_map);
+        boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(all_options).positional(positions).extra_parser(config_arguments_parser).run(), variables_map);
         
         // Did the user request help?
         if(variables_map.count(PO_HELP_FULL))

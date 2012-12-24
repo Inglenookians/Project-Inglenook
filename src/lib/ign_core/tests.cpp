@@ -53,6 +53,19 @@ BOOST_AUTO_TEST_CASE(application)
     inglenook::core::application::config_file("");
     BOOST_CHECK(inglenook::core::application::config_file() == "");
     
+    // Test the configuration arguments.
+    BOOST_CHECK(inglenook::core::application::config_arguments().size() == 0);
+    std::map<std::string, std::string> cl_arguments;
+    inglenook::core::application::config_arguments(cl_arguments);
+    BOOST_CHECK(inglenook::core::application::config_arguments().size() == 0);
+    cl_arguments["key"] = "value";
+    inglenook::core::application::config_arguments(cl_arguments);
+    BOOST_CHECK(inglenook::core::application::config_arguments().size() == 1);
+    BOOST_CHECK(inglenook::core::application::config_arguments().at("key") == "value");
+    BOOST_CHECK_THROW(inglenook::core::application::config_arguments().at("other"), std::out_of_range);
+    inglenook::core::application::config_arguments(std::map<std::string, std::string>());
+    BOOST_CHECK(inglenook::core::application::config_arguments().size() == 0);
+    
     // Test the application name (we know this!)
     BOOST_CHECK(inglenook::core::application::name() == "ign_core_tests");
     
@@ -68,7 +81,7 @@ BOOST_AUTO_TEST_CASE(application)
     boost::program_options::variables_map variables_map_two;
     const char* argv_two[] { "appname", "--version", "custom" };
     boost::program_options::variables_map variables_map_three;
-    const char* argv_three[] { "appname", "--config-file", "conf_file.xml" };
+    const char* argv_three[] { "appname", "--config-file", "conf_file.xml", "-conf-key=value" };
     boost::program_options::options_description options;
     options.add_options() ("custom", "Custom Option");
     boost::program_options::positional_options_description positions;
@@ -88,6 +101,10 @@ BOOST_AUTO_TEST_CASE(application)
     BOOST_CHECK_THROW(inglenook::core::application::arguments_parser(variables_map_three, 2, argv_three), inglenook::core::exceptions::application_arguments_parser_exception);
     // Test three arguments, with the --config-file specifed with a value.
     BOOST_CHECK(inglenook::core::application::arguments_parser(variables_map_three, 3, argv_three) == false);
+    // Test four arguments, with the -config- specifed with a key=value.
+    BOOST_CHECK(inglenook::core::application::arguments_parser(variables_map_three, 4, argv_three) == false);
+    BOOST_CHECK(inglenook::core::application::config_arguments().at("key") == "value");
+    inglenook::core::application::config_arguments(std::map<std::string, std::string>());
     
     // Test three arguments, with the --custom option specified but not added as an option, should throw.
     BOOST_CHECK_THROW(inglenook::core::application::arguments_parser(variables_map_one, 3, argv_one), inglenook::core::exceptions::application_arguments_parser_exception);

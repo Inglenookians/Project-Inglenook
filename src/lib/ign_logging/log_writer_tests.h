@@ -543,7 +543,8 @@ BOOST_AUTO_TEST_CASE ( log_writer_tests__default_log_file )
 
     result  = log_writer::default_log_path(specific_pid, specific_application);
     std::string specific_file_path = result.native();
-
+    
+    // Linux and OSX support (officially tested and maintained).
 #if defined(__linux__) || defined(__APPLE__)
 
     // setup regex elements to check results.
@@ -576,12 +577,10 @@ BOOST_AUTO_TEST_CASE ( log_writer_tests__default_log_file )
         BOOST_CHECK(lexical_cast<int>(items[7]) > 0 );
     }
     
-#elif defined(_WIN32)
-#warning log_writer_tests__default_log_file is not defined on the Windows platform.
-#warning a call to log_writer::default_log_path() will be executed to ensure it does not crash
-#warning but no attempt to verify the result will be made.
+#else // Unsupported platform
+    #error INGLENOOK: Unsupported platform.
 #endif
-
+    
 }
 
 //
@@ -690,4 +689,3 @@ BOOST_AUTO_TEST_CASE ( log_writer_tests__ouput )
 } // namespace inglenook::logging
 
 } // namespace inglenook
-

@@ -28,7 +28,6 @@
 //
 // Linux and OSX support (officially tested and maintained).
 #if defined(__linux__) || defined(__APPLE__)
-
     #include <sys/types.h>
     #include <unistd.h>
     #include <stdlib.h>
@@ -39,15 +38,8 @@
     #if defined(__APPLE__)
         #include <libproc.h>
     #endif
-
-// Windows support (not tested or maintained).
-#elif defined(_WIN32)
-
-    # include <windows.h>
-    # warning INGLENOOK: WIN32 code has never been tested. This might not even compile. Good luck brave warrior.
-    # define INGLENOOK_CURRENT_PID ( GetCurrentProcessId )
-    typedef DWORD pid_type;
-
+#else // Unsupported platform
+    #error INGLENOOK: Unsupported platform.
 #endif
 
 // standard library includes

@@ -266,47 +266,6 @@ std::string application::name()
             binary_path = application_name;
         }
         
-    #elif defined(_WIN32) // The following block is for WINDOWS and is NOT tested or maintained.
-        #warning INGLENOOK: WIN32 code has never been tested. This might not even compile. Good luck brave warrior.
-        
-        // Define a buffer to store path.
-        char application_name[MAX_PATH] = {};
-        
-        try
-        {
-            // Attempt to open the our own process with read access rights.
-            HANDLE application_handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, get_real_process_id());
-            
-            // Check if anything went wrong.
-            if(!application_handle)
-            {
-                BOOST_THROW_EXCEPTION(exceptions::application_name_exception());
-            }
-            
-            // Attempt to open handle was successful, set up a scoped exit clause to
-            // ensure that the process handle is closed when we are done.
-            BOOST_SCOPE_EXIT((&application_handle))
-            {
-                CloseHandle(application_handle);
-            } BOOST_SCOPE_EXIT_END
-            
-            // Query the name of the process using the handle acquired.
-            if(!GetModuleFileNameEx(application_handle, 0, application_name, sizeof(application_name) - 1))
-            {
-                // Something went wrong, abort and sulk
-                BOOST_THROW_EXCEPTION(exceptions::application_name_exception() << exceptions::win32_error_number(GetLastError()));
-            }
-            
-            // We have the process name.
-            binary_path = application_name;
-        }
-        catch(boost::exception& ex)
-        {
-            // In the event of any errors note that this is windows code.
-            ex << exceptions::is_win32_error(true);
-            throw;
-        }
-        
     #else // Unsupported platform
         #error INGLENOOK: Unsupported platform.
     #endif

@@ -31,15 +31,6 @@ namespace inglenook
             /// Added to exceptions when a config file cannot be read/written.
             typedef boost::error_info<struct __config_file, boost::filesystem::path> config_file;
             
-            /// Added to exceptions when a config file's parent directory does not exist.
-            typedef boost::error_info<struct __config_file_parent, boost::filesystem::path> config_file_parent;
-            
-            /// Added to exceptions when a config file's value cannot be converted.
-            typedef boost::error_info<struct __config_file_key, std::string> config_file_key;
-            
-            /// Added to exceptions when a config file's value cannot be converted.
-            typedef boost::error_info<struct __config_file_value, std::string> config_file_value;
-            
             /**
              * config_file_read_exception
              * This exception is thrown when issues are encountered with reading the config file.
@@ -49,54 +40,6 @@ namespace inglenook
                 /// provides a boiler plate explanation of the exception.
                 const char* what() const throw() {
                     return boost::locale::translate("There was a problem reading the config file").str().c_str();
-                }
-            };
-            
-            /**
-             * config_file_not_found_exception
-             * This exception is thrown when the specified config file does not exist.
-             */
-            struct config_file_not_found_exception : virtual inglenook::core::exceptions::inglenook_exception
-            {
-                /// provides a boiler plate explanation of the exception.
-                const char* what() const throw() {
-                    return boost::locale::translate("Failed to open specified config file").str().c_str();
-                }
-            };
-            
-            /**
-             * config_file_parent_exception
-             * This exception is thrown when the specified config file's parent directory does not exist.
-             */
-            struct config_file_parent_exception : virtual inglenook::core::exceptions::inglenook_exception
-            {
-                /// provides a boiler plate explanation of the exception.
-                const char* what() const throw() {
-                    return boost::locale::translate("Parent directory of config file does not exist").str().c_str();
-                }
-            };
-            
-            /**
-             * config_file_value_exception
-             * This exception is thrown when the specified value cannot be converted for saving.
-             */
-            struct config_file_value_exception : virtual inglenook::core::exceptions::inglenook_exception
-            {
-                /// provides a boiler plate explanation of the exception.
-                const char* what() const throw() {
-                    return boost::locale::translate("There was a problem converting the value for saving").str().c_str();
-                }
-            };
-            
-            /**
-             * config_file_write_exception
-             * This exception is thrown when issues are encountered with writing to the config file.
-             */
-            struct config_file_write_exception : virtual inglenook::core::exceptions::inglenook_exception
-            {
-                /// provides a boiler plate explanation of the exception.
-                const char* what() const throw() {
-                    return boost::locale::translate("There was a problem writing to the config file").str().c_str();
                 }
             };
             

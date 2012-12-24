@@ -123,36 +123,5 @@ namespace inglenook
             void clear();
             
         }
-
-        // Actual config file implementation.
-        namespace file
-        {
-
-            /**
-             * Get a config value from a file.
-             * @param file_path The location of the configuration file.
-             * @param key The key of the config value to retrieve.
-             * @param default_value The default value to return if no value set.
-             * @return The value for the key.
-             */
-            boost::optional<std::string> get(const boost::filesystem::path& file_path, const std::string& key, const boost::optional<std::string>& default_value = boost::optional<std::string>());
-            
-            /**
-             * Set a config value to a file.
-             * @param file_path The location of the configuration file.
-             * @param key The key of the config value to store.
-             * @param value The value to set for the key.
-             * @note Ensure that the parent directory of file_path exists and we have permission to write to it.
-             */
-            void set(const boost::filesystem::path& file_path, const std::string& key, const std::string& value);
-            
-            /**
-             * Remove a config value from a config file.
-             * @param file_path The location of the configuration file.
-             * @param key The key of the config value to remove.
-             */
-            void remove(const boost::filesystem::path& file_path, const std::string& key);
-
-        }
     }
 }

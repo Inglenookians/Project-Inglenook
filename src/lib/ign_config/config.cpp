@@ -37,9 +37,11 @@ using namespace inglenook;
 //--------------------------------------------------------//
 namespace
 {
-    /// Cache of configuration settings.
+    /// Cache of the command line configuration settings.
     boost::optional<boost::property_tree::ptree> m_command_line_config;
+    /// Cache of the application configuration settings.
     boost::optional<boost::property_tree::ptree> m_application_config;
+    /// Cache of the global configuration settings.
     boost::optional<boost::property_tree::ptree> m_global_config;
 }
 //--------------------------------------------------------//

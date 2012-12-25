@@ -31,70 +31,66 @@
 // it also defines INITIALIZE_TO which is designed to allow ign_logging
 // to initialize global variables to known values but is ignored by "import-ers".
 #ifndef IGN_LOGGING_LIBRARY
-	#ifdef _WIN32
-		#warning "WIN32 is not supported. Preparing the compiler to cry."
-		#define SHARED extern "C++" __declspec(dllimport)
-	#else
-		#define SHARED extern "C++"
-	#endif
+    // Linux and OSX support (officially tested and maintained).
+    #if defined(__linux__) || defined(__APPLE__)
+        #define SHARED extern "C++"
+    #else // Unsupported platform
+        #error INGLENOOK: Unsupported platform.
+    #endif
 #else
-	#ifdef _WIN32
-		#warning "WIN32 is not supported. Preparing the compiler to cry."
-		#define SHARED __declspec(dllexport)
-	#else
-		#define SHARED
-	#endif
+    // Linux and OSX support (officially tested and maintained).
+    #if defined(__linux__) || defined(__APPLE__)
+        #define SHARED
+    #else // Unsupported platform
+        #error INGLENOOK: Unsupported platform.
+    #endif
 #endif
 
 namespace inglenook
 {
 
-namespace logging
-{
+    namespace logging
+    {
 
-	// initializes the logging system
-	void initialize_logging();
+        // initializes the logging system
+        void initialize_logging();
 
-	// initializes the logging system with a define file path
-	void initialize_logging(const boost::filesystem::path& log_file);
+        // initializes the logging system with a define file path
+        void initialize_logging(const boost::filesystem::path& log_file);
 
-	/// creates an "off-the-record" logger (console only).
-	void initialize_logging_off_record();
+        /// creates an "off-the-record" logger (console only).
+        void initialize_logging_off_record();
 
-	/// checks if the logging structures are intialized.
-	void logging_initialization_check(const bool& warning = true);
+        /// checks if the logging structures are intialized.
+        void logging_initialization_check(const bool& warning = true);
 
-    /// Continues an existing log entry.
-	log_client& log();
+        /// Continues an existing log entry.
+        log_client& log();
 
-	/// Continues an existing log entry, switching context to debug.
-    log_client& log_debug();
+        /// Continues an existing log entry, switching context to debug.
+        log_client& log_debug();
 
-    /// Continues an existing log entry, switching context to trace.
-    log_client& log_trace();
+        /// Continues an existing log entry, switching context to trace.
+        log_client& log_trace();
 
-    /// Continues an existing log entry, switching context to info.
-    log_client& log_info();
+        /// Continues an existing log entry, switching context to info.
+        log_client& log_info();
 
-    /// Continues an existing log entry, switching context to warning.
-    log_client& log_warning();
+        /// Continues an existing log entry, switching context to warning.
+        log_client& log_warning();
 
-    /// Continues an existing log entry, switching context to error.
-    log_client& log_error();
+        /// Continues an existing log entry, switching context to error.
+        log_client& log_error();
 
-    /// Continues an existing log entry, switching context to fatal.
-    log_client& log_fatal();
+        /// Continues an existing log entry, switching context to fatal.
+        log_client& log_fatal();
 
-	/// log output interface - default serialization object.
-	SHARED std::shared_ptr<log_writer> log_output;
+        /// log output interface - default serialization object.
+        SHARED std::shared_ptr<log_writer> log_output;
 
-	/// log client interface - provides stream access to log writing.
-	SHARED std::shared_ptr<log_client> ilog;
+        /// log client interface - provides stream access to log writing.
+        SHARED std::shared_ptr<log_client> ilog;
 
-} // namespace logging
+    } // namespace logging
 
 } // namespace inglenook
-
-
-
-

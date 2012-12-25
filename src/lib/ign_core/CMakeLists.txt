@@ -22,32 +22,32 @@
 
 # Make the library.
 add_library(
-	ign_core 
-	SHARED
-	application.cpp
-	environment.cpp
+    ign_core
+    SHARED
+    application.cpp
+    environment.cpp
 )
 
 # Link to required libraries
 target_link_libraries(
-	ign_core
-	boost_filesystem
-	boost_locale
-	boost_program_options
-	boost_system
+    ign_core
+    boost_filesystem
+    boost_locale
+    boost_program_options
+    boost_system
 )
 
 # Set the properties
 set_target_properties(
-	ign_core PROPERTIES
-	VERSION 0.0.1
-	SOVERSION 1
+    ign_core PROPERTIES
+    VERSION 0.0.1
+    SOVERSION 1
 )
 
 # Specify the install location.
 install(
-	TARGETS ign_core 
-	DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
+    TARGETS ign_core
+    DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
 )
 
 #########
@@ -56,19 +56,25 @@ install(
 
 # Make the test.
 add_executable(
-	ign_core_tests 
-	tests.cpp
+    ign_core_tests
+    tests.cpp
+)
+
+# Set the properties
+set_target_properties(
+    ign_core_tests PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${TESTS_OUTPUT_DIRECTORY}
 )
 
 # Link to required libraries
 target_link_libraries(
-	ign_core_tests
-	ign_core
-	boost_unit_test_framework
+    ign_core_tests
+    ign_core
+    boost_unit_test_framework
 ) 
 
 # Add the test.
 add_test(
-	NAME ign_core_tests
-	COMMAND ign_core_tests
+    NAME ign_core_tests
+    COMMAND ign_core_tests
 )

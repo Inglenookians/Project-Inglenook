@@ -36,14 +36,14 @@ namespace logging
  */
 enum category : unsigned int
 {
-	unspecified = 0x00,  	/**< Use category defined by log_client::default_category. */
-	debugging 	= 0x01,		/**< Debugging information. Extremely verbose, usually only beneficial during development.*/
-	verbose 	= 0x02, 	/**< Verbose output. Useful for diagnosing hard to track issues in live environments. */
-	information = 0x03,		/**< Information. Standard output messages related to key events within the software. */
-	warning 	= 0x04,		/**< Warning. Notification of potentially erroneous or unexpected behavior. Usually not fatal . */
-	error 		= 0x05,		/**< Error. Significant deviation of expected behavior. */
-	fatal		= 0x06,		/**< Fatal Error. Unrecoverable deviation from expected behaviour. This will usually be the last entry. */
-	no_log		= 0x99		/**< No logging. (log_writer use only). */
+    unspecified = 0x00,  /**< Use category defined by log_client::default_category. */
+    debugging   = 0x01,  /**< Debugging information. Extremely verbose, usually only beneficial during development.*/
+    verbose     = 0x02,  /**< Verbose output. Useful for diagnosing hard to track issues in live environments. */
+    information = 0x03,  /**< Information. Standard output messages related to key events within the software. */
+    warning     = 0x04,  /**< Warning. Notification of potentially erroneous or unexpected behavior. Usually not fatal . */
+    error       = 0x05,  /**< Error. Significant deviation of expected behavior. */
+    fatal       = 0x06,  /**< Fatal Error. Unrecoverable deviation from expected behaviour. This will usually be the last entry. */
+    no_log      = 0x99   /**< No logging. (log_writer use only). */
 };
 
 /**
@@ -55,53 +55,51 @@ enum category : unsigned int
 class log_entry
 {
 
-	public:
+    public:
 
-		// creates a new log entry
-		log_entry();
+        // creates a new log entry
+        log_entry();
 
-		// deletes an existing log entry.
-		virtual ~log_entry();
+        // deletes an existing log entry.
+        virtual ~log_entry();
 
+        /// gets the current category
+        const category& entry_type() const;
 
-		/// gets the current category
-		const category& entry_type() const;
+        /// sets the current category
+        void entry_type(const category& value);
 
-		/// sets the current category
-		void entry_type(const category& value);
+        /// gets the log name space
+        const std::string& log_namespace() const;
 
-		/// gets the log name space
-		const std::string& log_namespace() const;
+        /// sets the log name space
+        void log_namespace(const std::string& value);
 
-		/// sets the log name space
-		void log_namespace(const std::string& value);
+        /// gets the log message
+        virtual const std::string& message();
 
-		/// gets the log message
-		virtual const std::string& message();
+        /// sets the log message
+        virtual void message(const std::string& value);
 
-		/// sets the log message
-		virtual void message(const std::string& value);
+        /// add a data entry to the log
+        void extended_data(const std::string& key, const std::string& value);
 
-		/// add a data entry to the log
-		void extended_data(const std::string& key, const std::string& value);
+        /// get the data records from the log.
+        const std::map<std::string, std::string>& extended_data();
 
-		/// get the data records from the log.
-		const std::map<std::string, std::string>& extended_data();
+    private:
 
-	private:
+        /// internal variable for category.
+        category m_category = category::unspecified;
 
-		/// internal variable for category.
-		category m_category = category::unspecified;
+        /// name space for this message
+        std::string m_namespace;
 
-		/// name space for this message
-		std::string m_namespace;
+        /// logs message body
+        std::string m_message;
 
-		/// logs message body
-		std::string m_message;
-
-		/// buffer for extended data.
-		std::map<std::string, std::string> m_extended;
-
+        /// buffer for extended data.
+        std::map<std::string, std::string> m_extended;
 };
 
 } // namespace inglenook::logging

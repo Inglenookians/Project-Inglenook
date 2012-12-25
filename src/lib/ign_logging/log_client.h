@@ -40,7 +40,7 @@ namespace logging
  */
 enum lf : unsigned int
 {
-	end = 0x01 /**< End the current log entry and schedule for serialization. */
+    end = 0x01 /**< End the current log entry and schedule for serialization. */
 };
 
 /// shared points to a log buffer
@@ -65,35 +65,35 @@ public:
 	/// there is no copy constructor for this class.
 	log_client(log_client&) = delete;
 
-	/// creates a new log_client, which will emit log entries to
-	/// the specified log_writer interface. log_writer cannot be null.
-	log_client(std::shared_ptr<log_writer> output_interface);
+    /// creates a new log_client, which will emit log entries to
+    /// the specified log_writer interface. log_writer cannot be null.
+    log_client(std::shared_ptr<log_writer> output_interface);
 
-	/// deconstructs the log_client and releases resources.
-	virtual ~log_client();
+    /// deconstructs the log_client and releases resources.
+    virtual ~log_client();
 
-	// gets the default name space for this thread.
-	const std::string& default_namespace() const;
+    // gets the default name space for this thread.
+    const std::string& default_namespace() const;
 
-	// unsets the default namespace for this log client (forcing it to
-	// fall back on to the log writers default namespace)
-	void clear_default_namespace();
+    // unsets the default namespace for this log client (forcing it to
+    // fall back on to the log writers default namespace)
+    void clear_default_namespace();
 
-	// sets the default name space for this thread.
-	void default_namespace(const std::string& value);
+    // sets the default name space for this thread.
+    void default_namespace(const std::string& value);
 
-	// gets the default entry type for this thread.
-	const category& default_entry_type() const;
+    // gets the default entry type for this thread.
+    const category& default_entry_type() const;
 
-	// unsets the default entry type for this log client (forcing it to
-	// fall back on to the log writers default type)
-	void clear_default_entry_type();
+    // unsets the default entry type for this log client (forcing it to
+    // fall back on to the log writers default type)
+    void clear_default_entry_type();
 
- 	/// sets the default entry type for this thread.
-	void default_entry_type(const category& value);
+     /// sets the default entry type for this thread.
+    void default_entry_type(const category& value);
 
-	/// The internal log entry buffer for this client.
-	log_buffer& buffer();
+    /// The internal log entry buffer for this client.
+    log_buffer& buffer();
 
     /// Creates a debug log entry
     log_client& debug();
@@ -122,11 +122,11 @@ private:
     /// ensures that the internal buffer is initialized within the current context.
     void check_buffer();
 
-	/// creates a log category of the specified type.
-	inline log_client& create_log_stream(category _category);
+    /// creates a log category of the specified type.
+    inline log_client& create_log_stream(category _category);
 
-	/// convenience method to perform null checks on thread specific
-	/// buffer prior to stream write. nice and centralized.
+    /// convenience method to perform null checks on thread specific
+    /// buffer prior to stream write. nice and centralized.
     template <class type> inline log_client& send_to_stream(type& x);
 
     /// pointer to the output interface that this client should submit log
@@ -141,7 +141,7 @@ private:
 
     /// thread specific data buffer used to collate stream input until a
     /// log entry is flushed with lf::end;
-	ts_log_buffer m_buffer;
+    ts_log_buffer m_buffer;
 
 public:
 

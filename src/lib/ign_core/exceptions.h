@@ -45,12 +45,6 @@ namespace inglenook
             /// Error message report by C API strerror(errno).
             typedef boost::error_info<struct __c_error_message, char *> c_error_message;
             
-            /// Error message report by win32 API GetLastError()
-            typedef boost::error_info<struct __win32_error_number, unsigned long> win32_error_number;
-            
-            /// Indicates if the code that is in fault is windows code.
-            typedef boost::error_info<struct __is_win32_error, bool> is_win32_error;
-            
             /**
              * inglenook_exception
              * Standard base exception for all exceptions thrown by objects in inglenook.

@@ -28,7 +28,6 @@
 //
 // Linux and OSX support (officially tested and maintained).
 #if defined(__linux__) || defined(__APPLE__)
-
     #include <sys/types.h>
     #include <unistd.h>
     #include <stdlib.h>
@@ -39,15 +38,8 @@
     #if defined(__APPLE__)
         #include <libproc.h>
     #endif
-
-// Windows support (not tested or maintained).
-#elif defined(_WIN32)
-
-    # include <windows.h>
-    # warning INGLENOOK: WIN32 code has never been tested. This might not even compile. Good luck brave warrior.
-    # define INGLENOOK_CURRENT_PID ( GetCurrentProcessId )
-    typedef DWORD pid_type;
-
+#else // Unsupported platform
+    #error INGLENOOK: Unsupported platform.
 #endif
 
 // standard library includes
@@ -69,6 +61,7 @@ namespace inglenook
     	 */
         class application
         {
+            
         public:
             
             /**
@@ -87,26 +80,26 @@ namespace inglenook
             
             /**
              * Fetch the application description.
-             * @retutn the description.
+             * @return the description.
              */
             static std::string description();
             
             /**
              * Fetch the application version number.
-             * @retutn the version number.
+             * @return the version number.
              */
             static std::string version();
             
             /**
              * Fetch the application build information.
-             * @retutn the build information.
+             * @return the build information.
              */
             static std::string build();
             
             /**
-             * Fetch the application overriding config file, which can be set 
-             * using the default argument parser as well as manually.
-             * @retutn the config file.
+             * Fetch the overriding config file from the command line,
+             * which can be set using the default argument parser.
+             * @return the config file.
              */
             static boost::filesystem::path config_file();
             
@@ -117,10 +110,23 @@ namespace inglenook
             static void config_file(const boost::filesystem::path& config_file);
             
             /**
+             * Fetch the overriding config arguments from the command line, 
+             * which can be set using the default argument parser.
+             * @return the config arguments.
+             */
+            static const std::map<std::string, std::string>& config_arguments();
+
+            /**
+             * Set the overriding config arguments for the application.
+             * @param config_arguments The config arguments to set.
+             */
+            static void config_arguments(const std::map<std::string, std::string>& config_arguments);
+
+            /**
              * Fetch the application's process id (pid).
              * @return The application's pid.
              */
-            static pid_t pid();
+            static pid_type pid();
             
             /**
              * Fetch the application's process name.
@@ -138,8 +144,8 @@ namespace inglenook
              * @return Whether the user has specified the help/version option, as usually we want to stop the application from executing any further.
              * @note This will throw if invalid arguments are specified on the command line.
              */
-            static bool arguments_parser(boost::program_options::variables_map& variables_map, int argc, char* argv[], const boost::program_options::options_description& options = boost::program_options::options_description(), const boost::program_options::positional_options_description& positions = boost::program_options::positional_options_description());
-            
+            static bool arguments_parser(boost::program_options::variables_map& variables_map, const int& argc, const char* argv[], const boost::program_options::options_description& options = boost::program_options::options_description(), const boost::program_options::positional_options_description& positions = boost::program_options::positional_options_description());
+
         };
         
     }

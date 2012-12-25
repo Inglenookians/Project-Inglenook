@@ -52,11 +52,11 @@ typedef boost::error_info<struct __unrecongised_action, std::string> unrecognise
  * Standard base exception for all exceptions thrown by ign_log_write.
  */
 struct log_write_exception: virtual inglenook::core::exceptions::inglenook_exception
-{	
-	/// provides a boiler plate explaination of the exception.
-   const char* what() const throw() {
-	   return boost::locale::translate("Unhandled exception in CLI log writer (ign_log_write)").str().c_str();
-   }
+{
+    /// provides a boiler plate explanation of the exception.
+    const char* what() const throw() {
+        return boost::locale::translate("Unhandled exception in CLI log writer (ign_log_write)").str().c_str();
+    }
 };
 
 /**
@@ -90,6 +90,7 @@ struct unrecognised_action_exception: virtual log_write_exception
    const char* what() const throw() {
 	   return boost::locale::translate("The action was not understood.").str().c_str();
    }
+
 };
 
 

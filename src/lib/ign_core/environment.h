@@ -41,10 +41,9 @@ namespace inglenook
              * @param variable The name of the environment variable.
              * @param value The value to set the environment variable to.
              * @param overwrite Whether to overwrite the value if it is already set.
-             * @return Whether the operation was successfully.
              * @note Setting an environment variable will only affect the runtime of this process.
              */
-            bool set(const std::string& variable, const std::string& value, bool overwrite = true);
+            void set(const std::string& variable, const std::string& value, bool overwrite = true);
             
         }
     }

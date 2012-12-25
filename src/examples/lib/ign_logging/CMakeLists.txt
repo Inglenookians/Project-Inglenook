@@ -18,30 +18,45 @@
 
 # Add all the examples.
 add_executable(
-	ign_examples_lib_logging_01_basic	
-	01-basic.cpp
+    ign_examples_lib_logging_01_basic
+    01-basic.cpp
 )
 
 add_executable(
-	ign_examples_lib_logging_02_threading	
-	02-threading.cpp
+    ign_examples_lib_logging_02_threading
+    02-threading.cpp
 )
 
-
 add_executable(
-    ign_examples_lib_logging_03_otr_and_fallback   
+    ign_examples_lib_logging_03_otr_and_fallback
     03-otr-and-fallback.cpp
+)
+
+# Set the properties
+set_target_properties(
+    ign_examples_lib_logging_01_basic PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${EXAMPLES_OUTPUT_DIRECTORY}
+)
+
+set_target_properties(
+    ign_examples_lib_logging_02_threading PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${EXAMPLES_OUTPUT_DIRECTORY}
+)
+
+set_target_properties(
+    ign_examples_lib_logging_03_otr_and_fallback PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${EXAMPLES_OUTPUT_DIRECTORY}
 )
 
 # Link to required libraries
 target_link_libraries(
-	ign_examples_lib_logging_01_basic
-	ign_logging
+    ign_examples_lib_logging_01_basic
+    ign_logging
 )
 
 target_link_libraries(
-	ign_examples_lib_logging_02_threading
-	ign_logging
+    ign_examples_lib_logging_02_threading
+    ign_logging
 )
 
 target_link_libraries(
@@ -51,46 +66,29 @@ target_link_libraries(
 
 # Configure the automatic version header generation.
 set(TARGET_VERSION 0.1)
-add_custom_target(ign_examples_lib_logging_01_basic_version ALL 
-	COMMAND ${CMAKE_COMMAND} 
-	-D TARGET_VERSION=${TARGET_VERSION}
-	-P ${PROJECT_SOURCE_DIR}/cmake/version_git.cmake
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-add_custom_target(ign_examples_lib_logging_02_threading_version ALL 
-	COMMAND ${CMAKE_COMMAND} 
-	-D TARGET_VERSION=${TARGET_VERSION}
-	-P ${PROJECT_SOURCE_DIR}/cmake/version_git.cmake
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-add_custom_target(ign_examples_lib_logging_03_otr_and_fallback_version ALL 
-    COMMAND ${CMAKE_COMMAND} 
+add_custom_target(ign_examples_lib_logging_01_basic_version ALL
+    COMMAND ${CMAKE_COMMAND}
     -D TARGET_VERSION=${TARGET_VERSION}
     -P ${PROJECT_SOURCE_DIR}/cmake/version_git.cmake
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+add_custom_target(ign_examples_lib_logging_02_threading_version ALL
+    COMMAND ${CMAKE_COMMAND}
+    -D TARGET_VERSION=${TARGET_VERSION}
+    -P ${PROJECT_SOURCE_DIR}/cmake/version_git.cmake
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_custom_target(ign_examples_lib_logging_03_otr_and_fallback_version ALL
+    COMMAND ${CMAKE_COMMAND}
+    -D TARGET_VERSION=${TARGET_VERSION}
+    -P ${PROJECT_SOURCE_DIR}/cmake/version_git.cmake
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
 
 add_dependencies(ign_examples_lib_logging_01_basic ign_examples_lib_logging_01_basic_version)
 
 add_dependencies(ign_examples_lib_logging_02_threading ign_examples_lib_logging_02_threading_version)
 
 add_dependencies(ign_examples_lib_logging_03_otr_and_fallback ign_examples_lib_logging_03_otr_and_fallback_version)
-
-# Specify the install location.
-install(
-	TARGETS ign_examples_lib_logging_01_basic 
-	DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
-)
-
-install(
-	TARGETS ign_examples_lib_logging_02_threading
-	DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
-)
-
-install(
-    TARGETS ign_examples_lib_logging_03_otr_and_fallback
-    DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
-)

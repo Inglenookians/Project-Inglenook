@@ -35,9 +35,9 @@ namespace logging
  * @param output_interface log_writer that completed entries should be written to.
  */
 log_client::log_client(std::shared_ptr<log_writer> output_interface)
-	: m_output_interface(output_interface)
+    : m_output_interface(output_interface)
 {
-	// nothing to do at the moment.
+    // nothing to do at the moment.
 }
 
 /**
@@ -45,7 +45,7 @@ log_client::log_client(std::shared_ptr<log_writer> output_interface)
  */
 log_client::~log_client()
 {
-	// nothing to do at the moment.
+    // nothing to do at the moment.
 }
 
 /**
@@ -53,8 +53,8 @@ log_client::~log_client()
  */
 void log_client::initialize_buffer()
 {
-	// create a new log entry (this is now a tls_ptr to a shared_ptr to a buffer).
-	m_buffer.reset(new std::shared_ptr<log_entry_buffered>(new log_entry_buffered()));
+    // create a new log entry (this is now a tls_ptr to a shared_ptr to a buffer).
+    m_buffer.reset(new std::shared_ptr<log_entry_buffered>(new log_entry_buffered()));
 }
 
 /**
@@ -62,12 +62,12 @@ void log_client::initialize_buffer()
  */
 void log_client::check_buffer()
 {
-	// if the buffer has not been initialized for this thread...
-	if (m_buffer.get() == nullptr)
-	{
-		// ...  then initialize it.
-		initialize_buffer();
-	}
+    // if the buffer has not been initialized for this thread...
+    if(m_buffer.get() == nullptr)
+    {
+        // ...  then initialize it.
+        initialize_buffer();
+    }
 }
 
 /**
@@ -76,23 +76,21 @@ void log_client::check_buffer()
  */
 const std::string& log_client::default_namespace() const
 {
+    //
+    // don't like multiple returns, but dont want to create
+    // local - as this can't be safely used as out by ref.
 
-	//
-	// don't like multiple returns, but dont want to create
-	// local - as this can't be safely used as out by ref.
-
-	// check if a class level override exists...
-	if (m_ts_default_namespace.get() != nullptr)
-	{
-		// .. and if so use it.
-		return *m_ts_default_namespace;
-	}
-	else
-	{
-		// .. else return the default value
-		return m_output_interface->default_namespace();
-	}
-
+    // check if a class level override exists...
+    if (m_ts_default_namespace.get() != nullptr)
+    {
+        // .. and if so use it.
+        return *m_ts_default_namespace;
+    }
+    else
+    {
+        // .. else return the default value
+        return m_output_interface->default_namespace();
+    }
 }
 
 /**
@@ -101,8 +99,8 @@ const std::string& log_client::default_namespace() const
  */
 void log_client::clear_default_namespace()
 {
-	// update default namespace
-	m_ts_default_namespace.reset(nullptr);
+    // update default namespace
+    m_ts_default_namespace.reset(nullptr);
 }
 
 /**
@@ -111,12 +109,12 @@ void log_client::clear_default_namespace()
  */
 void log_client::default_namespace(const std::string& value)
 {
-	// update default namespace
-	if(m_ts_default_namespace.get() == nullptr)
-	{
-		m_ts_default_namespace.reset(new std::string());
-	}
-	*m_ts_default_namespace = value;
+    // update default namespace
+    if(m_ts_default_namespace.get() == nullptr)
+    {
+        m_ts_default_namespace.reset(new std::string());
+    }
+    *m_ts_default_namespace = value;
 }
 
 /**
@@ -125,15 +123,15 @@ void log_client::default_namespace(const std::string& value)
  */
 const category& log_client::default_entry_type() const
 {
-	// check if a default is set, else fall back to writers.
-	if (m_ts_default_entry_type.get() != nullptr)
-	{
-		return *m_ts_default_entry_type;
-	}
-	else
-	{
-		return m_output_interface->default_entry_type();
-	}
+    // check if a default is set, else fall back to writers.
+    if (m_ts_default_entry_type.get() != nullptr)
+    {
+        return *m_ts_default_entry_type;
+    }
+    else
+    {
+        return m_output_interface->default_entry_type();
+    }
 }
 
 /**
@@ -142,8 +140,8 @@ const category& log_client::default_entry_type() const
  */
 void log_client::clear_default_entry_type()
 {
-	// update default entry types
-	m_ts_default_entry_type.reset(nullptr);
+    // update default entry types
+    m_ts_default_entry_type.reset(nullptr);
 }
 
 
@@ -153,13 +151,13 @@ void log_client::clear_default_entry_type()
  */
 void log_client::default_entry_type(const category& value)
 {
-	// update default entry types
-	if(m_ts_default_entry_type.get() == nullptr)
-	{
-		m_ts_default_entry_type.reset(new category);
-	}
+    // update default entry types
+    if(m_ts_default_entry_type.get() == nullptr)
+    {
+        m_ts_default_entry_type.reset(new category);
+    }
 
-	*m_ts_default_entry_type = value;
+    *m_ts_default_entry_type = value;
 }
 
 /**
@@ -170,13 +168,13 @@ void log_client::default_entry_type(const category& value)
  */
 template <class type> log_client& log_client::send_to_stream(type& x)
 {
-	// make sure buffers initialized
-	check_buffer();
+    // make sure buffers initialized
+    check_buffer();
 
-	// push element in the message stream
-	(m_buffer->get()->message_buffer()) << x;
+    // push element in the message stream
+    (m_buffer->get()->message_buffer()) << x;
 
-	return *this;
+    return *this;
 }
 
 /**
@@ -186,15 +184,15 @@ template <class type> log_client& log_client::send_to_stream(type& x)
  */
 log_client& log_client::create_log_stream(category _category)
 {
-	// make sure buffers initialized
-	check_buffer();
+    // make sure buffers initialized
+    check_buffer();
 
-	// set the initial category
-	m_buffer->get()->entry_type(_category);
+    // set the initial category
+    m_buffer->get()->entry_type(_category);
 
-	// return the message stream (even though its not entirely what we are currently
-	// working with it is the most relevant, usable std::ostream.
-	return *this;
+    // return the message stream (even though its not entirely what we are currently
+    // working with it is the most relevant, usable std::ostream.
+    return *this;
 }
 
 /**
@@ -203,8 +201,8 @@ log_client& log_client::create_log_stream(category _category)
  */
 log_buffer& log_client::buffer()
 {
-	check_buffer();
-	return *m_buffer.get();
+    check_buffer();
+    return *m_buffer.get();
 }
 
 /**
@@ -251,14 +249,14 @@ log_client& log_client::fatal() { return create_log_stream(category::fatal); }
  **/
 log_client& log_client::operator<<(const log_data& _log_data)
 {
-	// make sure buffers initialized
-	check_buffer();
+    // make sure buffers initialized
+    check_buffer();
 
-	// update namespace
-	m_buffer->get()->extended_data(_log_data.key(), _log_data.value());
+    // update namespace
+    m_buffer->get()->extended_data(_log_data.key(), _log_data.value());
 
-	// return the stream
-	return *this;
+    // return the stream
+    return *this;
 }
 
 /**
@@ -268,14 +266,14 @@ log_client& log_client::operator<<(const log_data& _log_data)
  **/
 log_client& log_client::operator<<(const ns& _ns)
 {
-	// make sure buffers initialized
-	check_buffer();
+    // make sure buffers initialized
+    check_buffer();
 
-	// update namespace
-	m_buffer->get()->log_namespace(_ns.log_namespace());
+    // update namespace
+    m_buffer->get()->log_namespace(_ns.log_namespace());
 
-	// return the stream
-	return *this;
+    // return the stream
+    return *this;
 }
 
 /**
@@ -285,53 +283,50 @@ log_client& log_client::operator<<(const ns& _ns)
  **/
 log_client& log_client::operator<<(lf _lf)
 {
+    // make sure buffers initialized
+    check_buffer();
 
-	// make sure buffers initialized
-	check_buffer();
+    // decide how to handle modifier.
+    switch(_lf)
+    {
+        // end entry and flush (lf::end)
+        case (lf::end):
+        {
+            // add the entry to the log schedule and create next entry.
+            auto converted_buffer = std::dynamic_pointer_cast<log_entry>(*m_buffer);
 
-	// decide how to handle modifier.
-	switch(_lf)
-	{
-		// end entry and flush (lf::end)
-		case (lf::end):
-		{
+            // ensure that the entry type is set...
+            if(converted_buffer->entry_type() == category::unspecified)
+            {
+                // ... else use the fallback type
+                converted_buffer->entry_type(default_entry_type());
+            }
 
-			// add the entry to the log schedule and create next entry.
-			auto converted_buffer = std::dynamic_pointer_cast<log_entry>(*m_buffer);
+            // ensure that the entry namespace is set...
+            if(converted_buffer->log_namespace() == "")
+            {
+                // ... else ue the fallback namespace
+                converted_buffer->log_namespace(default_namespace());
+            }
 
-			// ensure that the entry type is set...
-			if(converted_buffer->entry_type() == category::unspecified)
-			{
-				// ... else use the fallback type
-				converted_buffer->entry_type(default_entry_type());
-			}
+            // schedule the entry for serialization and re-initialize buffer
+            m_output_interface->add_entry(converted_buffer);
+            initialize_buffer();
 
-			// ensure that the entry namespace is set...
-			if(converted_buffer->log_namespace() == "")
-			{
-				// ... else ue the fallback namespace
-				converted_buffer->log_namespace(default_namespace());
-			}
+            break;
+        }
 
-			// schedule the entry for serialization and re-initialize buffer
-			m_output_interface->add_entry(converted_buffer);
-			initialize_buffer();
-
-			break;
-		}
-
-		// unknown operator
-		default:
-		{
+        // unknown operator
+        default:
+        {
 #ifdef _DEBUG
-			// if we are debugging - notify developer that the flow is unrecognized and going unprocessed.
-			std::cerr << translate("WARNING: unknown inglenook log flag encountered in stream (inglenook::logging::lf): ") << _lf << std::endl;
+            // if we are debugging - notify developer that the flow is unrecognized and going unprocessed.
+            std::cerr << translate("WARNING: unknown inglenook log flag encountered in stream (inglenook::logging::lf): ") << _lf << std::endl;
 #endif
-		}
-	}
+        }
+    }
 
-	return *this;
-
+    return *this;
 }
 //
 // THERE IS NOTHING SPECIAL BELOW THIS POINT

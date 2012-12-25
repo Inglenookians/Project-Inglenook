@@ -35,341 +35,339 @@ actually validated against. This can only be done by either:
 -->
 
 <schema 
-	xmlns               ="http://www.w3.org/2001/XMLSchema" 
-	targetNamespace     ="http://schemas.project-inglenook.co.uk/0.00-DEVELOPMENT/schemas/file-formats/inglenook-log-file.xsd" 
-	xmlns:inglenook     ="http://schemas.project-inglenook.co.uk/0.00-DEVELOPMENT/schemas/file-formats/inglenook-log-file.xsd" 
-	elementFormDefault  ="qualified">
+    xmlns               ="http://www.w3.org/2001/XMLSchema" 
+    targetNamespace     ="http://schemas.project-inglenook.co.uk/0.00-DEVELOPMENT/schemas/file-formats/inglenook-log-file.xsd" 
+    xmlns:inglenook     ="http://schemas.project-inglenook.co.uk/0.00-DEVELOPMENT/schemas/file-formats/inglenook-log-file.xsd" 
+    elementFormDefault  ="qualified">
 
     <annotation>
-    	<documentation>
-				This is an Inglenook file format. It specifically relates to the XML structure of an Inglenook log file.
-				Log files are usually written using the Inglenook logging library.
-				For more information check http://www.project-inglenook.co.uk
-			</documentation>
-		</annotation>
+        <documentation>
+            This is an Inglenook file format. It specifically relates to the XML structure of an Inglenook log file.
+            Log files are usually written using the Inglenook logging library.
+            For more information check http://www.project-inglenook.co.uk
+        </documentation>
+    </annotation>
 
-		<!-- 
-		Element XPATH: /inglenook-log-file
-		Root element of the inglenook-log-file
-		-->
+    <!--
+    Element XPATH: /inglenook-log-file
+    Root element of the inglenook-log-file
+    -->
     <element name="inglenook-log-file">
-			
-			<!-- inglenook-log-file element documentation -->
-      <annotation>
-				<documentation>
-					Log file, usually containing the entries from a single run of an Inglenook process.
-				</documentation>
-			</annotation>
 
-			<!-- inglenook-log-file element definition -->
-			<complexType>
-				<sequence>
+        <!-- inglenook-log-file element documentation -->
+        <annotation>
+            <documentation>
+                Log file, usually containing the entries from a single run of an Inglenook process.
+            </documentation>
+        </annotation>
 
-				<!-- starts with exactly one process-id element (see below) -->
-				<element maxOccurs="1" minOccurs="1" ref="inglenook:process-id">
-					<annotation>
-						<documentation>
-							Identifies the process generating this log. While we can easily identify the process while the file is in its 
-							directory structure (assuming its following a 'traditional installation' model, we need a manner to track this
-							information once the file is copied else where.
- 	  					</documentation>
- 	  				</annotation>
- 	  			</element>
+        <!-- inglenook-log-file element definition -->
+        <complexType>
+            <sequence>
+                
+                <!-- starts with exactly one process-id element (see below) -->
+                <element maxOccurs="1" minOccurs="1" ref="inglenook:process-id">
+                    <annotation>
+                        <documentation>
+                            Identifies the process generating this log. While we can easily identify the process while the file is in its
+                            directory structure (assuming its following a 'traditional installation' model, we need a manner to track this
+                            information once the file is copied else where.
+                        </documentation>
+                    </annotation>
+                </element>
 
-					<!-- then, optionally, follows with multiple log-entry elements (see below) -->
-	   			<element minOccurs="1" maxOccurs="1" ref="inglenook:log-entries">
-	          <annotation>
-	           	<documentation>
-								A log entry containing information about an event that occurred within the system.
-							</documentation>
-						</annotation>
-    			</element>
-
-    		</sequence>
-      </complexType>
+                <!-- then, optionally, follows with multiple log-entry elements (see below) -->
+                <element minOccurs="1" maxOccurs="1" ref="inglenook:log-entries">
+                    <annotation>
+                        <documentation>
+                            A log entry containing information about an event that occurred within the system.
+                        </documentation>
+                    </annotation>
+                </element>
+                
+            </sequence>
+        </complexType>
 
     </element>
 
+    <!--
+    Element XPATH: /inglenook-log-file/process-id
+    Element containing information about the process that wrote the log file.
 
-		<!-- 
-		Element XPATH: /inglenook-log-file/process-id
-		Element containing information about the process that wrote the log file.
-
-		Example of well formed entry:
-
-		<process-id pid="16403">
-			<binary-name><![CDATA[inglenook-log-example]]></binary-name>
-			<binary-version>#.## DEVELOPMENT</binary-version>
-			<log-writer-version>#.## DEVELOPMENT</log-writer-version>
-		</process-id>
-		-->
+    Example of well formed entry:
+     
+    <process-id pid="16403">
+        <binary-name><![CDATA[inglenook-log-example]]></binary-name>
+        <binary-version>#.## DEVELOPMENT</binary-version>
+        <log-writer-version>#.## DEVELOPMENT</log-writer-version>
+    </process-id>
+    -->
     <element name="process-id">
 
-  		<!-- process-id element documentation -->
-    	<annotation>
-      	<documentation>
-					The process-id element contains information about the process that generated the log file
-					This includes the processes name, the PID, and relevant version numbers. This information
-					may be expanded at a later date.
-				</documentation>
-      </annotation>
+        <!-- process-id element documentation -->
+        <annotation>
+            <documentation>
+                The process-id element contains information about the process that generated the log file
+                This includes the processes name, the PID, and relevant version numbers. This information
+                may be expanded at a later date.
+            </documentation>
+        </annotation>
 
-			<!-- process-id element definitions -->
-    	<complexType>
-    		<sequence>
+        <!-- process-id element definitions -->
+        <complexType>
+            <sequence>
 
-					<!-- binary-name element (documentation, definition and restrictions) -->
-    			<element minOccurs="1" maxOccurs="1" name="binary-name">
-    				<annotation>
-    					<documentation>
-								The name of the process that generated this file. This should always be CDATA encapsulated.
-							</documentation>
-    				</annotation>
-    				<simpleType>
-    					<restriction base="string">
-    						<minLength value="1" />
-    						<whiteSpace value="collapse" />
-    					</restriction>
-    				</simpleType>
-    			</element>
+                <!-- binary-name element (documentation, definition and restrictions) -->
+                <element minOccurs="1" maxOccurs="1" name="binary-name">
+                    <annotation>
+                        <documentation>
+                            The name of the process that generated this file. This should always be CDATA encapsulated.
+                        </documentation>
+                    </annotation>
+                    <simpleType>
+                        <restriction base="string">
+                            <minLength value="1" />
+                            <whiteSpace value="collapse" />
+                        </restriction>
+                    </simpleType>
+                </element>
 
-					<!-- binary-version element (documentation, definition and restrictions) -->
-    			<element minOccurs="1" maxOccurs="1" name="binary-version">
-    				<annotation>
-    					<documentation>
-								The software version of the process writing the log file.
-							</documentation>
-						</annotation>
-    				<simpleType>
-    					<restriction base="string">
-    						<minLength value="1" />
-    						<whiteSpace value="collapse" />
-    					</restriction>
-    				</simpleType>
-    			</element>
+                <!-- binary-version element (documentation, definition and restrictions) -->
+                <element minOccurs="1" maxOccurs="1" name="binary-version">
+                    <annotation>
+                        <documentation>
+                            The software version of the process writing the log file.
+                        </documentation>
+                    </annotation>
+                    <simpleType>
+                        <restriction base="string">
+                            <minLength value="1" />
+                            <whiteSpace value="collapse" />
+                        </restriction>
+                    </simpleType>
+                </element>
 
-					<!-- log-writer-version element (documentation, definition and restrictions) -->
-    			<element minOccurs="1" maxOccurs="1" name="log-writer-version">
-    				<annotation>
-    					<documentation>
-								The version of the log writer responsible for authoring this file.
-							</documentation>
-    				</annotation>
-    				<simpleType>
-    					<restriction base="string">
-    						<minLength value="1" />
-    						<whiteSpace value="collapse" />
-    					</restriction>
-    				</simpleType>
-    			</element>
+                <!-- log-writer-version element (documentation, definition and restrictions) -->
+                <element minOccurs="1" maxOccurs="1" name="log-writer-version">
+                    <annotation>
+                        <documentation>
+                            The version of the log writer responsible for authoring this file.
+                        </documentation>
+                    </annotation>
+                    <simpleType>
+                        <restriction base="string">
+                            <minLength value="1" />
+                            <whiteSpace value="collapse" />
+                        </restriction>
+                    </simpleType>
+                </element>
 
-    		</sequence>
-				
-				<!-- process-id attribute definitions -->
-				
-				<!-- pid attribute (documentation, defintion) -->
-    		<attribute use="optional" default="0" name="pid" type="unsignedInt">
-					<annotation>
-          	<documentation>
-							The process id (PID) of the process this log file.
-						</documentation>
-					</annotation>
-    		</attribute>
+            </sequence>
 
-    	</complexType>
+            <!-- process-id attribute definitions -->
+
+            <!-- pid attribute (documentation, defintion) -->
+            <attribute use="optional" default="0" name="pid" type="unsignedInt">
+                <annotation>
+                    <documentation>
+                        The process id (PID) of the process this log file.
+                    </documentation>
+                </annotation>
+            </attribute>
+
+        </complexType>
 
     </element>
 
-
-		<!-- 
-		Element XPATH: /inglenook-log-file/log-entries
-		Element containing information events that occured within about the process that wrote the log file.
-		-->
+    <!--
+    Element XPATH: /inglenook-log-file/log-entries
+    Element containing information events that occured within about the process that wrote the log file.
+    -->
     <element name="log-entries">
 
-  		<!-- log-entries element documentation -->
-    	<annotation>
-      	<documentation>
-					This element acts as a container for the log-file entries. It has no other purpose. Its not that exciting.
-				</documentation>
-      </annotation>
+        <!-- log-entries element documentation -->
+        <annotation>
+            <documentation>
+                This element acts as a container for the log-file entries. It has no other purpose. Its not that exciting.
+            </documentation>
+        </annotation>
 
-			<!-- log-entries element definitions -->
-			<complexType>
-	   		<sequence>
+        <!-- log-entries element definitions -->
+        <complexType>
+            <sequence>
 
-					<!-- just contains a lot of log entries -->
-	   			<element minOccurs="0" maxOccurs="unbounded" ref="inglenook:log-entry">
-	          <annotation>
-	           	<documentation>
-								A log entry containing information about an event that occurred within the system.
-							</documentation>
-						</annotation>
-    			</element>
+                <!-- just contains a lot of log entries -->
+                <element minOccurs="0" maxOccurs="unbounded" ref="inglenook:log-entry">
+                    <annotation>
+                        <documentation>
+                            A log entry containing information about an event that occurred within the system.
+                        </documentation>
+                    </annotation>
+                </element>
 
-    		</sequence>
-    	</complexType>
+            </sequence>
+        </complexType>
 
-		</element>
+    </element>
 
-		<!-- 
-		Element XPATH: /inglenook-log-file/log-entries/log-entry
-		Structure containing information about an event that occured within the process that wrote the log file.
+    <!--
+    Element XPATH: /inglenook-log-file/log-entries/log-entry
+    Structure containing information about an event that occured within the process that wrote the log file.
 
-		Example of well formed entry:
+    Example of well formed entry:
 
-		<log-entry timestamp="2012-12-21T00:00:00.00Z" severity="6" ns="inglenook.sample.process">
-			<message><![CDATA[Yikes! Something incredibly Mayan happened to the process - cannot continue.]]></message>
-			<extended-data>
-				<item key="sample.specific"><![CDATA[Kittens]]></item>
-				<item key="sample.host"><![CDATA[127.0.0.1]]></item>
-			<extended-data>
-		</log-entry>
-
-		-->
+    <log-entry timestamp="2012-12-21T00:00:00.00Z" severity="6" ns="inglenook.sample.process">
+        <message><![CDATA[Yikes! Something incredibly Mayan happened to the process - cannot continue.]]></message>
+        <extended-data>
+            <item key="sample.specific"><![CDATA[Kittens]]></item>
+            <item key="sample.host"><![CDATA[127.0.0.1]]></item>
+        <extended-data>
+    </log-entry>
+    -->
     <element name="log-entry">
 
-  		<!-- log-entry element documentation -->
-    	<annotation>
-      	<documentation>
-					The process-id element contains information about the process that generated the log file
-					This includes the processes name, the PID, and relevant version numbers. This information
-					may be expanded at a later date.
-				</documentation>
-      </annotation>
+        <!-- log-entry element documentation -->
+        <annotation>
+            <documentation>
+                The process-id element contains information about the process that generated the log file
+                This includes the processes name, the PID, and relevant version numbers. This information
+                may be expanded at a later date.
+            </documentation>
+        </annotation>
 
-  		<!-- log-entry element definition -->
-    	<complexType>
-    		<sequence>
+        <!-- log-entry element definition -->
+        <complexType>
+            <sequence>
 
-					<!-- message element (documentation, definition and restrictions) -->
-    			<element minOccurs="1" maxOccurs="1" name="message">
-    				<annotation>
-    					<documentation>
-								The actual log content. This content will be localized to the preferred language of the user, so tools 
-								should not base any logic on this field. It is purely for display purposes. Note content in this element 
-								is always CDATA encapsulated.
-							</documentation>
-    				</annotation>
-    				<simpleType>
-    					<annotation></annotation>
-    					<restriction base="string">
-    						<minLength value="1" />
-    						<whiteSpace value="collapse" />
-    					</restriction>
-    				</simpleType>
-    			</element>
+            <!-- message element (documentation, definition and restrictions) -->
+            <element minOccurs="1" maxOccurs="1" name="message">
+                    <annotation>
+                        <documentation>
+                            The actual log content. This content will be localized to the preferred language of the user, so tools
+                            should not base any logic on this field. It is purely for display purposes. Note content in this element
+                            is always CDATA encapsulated.
+                        </documentation>
+                    </annotation>
+                    <simpleType>
+                        <annotation></annotation>
+                        <restriction base="string">
+                            <minLength value="1" />
+                            <whiteSpace value="collapse" />
+                        </restriction>
+                    </simpleType>
+                </element>
 
-					<!-- 	
-					Element XPATH: /inglenook-log-file/log-entries/log-entry/extended-data
-					Structure containing supplementary information about the parent event.
-					-->
-    			<element minOccurs="0" maxOccurs="1" name="extended-data">
+                <!--
+                Element XPATH: /inglenook-log-file/log-entries/log-entry/extended-data
+                Structure containing supplementary information about the parent event.
+                -->
+                <element minOccurs="0" maxOccurs="1" name="extended-data">
 
-  					<!-- extended-data element documentation -->
-    				<annotation>
-    					<documentation>
-								This collection contains additional data that can be useful for diagnostic or development purposes. Not that
-								this is not necessarily localized, and is designed to provide standardized output of information to 
-								supplement the body of the message.
-							</documentation>
-    				</annotation>
+                    <!-- extended-data element documentation -->
+                    <annotation>
+                        <documentation>
+                            This collection contains additional data that can be useful for diagnostic or development purposes. Not that
+                            this is not necessarily localized, and is designed to provide standardized output of information to
+                            supplement the body of the message.
+                        </documentation>
+                    </annotation>
 
-			  		<!-- extended-data element definition -->
-    				<complexType>
-    					<sequence>
+                    <!-- extended-data element definition -->
+                    <complexType>
+                        <sequence>
 
-					  		<!-- item element definition -->
-    						<element minOccurs="1" maxOccurs="unbounded" name="item">
-    							<complexType>
+                            <!-- item element definition -->
+                            <element minOccurs="1" maxOccurs="unbounded" name="item">
+                                <complexType>
 
-							  		<!-- item element documentation -->
-    								<annotation>
-    									<documentation>
-												A single entry in to the extended-data collection. This information might be useful for diagnostics or debugging.
-											</documentation>
-    								</annotation>
+                                    <!-- item element documentation -->
+                                    <annotation>
+                                        <documentation>
+                                            A single entry in to the extended-data collection. This information might be useful for diagnostics or debugging.
+                                        </documentation>
+                                    </annotation>
 
-							  		<!-- item element (documentation, defintion, restrictions) -->
-    								<simpleContent>
-    									<extension base="string">
-    										<attribute name="key">
-    											<annotation>
-    												<documentation>
-															The key (unique within Inglenook) identifying the data member being set. This key should 
-															explicitly identify the type and purpose of value.
-														</documentation>
-    											</annotation>
-    											<simpleType>
-    												<restriction base="string">
-    													<minLength value="1" />
-    													<whiteSpace value="collapse" />
-    												</restriction>
-    											</simpleType>
-    										</attribute>
-    									</extension>
-    								</simpleContent>
+                                    <!-- item element (documentation, defintion, restrictions) -->
+                                    <simpleContent>
+                                        <extension base="string">
+                                            <attribute name="key">
+                                                <annotation>
+                                                    <documentation>
+                                                        The key (unique within Inglenook) identifying the data member being set. This key should
+                                                        explicitly identify the type and purpose of value.
+                                                    </documentation>
+                                                </annotation>
+                                                <simpleType>
+                                                    <restriction base="string">
+                                                        <minLength value="1" />
+                                                        <whiteSpace value="collapse" />
+                                                    </restriction>
+                                                </simpleType>
+                                            </attribute>
+                                        </extension>
+                                    </simpleContent>
 
-    							</complexType>
-    						</element>
+                                </complexType>
+                            </element>
 
+                        </sequence>
+                    </complexType>
+                </element>
 
-    					</sequence>
-    				</complexType>
-    			</element>
+            </sequence>
 
-    		</sequence>
+            <!-- log-entry attribute definitions -->
 
-				<!-- log-entry attribute definitions -->
-				
-				<!-- timestamp attribute (documentation, defintion) -->
-    		<attribute name="timestamp" type="dateTime">
-    			<annotation>
-    				<documentation>
-							The date and time that the log message was serialized. It is important to note that while close, this cannot 
-							be relied on as an accurate representation of when the actual event causing this log message actually occurred.
-						</documentation>
-    			</annotation>
-    		</attribute>
+            <!-- timestamp attribute (documentation, defintion) -->
+            <attribute name="timestamp" type="dateTime">
+                <annotation>
+                    <documentation>
+                        The date and time that the log message was serialized. It is important to note that while close, this cannot
+                        be relied on as an accurate representation of when the actual event causing this log message actually occurred.
+                    </documentation>
+                </annotation>
+            </attribute>
 
-				<!-- severity attribute (documentation, defintion, restrictions) -->
-    		<attribute use="optional" default="3" name="severity">
-    			<annotation>
-    				<documentation>
-							The type of log message directly relates to the 'category' enumeration defined in logging/common/log_entry.h.
+            <!-- severity attribute (documentation, defintion, restrictions) -->
+            <attribute use="optional" default="3" name="severity">
+                <annotation>
+                    <documentation>
+                        The type of log message directly relates to the 'category' enumeration defined in logging/common/log_entry.h.
 
-								Unspecified  = 0   Not valid in an XML context - internal use only. 
-								Debugging    = 1   Extremely verbose, usually only beneficial during development.
-								Verbose      = 2   Useful for diagnosing hard to track issues in live environments. 
-								Information  = 3   Standard output messages related to key events within the software.
-								Warning      = 4   Notification of potentially erroneous or unexpected behavior.
-								Error        = 5   Significant deviation of expected behavior. 
-								Fatal        = 6   Unrecoverable deviation from expected behavior.
-						</documentation>
-    			</annotation>
-    			<simpleType>
-    				<restriction base="int">
-    					<minInclusive value="1"></minInclusive>
-    					<maxInclusive value="6"></maxInclusive>
-    					<whiteSpace value="collapse"></whiteSpace>
-    				</restriction>
-    			</simpleType>
-    		</attribute>
+                            Unspecified  = 0   Not valid in an XML context - internal use only.
+                            Debugging    = 1   Extremely verbose, usually only beneficial during development.
+                            Verbose      = 2   Useful for diagnosing hard to track issues in live environments.
+                            Information  = 3   Standard output messages related to key events within the software.
+                            Warning      = 4   Notification of potentially erroneous or unexpected behavior.
+                            Error        = 5   Significant deviation of expected behavior.
+                            Fatal        = 6   Unrecoverable deviation from expected behavior.
+                    </documentation>
+                </annotation>
+                <simpleType>
+                    <restriction base="int">
+                        <minInclusive value="1"></minInclusive>
+                        <maxInclusive value="6"></maxInclusive>
+                        <whiteSpace value="collapse"></whiteSpace>
+                    </restriction>
+                </simpleType>
+            </attribute>
 
-				<!-- namespace (ns) attribute (documentation, defintion, restrictions) -->
-    		<attribute use="optional" default="inglenook.uncategorised"
-    			name="ns">
-    			<annotation>
-    				<documentation>The name space that the log entry occurs in. This is useful for categorization.</documentation></annotation>
-    			<simpleType>
-    				<restriction base="string">
-    					<minLength value="1"></minLength>
-    					<whiteSpace value="collapse"></whiteSpace>
-    				</restriction>
-    			</simpleType>
-    		</attribute>
+            <!-- namespace (ns) attribute (documentation, defintion, restrictions) -->
+            <attribute use="optional" default="inglenook.uncategorised" name="ns">
+                <annotation>
+                    <documentation>
+                        The name space that the log entry occurs in. This is useful for categorization.
+                    </documentation>
+                </annotation>
+                <simpleType>
+                    <restriction base="string">
+                        <minLength value="1"></minLength>
+                        <whiteSpace value="collapse"></whiteSpace>
+                    </restriction>
+                </simpleType>
+            </attribute>
 
-    	</complexType>
+        </complexType>
     </element>
 
 </schema>

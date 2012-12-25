@@ -17,4 +17,5 @@
 #
 
 # Include subdirectories to process.
+add_subdirectory(cli)
 add_subdirectory(lib)

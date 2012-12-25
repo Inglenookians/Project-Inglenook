@@ -32,17 +32,16 @@ LOG_FILE=$(ign_log_write start -n `basename $0` -p $$)
 ########################################
 function log()
 {
-  # default the category to information
-  CATEGORY=3 
+    # default the category to information
+    CATEGORY=3
 
-  # check if another category has been specified
-  if [ $# -gt 1 ]; then
-    CATEGORY=$2; 
-  fi
+    # check if another category has been specified
+    if [ $# -gt 1 ]; then
+        CATEGORY=$2;
+    fi
 
-  # write the message to the log file.
-  eval "ign_log_write -a write -f $LOG_FILE -N $LOG_NAMESPACE -C $CATEGORY -m \"$1\""
-
+    # write the message to the log file.
+    eval "ign_log_write -a write -f $LOG_FILE -N $LOG_NAMESPACE -C $CATEGORY -m \"$1\""
 }
 
 ########################################
@@ -51,8 +50,8 @@ function log()
 ########################################
 function log_debug()
 {
-  # write out the log message
-  log "$1" 1
+    # write out the log message
+    log "$1" 1
 }
 
 ########################################
@@ -61,9 +60,8 @@ function log_debug()
 ########################################
 function log_verbose()
 {
-  # write out a verbose log message
-  log "$1" 2
-
+    # write out a verbose log message
+    log "$1" 2
 }
 ########################################
 # log_info()
@@ -71,8 +69,8 @@ function log_verbose()
 ########################################
 function log_info()
 {
-  # write out the log message
-  log "$1" 3
+    # write out the log message
+    log "$1" 3
 }
 
 ########################################
@@ -81,8 +79,8 @@ function log_info()
 ########################################
 function log_warning()
 {
-  # write out the log message
-  log "$1" 4
+    # write out the log message
+    log "$1" 4
 }
 
 ########################################
@@ -91,8 +89,8 @@ function log_warning()
 ########################################
 function log_error()
 {
-  # write out a error log message
-  log "$1" 5
+    # write out a error log message
+    log "$1" 5
 }
 
 ########################################
@@ -101,8 +99,8 @@ function log_error()
 ########################################
 function log_fatal()
 {
-  # write out a fatal log message
-  log "$1" 6
+    # write out a fatal log message
+    log "$1" 6
 }
 
 ########################################
@@ -111,8 +109,8 @@ function log_fatal()
 ########################################
 function close_log_file()
 {
-  # close the log file
-  eval ign_log_write close $LOG_FILE
+    # close the log file
+    eval ign_log_write close $LOG_FILE
 }
 
 # setup exit trapping

@@ -21,18 +21,13 @@
 // inglenook includes
 #include "exceptions.h"
 
-// boost (http://boost.org) includes
-#include <boost/exception/all.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/locale.hpp>
-
 namespace inglenook
 {
     namespace core
     {  
         namespace exceptions
         {
-                
+
             /// Added to exceptions when a process cmdline file handle couldn't be opened..
             typedef boost::error_info<struct __application_cmdline_file, boost::filesystem::path> application_cmdline_file;
             
@@ -48,15 +43,19 @@ namespace inglenook
                     return boost::locale::translate("There was a problem determining the processes real name").str().c_str();
                 }
             };
-            
+
             /**
              * application_arguments_parser_exception
              * This exception is thrown when the command line parser is given invalid arguments.
              */
             struct application_arguments_parser_exception : virtual inglenook::core::exceptions::inglenook_exception
             {
+                /// provides a boiler plate explanation of the exception.
+                const char* what() const throw() {
+                    return boost::locale::translate("There was a problem processing the command line arguments").str().c_str();
+                }
             };
-            
+
         }
     }
 }

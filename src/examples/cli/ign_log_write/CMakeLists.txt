@@ -16,12 +16,14 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-# Include subdirectories to process.
-add_subdirectory(lib)
-add_subdirectory(cli)
-add_subdirectory(srv)
+###########
+# Scripts #
+###########
 
-# Determine if we want to compile the examples as well
-if(WITH_EXAMPLES)
-    add_subdirectory(examples)
-endif(WITH_EXAMPLES)
+# Copy script into build directory.
+add_custom_target(ign_log_write_sample.sh
+    COMMAND cmake -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/ign_log_write_sample.sh
+    ${EXAMPLES_OUTPUT_DIRECTORY}/ign_log_write_sample.sh
+)
+add_custom_target(ign_log_write_sample ALL DEPENDS ign_log_write_sample.sh)

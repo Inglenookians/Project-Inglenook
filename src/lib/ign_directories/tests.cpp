@@ -37,12 +37,8 @@ BOOST_AUTO_TEST_CASE(directories)
 #if defined(__linux__) || defined(__APPLE__)
     // Linux and OSX support (officially tested and maintained).
     boost::filesystem::path default_path("/usr/local/bin");
-#elif defined(_WIN32)
-    // Windows support (not tested or maintained).
-#error Default local user directory for Windows not defined.
-    boost::filesystem::path default_path("");
 #else // Unsupported platform
-#error INGLENOOK: Unsupported platform.
+    #error INGLENOOK: Unsupported platform.
 #endif
     
     // Check the system default path is returned.

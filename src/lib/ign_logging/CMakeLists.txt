@@ -22,36 +22,36 @@
 
 # Make the library.
 add_library(
-	ign_logging 
-	SHARED
-	log_client.cpp
-	log_entry_buffered.cpp
-	log_entry.cpp
-	log_writer.cpp
-	logging.cpp
+    ign_logging
+    SHARED
+    log_client.cpp
+    log_entry_buffered.cpp
+    log_entry.cpp
+    log_writer.cpp
+    logging.cpp
 )
 
 # Link to required libraries
 target_link_libraries(
-	ign_logging
-	boost_thread
-	boost_filesystem
-	ign_core
-	ign_directories
+    ign_logging
+    boost_thread
+    boost_filesystem
+    ign_core
+    ign_directories
 )
 
 # Set the properties
 set_target_properties(
-	ign_logging PROPERTIES
-	VERSION 0.0.1
-	SOVERSION 1
-	COMPILE_FLAGS -DIGN_LOGGING_LIBRARY
+    ign_logging PROPERTIES
+    VERSION 0.0.1
+    SOVERSION 1
+    COMPILE_FLAGS -DIGN_LOGGING_LIBRARY
 )
 
 # Specify the install location.
 install(
-	TARGETS ign_logging 
-	DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
+    TARGETS ign_logging
+    DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
 )
 
 #########
@@ -60,20 +60,26 @@ install(
 
 # Make the test.
 add_executable(
-	ign_logging_tests 
-	all_tests.cpp
+    ign_logging_tests
+    all_tests.cpp
+)
+
+# Set the properties
+set_target_properties(
+    ign_logging_tests PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${TESTS_OUTPUT_DIRECTORY}
 )
 
 # Link to required libraries
 target_link_libraries(
-	ign_logging_tests
-	ign_logging
-	boost_unit_test_framework
-	boost_regex
+    ign_logging_tests
+    ign_logging
+    boost_unit_test_framework
+    boost_regex
 ) 
 
 # Add the test.
 add_test(
-	NAME ign_logging_tests
-	COMMAND ign_logging_tests
+    NAME ign_logging_tests
+    COMMAND ign_logging_tests
 )

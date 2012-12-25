@@ -21,9 +21,9 @@
 //
 // This is the manifest for logging tests, please note that the following
 // elements are currently outside of test coverage:
-//		log_exceptions.h 	- defines logging exception structures, no real functional code.
-//		logging.h			- include file for dependants to initialize logging easily.
-//		all examples		- these items are not tested and are not considered *functional* code.
+//      log_exceptions.h  - defines logging exception structures, no real functional code.
+//      logging.h         - include file for dependants to initialize logging easily.
+//      all examples      - these items are not tested and are not considered *functional* code.
 //
 
 #include "log_entry_tests.h"

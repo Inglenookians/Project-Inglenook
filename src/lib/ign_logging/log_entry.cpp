@@ -38,7 +38,7 @@ log_entry::log_entry()
     m_message("")
 
 {
-	this->m_extended.clear();
+    this->m_extended.clear();
 }
 
 /**
@@ -47,7 +47,7 @@ log_entry::log_entry()
 */
 log_entry::~log_entry()
 {
-	// nothing to do here.
+    // nothing to do here.
 }
 
 /**
@@ -59,7 +59,7 @@ log_entry::~log_entry()
  */
 const category& log_entry::entry_type() const
 {
-	return m_category;
+    return m_category;
 }
 
 /**
@@ -71,7 +71,7 @@ const category& log_entry::entry_type() const
  */
 void log_entry::entry_type(const category& value)
 {
-	m_category = value;
+    m_category = value;
 }
 
 /**
@@ -84,7 +84,7 @@ void log_entry::entry_type(const category& value)
  */
 const std::string& log_entry::log_namespace() const
 {
-	return m_namespace;
+    return m_namespace;
 }
 
 /**
@@ -97,7 +97,7 @@ const std::string& log_entry::log_namespace() const
  */
 void log_entry::log_namespace(const std::string& value)
 {
-	m_namespace = value;
+    m_namespace = value;
 }
 
 /**
@@ -109,7 +109,7 @@ void log_entry::log_namespace(const std::string& value)
  */
 void log_entry::message(const std::string& value)
 {
-	m_message = value;
+    m_message = value;
 }
 
 /**
@@ -124,7 +124,7 @@ void log_entry::message(const std::string& value)
  */
 const std::string& log_entry::message() //const
 {
-	return m_message;
+    return m_message;
 }
 
 /**
@@ -136,25 +136,25 @@ const std::string& log_entry::message() //const
  */
 void log_entry::extended_data(const std::string& key, const std::string& value)
 {
-	// ensure we are actually adding something
-	if(value.length() > 0)
-	{
-		// the [] operator does exactly what we want (creates or updates key based
-		// on prior existence, so just rely on this behavior.
-		m_extended[key] = value;
-	}
-	// else quickly check if we need to remove something.
-	else
-	{
-		// attempt to find the key in the collection
-		auto iterator = m_extended.find(key);
+    // ensure we are actually adding something
+    if(value.length() > 0)
+    {
+        // the [] operator does exactly what we want (creates or updates key based
+        // on prior existence, so just rely on this behavior.
+        m_extended[key] = value;
+    }
+    // else quickly check if we need to remove something.
+    else
+    {
+        // attempt to find the key in the collection
+        auto iterator = m_extended.find(key);
 
-		// and on success remove it.
-		if(iterator != m_extended.end())
-		{
-			m_extended.erase(iterator);
-		}
-	}
+        // and on success remove it.
+        if(iterator != m_extended.end())
+        {
+            m_extended.erase(iterator);
+        }
+    }
 }
 
 /**
@@ -165,12 +165,8 @@ void log_entry::extended_data(const std::string& key, const std::string& value)
  */
 const std::map<std::string, std::string>& log_entry::extended_data()
 {
-	return m_extended;
+    return m_extended;
 }
-
-
-
-
 
 } // namespace inglenook::logging
 

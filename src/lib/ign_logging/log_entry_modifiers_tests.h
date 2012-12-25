@@ -39,21 +39,19 @@ namespace logging
 // to be working as expected (these will be further tested).
 BOOST_AUTO_TEST_CASE ( log_entry_modifiers_tests__construction )
 {
+    // resources
+    const std::string ns_test_value = "inglenook.logging.test";
+    const std::string log_data_test_key = "inglenook.key";
+    const std::string log_data_test_value = "a value";
 
-	// resources
-	const std::string ns_test_value = "inglenook.logging.test";
-	const std::string log_data_test_key = "inglenook.key";
-	const std::string log_data_test_value = "a value";
-	
-	// check ns construction 
-	ns _ns(ns_test_value);
-	BOOST_CHECK(_ns.log_namespace() == ns_test_value);
+    // check ns construction 
+    ns _ns(ns_test_value);
+    BOOST_CHECK(_ns.log_namespace() == ns_test_value);
 
-	// check log_data construction
-	log_data _log_data(log_data_test_key, log_data_test_value);
-	BOOST_CHECK(_log_data.key() == log_data_test_key);
-	BOOST_CHECK(_log_data.value() == log_data_test_value);
-
+    // check log_data construction
+    log_data _log_data(log_data_test_key, log_data_test_value);
+    BOOST_CHECK(_log_data.key() == log_data_test_key);
+    BOOST_CHECK(_log_data.value() == log_data_test_value);
 }
 
 } // namespace inglenook::logging

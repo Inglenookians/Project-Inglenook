@@ -56,10 +56,11 @@ typedef boost::error_info<struct __log_file_name, boost::filesystem::path> log_f
 // log_exception
 // Standard base exception for all exceptions thrown by objects in the logging library.
 struct log_exception: virtual inglenook::core::exceptions::inglenook_exception
-{/// provides a boiler plate explanation of the exception.
-   const char* what() const throw() {
-	   return boost::locale::translate("Unhandled exception in inglenook logging mechanism").str().c_str();
-   }
+{
+    /// provides a boiler plate explanation of the exception.
+    const char* what() const throw() {
+        return boost::locale::translate("Unhandled exception in inglenook logging mechanism").str().c_str();
+    }
 };
 
 //
@@ -67,30 +68,33 @@ struct log_exception: virtual inglenook::core::exceptions::inglenook_exception
 // This exception is thrown when a specified log file cannot be found and, when
 // available, the option to create non-existent log files was disabled.
 struct log_not_found_exception : virtual log_exception
-{/// provides a boiler plate explanation of the exception.
-   const char* what() const throw() {
-	   return boost::locale::translate("Failed to open the specified log file.").str().c_str();
-   }
+{
+    /// provides a boiler plate explanation of the exception.
+    const char* what() const throw() {
+        return boost::locale::translate("Failed to open the specified log file.").str().c_str();
+    }
 };
 
 //
 // failed_to_create_log_exception
 // This exception is thrown when Inglenook fails to create an error log.
 struct failed_to_create_log_exception : virtual log_exception
-{  /// provides a boiler plate explanation of the exception.
-   const char* what() const throw() {
-	   return boost::locale::translate("Failed to create the specified log file.").str().c_str();
-   }
+{
+    /// provides a boiler plate explanation of the exception.
+    const char* what() const throw() {
+       return boost::locale::translate("Failed to create the specified log file.").str().c_str();
+    }
 };
 
 //
 // serialization_exception
 // This exception is thrown by the log serialization worker (log_writer::_log_serialization_worker).
 struct log_serialization_exception : virtual log_exception
-{	/// provides a boiler plate explanation of the exception.
-   const char* what() const throw() {
-	   return boost::locale::translate("There was a problem with the log serialization mechanism").str().c_str();
-   }
+{
+    /// provides a boiler plate explanation of the exception.
+    const char* what() const throw() {
+       return boost::locale::translate("There was a problem with the log serialization mechanism").str().c_str();
+    }
 };
 
 } // namespace inglenook::logging

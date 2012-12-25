@@ -16,34 +16,52 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-# Make the library.
+# Make the application.
 add_executable(
-	ign_log_write
-	main.cpp
-	log_write_actions.cpp
+    ign_log_write
+    main.cpp
+    log_write_actions.cpp
 )
 
 # Link to required libraries
 target_link_libraries(
-	ign_log_write
-	ign_logging
-	ign_core
+    ign_log_write
+    ign_logging
+    ign_core
 )
 
 # Configure the automatic version header generation.
 set(TARGET_VERSION 0.1)
-add_custom_target(ign_log_write_version ALL 
-	COMMAND ${CMAKE_COMMAND} 
-	-D TARGET_VERSION=${TARGET_VERSION}
-	-P ${PROJECT_SOURCE_DIR}/cmake/version_git.cmake
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+add_custom_target(ign_log_write_version ALL
+    COMMAND ${CMAKE_COMMAND}
+    -D TARGET_VERSION=${TARGET_VERSION}
+    -P ${PROJECT_SOURCE_DIR}/cmake/version_git.cmake
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 add_dependencies(ign_log_write ign_log_write_version)
 
 # Specify the install location.
 install(
-	TARGETS ign_log_write 
-	DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
+    TARGETS ign_log_write
+    DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
+)
+
+###########
+# Scripts #
+###########
+
+# Copy script into build directory.
+add_custom_target(ign_logging.sh
+    COMMAND cmake -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/ign_logging.sh
+    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ign_logging.sh
+)
+add_dependencies(ign_log_write ign_logging.sh)
+
+# Specify the install location.
+install(
+    FILES ign_logging.sh
+    DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
 )
 
 #########
@@ -52,22 +70,28 @@ install(
 
 # Make the test.
 add_executable(
-	ign_log_write_tests 
-	tests.cpp
-	log_write_actions.cpp
+    ign_log_write_tests
+    tests.cpp
+    log_write_actions.cpp
+)
+
+# Set the properties
+set_target_properties(
+    ign_log_write_tests PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${EXAMPLES_OUTPUT_DIRECTORY}
 )
 
 # Link to required libraries
 target_link_libraries(
-	ign_log_write_tests
-	ign_logging
-	ign_core
-	boost_unit_test_framework
-	boost_regex
-) 
+    ign_log_write_tests
+    ign_logging
+    ign_core
+    boost_unit_test_framework
+    boost_regex
+)
 
 # Add the test.
 add_test(
-	NAME ign_log_write_tests
-	COMMAND ign_log_write_tests
+    NAME ign_log_write_tests
+    COMMAND ign_log_write_tests
 )

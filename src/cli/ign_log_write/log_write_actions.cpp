@@ -23,6 +23,7 @@
 #include <ign_core/application.h>
 #include "log_write_actions.h"
 #include "log_write_exceptions.h"
+#include "program_options.h"
 
 namespace inglenook
 {
@@ -37,43 +38,41 @@ namespace logging
  */
 log_write_action parse_action(const std::string& action_string)
 {
+    // initialize result buffer
+    auto result = log_write_action::no_action;
 
-	// initialize result buffer
-	auto result = log_write_action::no_action;
-	
-	//
-	// determine what is being requested
-	// and assign an appropriate value
-	//
+    //
+    // determine what is being requested
+    // and assign an appropriate value
+    //
 
-	if(action_string == start_full_action_string)
-	{
-		result = create_new_log;
-	}
-	else if	(action_string == start_short_action_string)
-	{
-		result = create_new_log;
-	}
-	else if	(action_string == write_full_action_string)
-	{
-	    result = write_message_to_log;
-	}
-	else if	(action_string == write_short_action_string)
-	{
-	    result = write_message_to_log;
-	}
-	else if	(action_string == close_full_action_string)
+    if(action_string == start_full_action_string)
     {
-	    result = close_log;
-	}
-	else if	(action_string == close_short_action_string)
+        result = create_new_log;
+    }
+    else if(action_string == start_short_action_string)
+    {
+        result = create_new_log;
+    }
+    else if(action_string == write_full_action_string)
+    {
+        result = write_message_to_log;
+    }
+    else if(action_string == write_short_action_string)
+    {
+        result = write_message_to_log;
+    }
+    else if(action_string == close_full_action_string)
     {
         result = close_log;
     }
-	
-	// return the result
-	return result;
-	
+    else if(action_string == close_short_action_string)
+    {
+        result = close_log;
+    }
+    
+    // return the result
+    return result;
 }
 
 
@@ -86,36 +85,34 @@ log_write_action parse_action(const std::string& action_string)
  */
 category convert_to_category(unsigned int value)
 {
+    // preload buffer with the default
+    auto result = category::information;
 
-	// preload buffer with the default
-	auto result = category::information;
+    // check for deviation
+    switch(value)
+    {
+        case 1: // debugging category
+            result = category::debugging;
+            break;
 
-	// check for deviation
-	switch(value)
-	{
-		case 1: // debugging category
-			result = category::debugging;
-			break;
+        case 2:  // verbose category
+            result = category::verbose;
+            break;
 
-		case 2:  // verbose category
-			result = category::verbose;
-			break;
+        case 4:  // warning category
+            result = category::warning;
+            break;
 
-		case 4:  // warning category
-			result = category::warning;
-			break;
+        case 5:  // error category
+            result = category::error;
+            break;
 
-		case 5:  // error category
-			result = category::error;
-			break;
+        case 6:  // fatal category
+            result = category::fatal;
+            break;
+    }
 
-		case 6:  // fatal category
-			result = category::fatal;
-			break;
-	}
-
-	return result;
-
+    return result;
 }
 
 /**
@@ -125,49 +122,48 @@ category convert_to_category(unsigned int value)
  */
 const boost::filesystem::path create_log_file(const boost::program_options::variables_map& arguments)
 {
+    using namespace boost::locale;
 
-	using namespace boost::locale;
+    boost::filesystem::path result = "";
 
-	boost::filesystem::path result = "";
+    // based on the size of the arguments vector - choose how to process
+    // the create request
+    switch (arguments.size())
+    {
+        case 2: // expect create action and a file name.
+        {
+            // extract the log name and call the appropriate method...
+            auto log_file = require_parameter<std::string>(arguments, PO_FILENAME_FULL);
+            result = create_log_file(log_file);
+            break;
+        }
+        case 3: // expect create action, a process id and name.
+        {
+            // extract the pid and name, then call the appropriate method...
+            auto pid = require_parameter<pid_type>(arguments, PO_PID_FULL);
+            auto name = require_parameter<std::string>(arguments, PO_NAME_FULL);
+            result = create_log_file(name, pid);
+            break;
+        }
+        default: // improper number of arguments - tell user whats wrong.
+        {
 
-	// based on the size of the arguments vector - choose how to process
-	// the create request
-	switch (arguments.size())
-	{
-		case 2: // expect create action and a file name.
-		{
-			// extract the log name and call the appropriate method...
-			auto log_file = require_parameter<std::string>(arguments, "filename");
-			result = create_log_file(log_file);
-			break;
-		}
-		case 3: // expect create action, a process id and name.
-		{
-			// extract the pid and name, then call the appropriate method...
-			auto pid = require_parameter<pid_type>(arguments, "pid");
-			auto name = require_parameter<std::string>(arguments, "name");
-			result = create_log_file(name, pid);
-			break;
-		}
-		default: // improper number of arguments - tell user whats wrong.
-		{
+            // build the explaination string
+            std::string acceptable_arguments_string = translate("The create action can take either one argument, the log file "
+                    "you wish to create (-f), or two arguments, the process id (-p) and name of the program (-n) you "
+                    "are logging on behalf of");
 
-			// build the explaination string
-			std::string acceptable_arguments_string = translate("The create action can take either one argument, the log file "
-					"you wish to create (-f), or two arguments, the process id (-p) and name of the program (-n) you "
-					"are logging on behalf of");
+            // throw exception - tell the user what we expected
+            BOOST_THROW_EXCEPTION( wrong_number_of_arguments_exception()
+                    << acceptable_arguments(acceptable_arguments_string));
 
-			// throw exception - tell the user what we expected
-			BOOST_THROW_EXCEPTION( wrong_number_of_arguments_exception()
-					<< acceptable_arguments(acceptable_arguments_string));
+            break;
+        }
 
-			break;
-		}
+    }
 
-	}
-
-	// return the result
-	return result;
+    // return the result
+    return result;
 }
 
 
@@ -178,29 +174,29 @@ const boost::filesystem::path create_log_file(const boost::program_options::vari
  */
 const boost::filesystem::path create_log_file(const boost::filesystem::path& path_to_log)
 {
-	using namespace inglenook::logging;
-	using namespace boost::locale;
+    using namespace inglenook::logging;
+    using namespace boost::locale;
 
-	// make things a little more readable
-	const bool create_file_if_not_exists = true;
-	const bool emmit_xml_header = true;
-	const bool emmit_xml_footer = false;
+    // make things a little more readable
+    const bool create_file_if_not_exists = true;
+    const bool emmit_xml_header = true;
+    const bool emmit_xml_footer = false;
 
-	// create the log file and a log client to work with
-	auto _log_writer = log_writer::create_from_file_path(path_to_log,
-			create_file_if_not_exists, emmit_xml_header, emmit_xml_footer);
-	log_client _log_client(_log_writer);
+    // create the log file and a log client to work with
+    auto _log_writer = log_writer::create_from_file_path(path_to_log,
+            create_file_if_not_exists, emmit_xml_header, emmit_xml_footer);
+    log_client _log_client(_log_writer);
 
-	// we want to only have the name of the log file printed out to console. but we want to put
-	// some content in the XML file (so we know when the script started running if the user script
-	// doesn't do this itself). As such, turn off console logging.
-	_log_writer->console_threshold(category::no_log);
+    // we want to only have the name of the log file printed out to console. but we want to put
+    // some content in the XML file (so we know when the script started running if the user script
+    // doesn't do this itself). As such, turn off console logging.
+    _log_writer->console_threshold(category::no_log);
 
-	// write out that we started logging (marks the start of the running script if they do not emmit there own note).
-	_log_client.info() << ns(log_write_default_namespace) << translate("Started new logging session.") << lf::end;
+    // write out that we started logging (marks the start of the running script if they do not emmit there own note).
+    _log_client.info() << ns(log_write_default_namespace) << translate("Started new logging session.") << lf::end;
 
-	// return the new log file.
-	return path_to_log;
+    // return the new log file.
+    return path_to_log;
 }
 
 /**
@@ -211,32 +207,32 @@ const boost::filesystem::path create_log_file(const boost::filesystem::path& pat
  */
 const boost::filesystem::path create_log_file(const std::string& name, const pid_type& pid)
 {
-	// determine where to log to
-	auto log_file = log_writer::default_log_path(pid, name);
+    // determine where to log to
+    auto log_file = log_writer::default_log_path(pid, name);
 
-	using namespace inglenook::logging;
-	using namespace boost::locale;
+    using namespace inglenook::logging;
+    using namespace boost::locale;
 
-	// make things a little more readable
-	const bool emmit_xml_header = true;
-	const bool emmit_xml_footer = false;
+    // make things a little more readable
+    const bool emmit_xml_header = true;
+    const bool emmit_xml_footer = false;
 
-	auto path_to_log = std::shared_ptr<boost::filesystem::path>(new boost::filesystem::path());
+    auto path_to_log = std::shared_ptr<boost::filesystem::path>(new boost::filesystem::path());
 
-	// create the log file and a log client to work with
-	auto _log_writer = log_writer::create(emmit_xml_header, emmit_xml_footer, pid, name, path_to_log);
-	log_client _log_client(_log_writer);
+    // create the log file and a log client to work with
+    auto _log_writer = log_writer::create(emmit_xml_header, emmit_xml_footer, pid, name, path_to_log);
+    log_client _log_client(_log_writer);
 
-	// we want to only have the name of the log file printed out to console. but we want to put
-	// some content in the XML file (so we know when the script started running if the user script
-	// doesn't do this itself). As such, turn off console logging.
-	_log_writer->console_threshold(category::no_log);
+    // we want to only have the name of the log file printed out to console. but we want to put
+    // some content in the XML file (so we know when the script started running if the user script
+    // doesn't do this itself). As such, turn off console logging.
+    _log_writer->console_threshold(category::no_log);
 
-	// write out that we started logging (marks the start of the running script if they do not emmit there own note).
-	_log_client.info() << ns(log_write_default_namespace) << translate("Started new logging session.") << lf::end;
+    // write out that we started logging (marks the start of the running script if they do not emmit there own note).
+    _log_client.info() << ns(log_write_default_namespace) << translate("Started new logging session.") << lf::end;
 
-	// return the new log file.
-	return boost::filesystem::path( boost::filesystem::system_complete(*path_to_log) );
+    // return the new log file.
+    return boost::filesystem::path( boost::filesystem::system_complete(*path_to_log) );
 
 }
 
@@ -246,15 +242,14 @@ const boost::filesystem::path create_log_file(const std::string& name, const pid
  */
 void write_log_entry(const boost::program_options::variables_map& arguments)
 {
-	// create defaults - we only actually require the log path and the message
-	std::string file_path 		= require_parameter	<std::string>(arguments, "filename");
-	std::string message 		= require_parameter	<std::string>(arguments, "message");;
-	std::string log_namespace 	= optional_parameter<std::string>(arguments, "namespace", log_write_default_namespace);
-	unsigned int event_type 	= optional_parameter<unsigned int>(arguments, "category", category::information);
+    // create defaults - we only actually require the log path and the message
+    std::string file_path       = require_parameter <std::string>(arguments, PO_FILENAME_FULL);
+    std::string message         = require_parameter <std::string>(arguments, PO_MESSAGE_FULL);
+    std::string log_namespace   = optional_parameter<std::string>(arguments, PO_NAMESPACE_FULL, log_write_default_namespace);
+    unsigned int event_type     = optional_parameter<unsigned int>(arguments, PO_CATEGORY_FULL, category::information);
 
-	// write out the log entry
-	write_log_entry(file_path, message, log_namespace, convert_to_category(event_type) );
-
+    // write out the log entry
+    write_log_entry(file_path, message, log_namespace, convert_to_category(event_type) );
 }
 
 /**
@@ -266,24 +261,23 @@ void write_log_entry(const boost::program_options::variables_map& arguments)
  */
 void write_log_entry(const boost::filesystem::path& path_to_log, const std::string& message, const std::string& log_namespace, const category& event_type)
 {
-	using namespace inglenook::logging;
-	using namespace boost::locale;
+    using namespace inglenook::logging;
+    using namespace boost::locale;
 
-	// make things a little more readable
-	const bool create_file_if_not_exists = false;
-	const bool emmit_xml_header = false;
-	const bool emmit_xml_footer = false;
+    // make things a little more readable
+    const bool create_file_if_not_exists = false;
+    const bool emmit_xml_header = false;
+    const bool emmit_xml_footer = false;
 
-	// create the log file and a log client to work with
-	auto _log_writer = log_writer::create_from_file_path(path_to_log,
-		create_file_if_not_exists, emmit_xml_header, emmit_xml_footer);
-	log_client _log_client(_log_writer);
+    // create the log file and a log client to work with
+    auto _log_writer = log_writer::create_from_file_path(path_to_log,
+        create_file_if_not_exists, emmit_xml_header, emmit_xml_footer);
+    log_client _log_client(_log_writer);
 
-	_log_client.buffer()->entry_type(event_type);
+    _log_client.buffer()->entry_type(event_type);
 
-	// write out that we started logging (marks the start of the running script if they do not emmit there own note).
-	_log_client << ns(log_namespace) << message << lf::end;
-
+    // write out that we started logging (marks the start of the running script if they do not emmit there own note).
+    _log_client << ns(log_namespace) << message << lf::end;
 }
 
 
@@ -293,9 +287,9 @@ void write_log_entry(const boost::filesystem::path& path_to_log, const std::stri
  */
 void close_log_file(const boost::program_options::variables_map& arguments)
 {
-	// extract the log name and call close method...
-	auto log_file = require_parameter<std::string>(arguments, "filename");
-	close_log_file(log_file);
+    // extract the log name and call close method...
+    auto log_file = require_parameter<std::string>(arguments, PO_FILENAME_FULL);
+    close_log_file(log_file);
 }
 
 /**
@@ -304,27 +298,26 @@ void close_log_file(const boost::program_options::variables_map& arguments)
  */
 void close_log_file(const boost::filesystem::path& path_to_log)
 {
-	using namespace inglenook::logging;
-	using namespace boost::locale;
+    using namespace inglenook::logging;
+    using namespace boost::locale;
 
-	// make things a little more readable
-	const bool create_file_if_not_exists = false;
-	const bool emmit_xml_header = false;
-	const bool emmit_xml_footer = true;
+    // make things a little more readable
+    const bool create_file_if_not_exists = false;
+    const bool emmit_xml_header = false;
+    const bool emmit_xml_footer = true;
 
-	// create the log file and a log client to work with
-	auto _log_writer = log_writer::create_from_file_path(path_to_log,
-			create_file_if_not_exists, emmit_xml_header, emmit_xml_footer);
-	log_client _log_client(_log_writer);
+    // create the log file and a log client to work with
+    auto _log_writer = log_writer::create_from_file_path(path_to_log,
+            create_file_if_not_exists, emmit_xml_header, emmit_xml_footer);
+    log_client _log_client(_log_writer);
 
-	// No console output is expected from this method. but we want to put some content in
-	// the XML file (so we know when the script has finished running if the user script
-	// doesn't do this itself). As such, turn off console logging.
-	_log_writer->console_threshold(category::no_log);
+    // No console output is expected from this method. but we want to put some content in
+    // the XML file (so we know when the script has finished running if the user script
+    // doesn't do this itself). As such, turn off console logging.
+    _log_writer->console_threshold(category::no_log);
 
-	// write out that we started logging (marks the start of the running script if they do not emmit there own note).
-	_log_client.info() << ns(log_write_default_namespace) << translate("Terminated logging session.") << lf::end;
-
+    // write out that we started logging (marks the start of the running script if they do not emmit there own note).
+    _log_client.info() << ns(log_write_default_namespace) << translate("Terminated logging session.") << lf::end;
 }
 
 } // namespace logging

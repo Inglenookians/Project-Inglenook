@@ -34,7 +34,7 @@ namespace
 {
 
 	/**
-	 * Implamentation of logic that determines where to find a given inglenook directory.
+	 * Implementation of logic that determines where to find a given inglenook directory.
 	 * @param environment_variable environment variable to examine for an value that overrides the default.
 	 * @param default_value default value to assume if a specific environment variable is not set.
 	 * @param explain if true, will print out logic used to determine the location to standard output.

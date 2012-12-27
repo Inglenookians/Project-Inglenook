@@ -67,8 +67,8 @@ log_write_action parse_action(const std::string& action_string);
 
 /**
  * extracts a required parameter from the arguments vector.
- * @params from arguments vector to extract value from.
- * @params parameter parameter to extract.
+ * @param from arguments vector to extract value from.
+ * @param parameter parameter to extract.
  * @throws action_required_arguments_missing if the required argument is missing.
  * @returns value of the required argument
  */
@@ -90,9 +90,9 @@ template <class T> T require_parameter(const boost::program_options::variables_m
 
 /**
  * extracts an optional parameter from the arguments vector.
- * @params from arguments vector to extract value from.
- * @params parameter parameter to extract.
- * @params fallback what to use if the parameter isn't present
+ * @param from arguments vector to extract value from.
+ * @param parameter parameter to extract.
+ * @param fallback what to use if the parameter isn't present
  * @returns value of the optional argument
  */
 template <class T> T optional_parameter(const boost::program_options::variables_map& from, const std::string& parameter, const T& fallback)

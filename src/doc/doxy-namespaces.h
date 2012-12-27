@@ -36,14 +36,50 @@
 namespace inglenook
 {
 
+	/// Contains common application configuration logic and handling.
+	namespace config
+	{
+	
+		/// Logic for interaction with settings at application configuration scope.
+		namespace app {}
+		
+		/// Logic for interacting with the settings cache (prevent unneccessary IO).
+		namespace cache {}
+		
+		/// Logic for interaction with settings receieved from the command line.
+		namespace command_line {}
+		
+		/// Exceptions specific to configuration logic.
+		namespace exceptions {}
+	
+		/// Logic for interaction with settings at global configuration scope.
+		namespace global {}
+		
+		/// Common confguration keys
+		namespace keys {}
+	
+	}
+
 	/// Contains code that is core to most, if not all, inglenook applications.
 	namespace core 
 	{
+	
+		/// Logic for interacting with the system environment.
+		namespace environmnet
+		{
+		
+			/// Logic for manipulating environment variables.
+			namespace variables {}
+		
+		}
 	
 		/// Various exception definitiions (and related elements) used by many inglenook applications.
 		namespace exceptions {}
 	
 	}
+	
+	/// Logic for directory reasoning (where *stuff* can be located).
+	namespace directories {}
 	
 	/// Contains code related to the various logging tools and libraries within inglenook.
 	namespace logging {}

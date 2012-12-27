@@ -33,7 +33,7 @@ namespace logging
 
 /**
  * Parses an action string and determines the action it relates to.
- * @params action_string action string to parse.
+ * @param action_string action string to parse.
  * @returns action to perform, or no_action on failure.
  */
 log_write_action parse_action(const std::string& action_string)
@@ -80,7 +80,7 @@ log_write_action parse_action(const std::string& action_string)
 /**
  * Converts an unsigned integer in to a category
  * This method is designed to ensure that no values are used which are outside the range supported by the category enumeration
- * @params value value to convert.
+ * @param value value to convert.
  * @returns value as category, or information on failure.
  */
 category convert_to_category(unsigned int value)
@@ -117,7 +117,7 @@ category convert_to_category(unsigned int value)
 
 /**
  * Creates a new file using the arguments provided.
- * @params arguments command line arguments to extract log creation parameters from.
+ * @param	 arguments command line arguments to extract log creation parameters from.
  * @returns path to created file on success; or an empty path on failure.
  */
 const boost::filesystem::path create_log_file(const boost::program_options::variables_map& arguments)
@@ -169,7 +169,7 @@ const boost::filesystem::path create_log_file(const boost::program_options::vari
 
 /**
  * Creates a new file using the specified log path
- * @params path_to_log path to the log file to create
+ * @param path_to_log path to the log file to create
  * @returns path to created file on success; or an empty path on failure.
  */
 const boost::filesystem::path create_log_file(const boost::filesystem::path& path_to_log)
@@ -201,8 +201,8 @@ const boost::filesystem::path create_log_file(const boost::filesystem::path& pat
 
 /**
  * Creates a new file using the name and process id specified
- * @params name specific name to log for.
- * @params pid specific pid to log for.
+ * @param name specific name to log for.
+ * @param pid specific pid to log for.
  * @returns path to created file on success; or an empty path on failure.
  */
 const boost::filesystem::path create_log_file(const std::string& name, const pid_type& pid)
@@ -238,7 +238,7 @@ const boost::filesystem::path create_log_file(const std::string& name, const pid
 
 /**
  * Writes a log message with information extracted from the arguments collection.
- * @params arguments arguments to extract message from.
+ * @param arguments arguments to extract message from.
  */
 void write_log_entry(const boost::program_options::variables_map& arguments)
 {
@@ -254,10 +254,10 @@ void write_log_entry(const boost::program_options::variables_map& arguments)
 
 /**
  * Writes a log message with the specified information
- * @params path_to_log log file to write out to.
- * @params message message to write out.
- * @params log_namespace namespace to write the log out to
- * @params category the type of event to write
+ * @param path_to_log log file to write out to.
+ * @param message message to write out.
+ * @param log_namespace namespace to write the log out to
+ * @param category the type of event to write
  */
 void write_log_entry(const boost::filesystem::path& path_to_log, const std::string& message, const std::string& log_namespace, const category& event_type)
 {
@@ -283,7 +283,7 @@ void write_log_entry(const boost::filesystem::path& path_to_log, const std::stri
 
 /**
  * Closes the log file idenfied by the arguments.
- * @params arguments arguments to extract file name from.
+ * @param arguments arguments to extract file name from.
  */
 void close_log_file(const boost::program_options::variables_map& arguments)
 {
@@ -294,7 +294,7 @@ void close_log_file(const boost::program_options::variables_map& arguments)
 
 /**
  * Closes the specified log file.
- * @params path_to_log log file to close.
+ * @param path_to_log log file to close.
  */
 void close_log_file(const boost::filesystem::path& path_to_log)
 {

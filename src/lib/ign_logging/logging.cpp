@@ -42,7 +42,7 @@ void initialize_logging()
 /**
  * Initializes the logging system using a specific file path
  * Initializes logging, emmiting log entries to the specified log file.
- * @params log_file path to the file in which to store logs. Will be created if does not exist.
+ * @param log_file path to the file in which to store logs. Will be created if does not exist.
  */
 void initialize_logging(const boost::filesystem::path& log_file)
 {
@@ -64,7 +64,7 @@ void initialize_logging_off_record()
 
 /**
  * Checks if the logging system is initialized and provides just-in-time initialization.
- * @params warning indicates if the fallback warning should be shown if just-in-time initialization was required.
+ * @param warning indicates if the fallback warning should be shown if just-in-time initialization was required.
  */
 void logging_initialization_check(const bool& warning)
 {

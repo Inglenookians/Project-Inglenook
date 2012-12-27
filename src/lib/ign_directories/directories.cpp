@@ -32,6 +32,14 @@ using namespace inglenook;
 // Hide the implementation in the anonynous namespace.
 namespace
 {
+
+	/**
+	 * Implementation of logic that determines where to find a given inglenook directory.
+	 * @param environment_variable environment variable to examine for an value that overrides the default.
+	 * @param default_value default value to assume if a specific environment variable is not set.
+	 * @param explain if true, will print out logic used to determine the location to standard output.
+	 * @returns path that inglenook believes should resolve this query.
+	 */
     const boost::filesystem::path implementation(const std::string& environment_variable, const boost::filesystem::path& default_value, bool explain)
     {
         // Fetch the environment variable first.

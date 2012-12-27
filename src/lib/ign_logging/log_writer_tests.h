@@ -41,9 +41,9 @@ namespace logging
 
 /**
  * Creates a new log entry with specified parameters
- * @param submit_as.            category of message to create.
- * @param message.              message body for the log entry.
- * @param log_namespace.        entry namespace.
+ * @param submit_as category of message to create.
+ * @param message message body for the log entry.
+ * @param log_namespace entry namespace.
  * @returns shared pointer to log entry
  */
 std::shared_ptr<log_entry> create_log_entry(const category& submit_as, const std::string& message, const std::string& log_namespace)
@@ -60,13 +60,13 @@ std::shared_ptr<log_entry> create_log_entry(const category& submit_as, const std
  * Test scenario for log_writer.
  * Creates a log writer and entry with the specified parameters, and returns the xml, cout and cerr results of
  * passing that entry in to the writer.
- * @param _log_entry.           [log_entry] log entry to write
- * @param xml_filter.           [log_writer] XML serialiation threshold.
- * @param console_filter.       [log_writer] Console serialiation threshold.
- * @param default_namespace.    [log_writer] default fallback namespace
- * @param xml_out.              [output] how the entry appears in XML.
- * @param console_cout_out.     [output] how the entry appears in cout.
- * @param console_cerr_out.     [output] how the entry appears in cerr.
+ * @param _log_entry [log_entry] log entry to write
+ * @param xml_filter [log_writer] XML serialiation threshold.
+ * @param console_filter [log_writer] Console serialiation threshold.
+ * @param default_namespace [log_writer] default fallback namespace
+ * @param xml_out [output] how the entry appears in XML.
+ * @param console_cout_out [output] how the entry appears in cout.
+ * @param console_cerr_out [output] how the entry appears in cerr.
  */
 void run_writer(std::shared_ptr<log_entry> _log_entry,
                 const category& xml_filter, const category& console_filter, const std::string& default_namespace,
@@ -119,15 +119,15 @@ void run_writer(std::shared_ptr<log_entry> _log_entry,
  * Test scenario for log_writer.
  * Creates a log writer and entry with the specified parameters, and returns the xml, cout and cerr results of
  * passing that entry in to the writer.
- * @param submit_as.            [log_entry] category of message to create.
- * @param message.              [log_entry] message body for the log entry.
- * @param log_namespace.        [log_entry] entry namespace.
- * @param xml_filter.           [log_writer] XML serialiation threshold.
- * @param console_filter.       [log_writer] Console serialiation threshold.
- * @param default_namespace.    [log_writer] default fallback namespace
- * @param xml_out.              [output] how the entry appears in XML.
- * @param console_cout_out.     [output] how the entry appears in cout.
- * @param console_cerr_out.     [output] how the entry appears in cerr.
+ * @param submit_as [log_entry] category of message to create.
+ * @param message [log_entry] message body for the log entry.
+ * @param log_namespace [log_entry] entry namespace.
+ * @param xml_filter [log_writer] XML serialiation threshold.
+ * @param console_filter [log_writer] Console serialiation threshold.
+ * @param default_namespace [log_writer] default fallback namespace
+ * @param xml_out [output] how the entry appears in XML.
+ * @param console_cout_out [output] how the entry appears in cout.
+ * @param console_cerr_out [output] how the entry appears in cerr.
  */
 void run_writer(const category& submit_as, const std::string& message, const std::string& log_namespace,
                 const category& xml_filter, const category& console_filter, const std::string& default_namespace,
@@ -141,12 +141,12 @@ void run_writer(const category& submit_as, const std::string& message, const std
 /**
  * Filter test scenario for log_writer.
  * Use to test filter scenario's with run_writer_with_filter, allows us to drop 3 parameters.
- * @param submit_as.            [log_entry] category of message to create.
- * @param xml_filter.           [log_writer] XML serialiation threshold.
- * @param console_filter.       [log_writer] Console serialiation threshold.
- * @param xml_out.              [output] how the entry appears in XML.
- * @param console_cout_out.     [output] how the entry appears in cout.
- * @param console_cerr_out.     [output] how the entry appears in cerr.
+ * @param entry_category [log_entry] category of message to create.
+ * @param xml_filter [log_writer] XML serialiation threshold.
+ * @param console_filter [log_writer] Console serialiation threshold.
+ * @param xml_out [output] how the entry appears in XML.
+ * @param console_cout_out [output] how the entry appears in cout.
+ * @param console_cerr_out [output] how the entry appears in cerr.
  */
 void filter_scenario(const category& entry_category, const category& xml_filter, const category& console_filter,
                      std::string& xml_out, std::string& console_cout_out, std::string& console_cerr_out)

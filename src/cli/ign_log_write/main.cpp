@@ -92,8 +92,8 @@ boost::program_options::positional_options_description create_program_positional
 
 /**
  * This is the main entry point of the ign_log_write application.
- * @params arg_c number of command line arguments
- * @params arg_v list of command line arguments
+ * @param arg_c number of command line arguments
+ * @param arg_v list of command line arguments
  * @returns EXIT_SUCCESS on success, EXIT_FAILURE on generic failure.
  */
 int main(int arg_c, const char* arg_v[])

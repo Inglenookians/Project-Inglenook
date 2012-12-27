@@ -42,9 +42,10 @@ namespace logging {
 const pid_type log_writer::NO_PID = 0;
 
 /**
- * todo: this method is being passed to ign_core; move to centeralized method once accomodated.
  * Creates a POSIX time item out of a milisecond duration..
  * @param ms milliseconds until event.
+ * @returns ptime for duration specified.
+ * @todo This method is being passed to ign_core; move to centeralized method once accomodated.
  */
 const boost::posix_time::ptime timeout_ms(int ms) {
     return boost::get_system_time() + boost::posix_time::milliseconds(ms);
@@ -310,8 +311,7 @@ std::shared_ptr<log_writer> log_writer::create_from_file_path(
  * @param output_stream stream to write XML to.
  * @param write_header indicates if the XML preamble should be written on startup
  * @param write_footer indicates if the XML closure tags should be written on shutdown.
- * @param specific_pid specify the PID to create log for
- * @param specific_application_name specify the application name to create log for
+ * @returns shared pointer to newly instanced log_writer.
  */
 std::shared_ptr<log_writer> log_writer::create_from_stream(const std::shared_ptr<std::ostream>& output_stream,
         const bool& write_header, const bool& write_footer)
@@ -331,6 +331,7 @@ std::shared_ptr<log_writer> log_writer::create_from_stream(const std::shared_ptr
  * @param write_footer indicates if the XML closure tags should be written on shutdown.
  * @param specific_pid specify the PID to create log for
  * @param specific_application_name specify the application name to create log for
+ * @returns Shared pointer to newly instanced log_writer.
  */
 std::shared_ptr<log_writer> log_writer::create_from_stream(const std::shared_ptr<std::ostream>& output_stream,
         const bool& write_header, const bool& write_footer, const pid_type& specific_pid, const std::string& specific_application_name)

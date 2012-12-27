@@ -53,6 +53,12 @@ namespace inglenook
 {
     namespace core
     {  
+    	/**
+    	 * Descriptor class for encapsulating application information.
+    	 * Every application should create a descriptor for itself. Class exposes utility methods for accessing common
+    	 * information related to the running process and standard behaviours such as parsing the applications command
+    	 * line arguments.
+    	 */
         class application
         {
             

@@ -97,9 +97,9 @@ BOOST_AUTO_TEST_CASE ( log_write_tests__parsing_action )
 
 /**
  * Adds an argument to the specified program options object.
- * @params arguments arguments collection to add argument to.
- * @params argument argument to add.
- * @params value value of argument..
+ * @param arguments arguments collection to add argument to.
+ * @param argument argument to add.
+ * @param value value of argument..
  */
 template <class T> void add_argument(boost::program_options::variables_map& arguments, std::string argument, T value)
 {
@@ -113,8 +113,8 @@ template <class T> void add_argument(boost::program_options::variables_map& argu
 
 /**
  * Submits a require instruction which is expected to fail.
- * @params arguments arguments collection to query.
- * @params argument argument to find (or not as case may be).
+ * @param arguments arguments collection to query.
+ * @param argument argument to find (or not as case may be).
  */
 template <class T> void require_and_expect_missing(boost::program_options::variables_map& arguments, std::string argument)
 {

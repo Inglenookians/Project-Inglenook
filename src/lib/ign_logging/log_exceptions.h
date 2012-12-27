@@ -52,9 +52,9 @@ const unsigned long unable_to_aquire_queue_notification_lock = module_error_base
 /// log file that was being written to (or attempted writing to) at time of exception.
 typedef boost::error_info<struct __log_file_name, boost::filesystem::path> log_file_name;
 
-//
-// log_exception
-// Standard base exception for all exceptions thrown by objects in the logging library.
+/**
+ * Standard base exception for all exceptions thrown by objects in ign_logging.
+ */
 struct log_exception: virtual inglenook::core::exceptions::inglenook_exception
 {
     /// provides a boiler plate explanation of the exception.
@@ -63,21 +63,22 @@ struct log_exception: virtual inglenook::core::exceptions::inglenook_exception
     }
 };
 
-//
-// log_not_found_exception
-// This exception is thrown when a specified log file cannot be found and, when
-// available, the option to create non-existent log files was disabled.
+/**
+ * This exception is thrown when a specified log file cannot be found and 
+ * the option to create non-existent log files was disabled.
+ */
 struct log_not_found_exception : virtual log_exception
 {
-    /// provides a boiler plate explanation of the exception.
-    const char* what() const throw() {
-        return boost::locale::translate("Failed to open the specified log file.").str().c_str();
-    }
+	/// provides a boiler plate explaination of the exception.
+   const char* what() const throw() {
+	   return boost::locale::translate("Failed to open the specified log file.").str().c_str();
+   }
 };
 
-//
-// failed_to_create_log_exception
-// This exception is thrown when Inglenook fails to create an error log.
+/**
+ * Thrown when Inglenook fails to create an error log.
+ * Could be the result of a permissions issue or other IO fault.
+ */
 struct failed_to_create_log_exception : virtual log_exception
 {
     /// provides a boiler plate explanation of the exception.
@@ -86,9 +87,10 @@ struct failed_to_create_log_exception : virtual log_exception
     }
 };
 
-//
-// serialization_exception
-// This exception is thrown by the log serialization worker (log_writer::_log_serialization_worker).
+/**
+ * Thrown by the log serialization worker (log_writer::_log_serialization_worker).
+ * Usually the result of a mutex contention issue.
+ */
 struct log_serialization_exception : virtual log_exception
 {
     /// provides a boiler plate explanation of the exception.

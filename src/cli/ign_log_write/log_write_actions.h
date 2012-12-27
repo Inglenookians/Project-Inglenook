@@ -34,16 +34,22 @@ namespace inglenook
 namespace logging
 {
 
-// start log file action strings
+/// full action string (command) to start a new log file
 const std::string start_full_action_string = "start";
+
+/// abbreviated action string (command) to start a new log file.
 const std::string start_short_action_string = "s";
 
-// write log entry strings
+/// full action string (command) to write to an existing log file
 const std::string write_full_action_string = "write";
+
+/// abbreviated action string (command) to write to an existing log file
 const std::string write_short_action_string = "w";
 
-// close log file action strings
+/// full action string (command) to close an existing log file
 const std::string close_full_action_string = "close";
+
+/// abbreviated action string (command) to close an existing log file
 const std::string close_short_action_string = "c";
 
 /**
@@ -67,8 +73,8 @@ log_write_action parse_action(const std::string& action_string);
 
 /**
  * extracts a required parameter from the arguments vector.
- * @params from arguments vector to extract value from.
- * @params parameter parameter to extract.
+ * @param from arguments vector to extract value from.
+ * @param parameter parameter to extract.
  * @throws action_required_arguments_missing if the required argument is missing.
  * @returns value of the required argument
  */
@@ -90,9 +96,9 @@ template <class T> T require_parameter(const boost::program_options::variables_m
 
 /**
  * extracts an optional parameter from the arguments vector.
- * @params from arguments vector to extract value from.
- * @params parameter parameter to extract.
- * @params fallback what to use if the parameter isn't present
+ * @param from arguments vector to extract value from.
+ * @param parameter parameter to extract.
+ * @param fallback what to use if the parameter isn't present
  * @returns value of the optional argument
  */
 template <class T> T optional_parameter(const boost::program_options::variables_map& from, const std::string& parameter, const T& fallback)

@@ -34,16 +34,22 @@ namespace inglenook
 namespace logging
 {
 
-// start log file action strings
+/// full action string (command) to start a new log file
 const std::string start_full_action_string = "start";
+
+/// abbreviated action string (command) to start a new log file.
 const std::string start_short_action_string = "s";
 
-// write log entry strings
+/// full action string (command) to write to an existing log file
 const std::string write_full_action_string = "write";
+
+/// abbreviated action string (command) to write to an existing log file
 const std::string write_short_action_string = "w";
 
-// close log file action strings
+/// full action string (command) to close an existing log file
 const std::string close_full_action_string = "close";
+
+/// abbreviated action string (command) to close an existing log file
 const std::string close_short_action_string = "c";
 
 /**

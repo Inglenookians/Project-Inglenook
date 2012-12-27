@@ -98,6 +98,7 @@ log_client& set_category_and_return(const category& new_value)
 
 /**
  * Continues an existing log entry.
+ * @returns instance of default, shared log client interface.
  */
 log_client& log()
 {
@@ -107,6 +108,7 @@ log_client& log()
 
 /**
  * Continues an existing log entry, switching context to debug.
+ * @returns instance of default, shared log client interface.
  */
 log_client& log_debug()
 {
@@ -115,6 +117,7 @@ log_client& log_debug()
 
 /**
  * Continues an existing log entry, switching context to trace.
+ * @returns instance of default, shared log client interface.
  */
 log_client& log_trace()
 {
@@ -123,6 +126,7 @@ log_client& log_trace()
 
 /**
  * Continues an existing log entry, switching context to information.
+ * @returns instance of default, shared log client interface.
  */
 log_client& log_info()
 {
@@ -131,6 +135,7 @@ log_client& log_info()
 
 /**
  * Continues an existing log entry, switching context to warning.
+ * @returns instance of default, shared log client interface.
  */
 log_client& log_warning()
 {
@@ -139,6 +144,7 @@ log_client& log_warning()
 
 /**
  * Continues an existing log entry, switching context to error.
+ * @returns instance of default, shared log client interface.
  */
 log_client& log_error()
 {
@@ -147,6 +153,7 @@ log_client& log_error()
 
 /**
  * Continues an existing log entry, switching context to fatal.
+ * @returns instance of default, shared log client interface.
  */
 log_client& log_fatal()
 {

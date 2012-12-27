@@ -45,7 +45,7 @@ const pid_type log_writer::NO_PID = 0;
  * Creates a POSIX time item out of a milisecond duration..
  * @param ms milliseconds until event.
  * @returns ptime for duration specified.
- * @todo: this method is being passed to ign_core; move to centeralized method once accomodated.
+ * @todo This method is being passed to ign_core; move to centeralized method once accomodated.
  */
 const boost::posix_time::ptime timeout_ms(int ms) {
     return boost::get_system_time() + boost::posix_time::milliseconds(ms);

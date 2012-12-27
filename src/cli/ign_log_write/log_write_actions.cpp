@@ -257,7 +257,7 @@ void write_log_entry(const boost::program_options::variables_map& arguments)
  * @param path_to_log log file to write out to.
  * @param message message to write out.
  * @param log_namespace namespace to write the log out to
- * @param category the type of event to write
+ * @param event_type the type of event to write
  */
 void write_log_entry(const boost::filesystem::path& path_to_log, const std::string& message, const std::string& log_namespace, const category& event_type)
 {

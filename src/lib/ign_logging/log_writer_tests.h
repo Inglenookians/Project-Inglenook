@@ -141,7 +141,7 @@ void run_writer(const category& submit_as, const std::string& message, const std
 /**
  * Filter test scenario for log_writer.
  * Use to test filter scenario's with run_writer_with_filter, allows us to drop 3 parameters.
- * @param submit_as [log_entry] category of message to create.
+ * @param entry_category [log_entry] category of message to create.
  * @param xml_filter [log_writer] XML serialiation threshold.
  * @param console_filter [log_writer] Console serialiation threshold.
  * @param xml_out [output] how the entry appears in XML.

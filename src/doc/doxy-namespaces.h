@@ -65,7 +65,7 @@ namespace inglenook
 	{
 	
 		/// Logic for interacting with the system environment.
-		namespace environmnet
+		namespace environment
 		{
 		
 			/// Logic for manipulating environment variables.

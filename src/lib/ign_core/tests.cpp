@@ -72,8 +72,6 @@ BOOST_AUTO_TEST_CASE(application)
     // It's difficult to test whether the pid is correct, just check a valid pid is returned (ie: pid > 0)
     BOOST_CHECK(inglenook::core::application::pid() > 0);
     
-    /// @todo test for arguments parser.
-    
     // Test the arguments parser.
     // Setup some required variables.
     boost::program_options::variables_map variables_map_one;

@@ -73,7 +73,7 @@ namespace inglenook
 		
 		}
 	
-		/// Various exception definitiions (and related elements) used by many inglenook applications.
+		/// Various exception definitions (and related elements) used by many inglenook applications.
 		namespace exceptions {}
 	
 	}

@@ -26,6 +26,8 @@ add_library(
     SHARED
     application.cpp
     environment.cpp
+    filesystem.cpp
+    file_permissions.cpp
 )
 
 # Link to required libraries
